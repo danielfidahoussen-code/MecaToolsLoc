@@ -1,20 +1,17 @@
 const router = require('express').Router();
-const db = require('../database');
+const { orders, products } = require('../database');
 const { authMiddleware } = require('../middleware/auth');
 
-router.post('/', async (req, res) => {
+router.post('/', (req, res) => {
   const { customer_name, customer_email, customer_phone, customer_address, items, total_price, type } = req.body;
   try {
-    const result = db.prepare(`
-      INSERT INTO orders (customer_name, customer_email, customer_phone, customer_address, items, total_price, type, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'paid')
-    `).run(customer_name, customer_email, customer_phone, customer_address, JSON.stringify(items), total_price, type || 'mixed');
+    const result = orders.insert({ customer_name, customer_email, customer_phone: customer_phone || '', customer_address: customer_address || '', items: JSON.stringify(items), total_price, type: type || 'mixed', status: 'paid' });
 
-    // Update stock for purchases
-    const parsedItems = JSON.parse(JSON.stringify(items));
-    parsedItems.forEach(item => {
+    // Deduct stock for purchases
+    (items || []).forEach(item => {
       if (item.type === 'sale') {
-        db.prepare('UPDATE products SET stock = MAX(0, stock - ?) WHERE id = ?').run(item.quantity, item.id);
+        const p = products.getById(item.id);
+        if (p) products.update(item.id, { stock: Math.max(0, p.stock - item.quantity) });
       }
     });
 
@@ -24,25 +21,17 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.post('/create-payment-intent', async (req, res) => {
-  const { amount } = req.body;
-  // In production, use Stripe: const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
-  // For demo, simulate a payment intent
-  res.json({
-    clientSecret: `mock_pi_${Date.now()}_secret_demo`,
-    amount,
-    message: 'Paiement en mode démonstration'
-  });
+router.post('/create-payment-intent', (req, res) => {
+  res.json({ clientSecret: `mock_pi_${Date.now()}_secret_demo`, amount: req.body.amount, message: 'Paiement en mode démonstration' });
 });
 
-// Admin
 router.get('/', authMiddleware, (req, res) => {
-  const orders = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
-  res.json(orders);
+  const all = orders.all().sort((a, b) => b.created_at.localeCompare(a.created_at));
+  res.json(all);
 });
 
 router.put('/:id/status', authMiddleware, (req, res) => {
-  db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(req.body.status, req.params.id);
+  orders.update(Number(req.params.id), { status: req.body.status });
   res.json({ success: true });
 });
 

@@ -1,73 +1,63 @@
 const router = require('express').Router();
-const db = require('../database');
+const { products, categories } = require('../database');
 const { authMiddleware } = require('../middleware/auth');
+
+function withCategory(product) {
+  if (!product) return null;
+  const cat = categories.getById(product.category_id);
+  return { ...product, category_name: cat?.name, category_slug: cat?.slug, category_icon: cat?.icon };
+}
+
+router.get('/categories', (req, res) => {
+  res.json(categories.all());
+});
 
 router.get('/', (req, res) => {
   const { category, type, search, page = 1, limit = 12 } = req.query;
-  let query = `SELECT p.*, c.name as category_name, c.slug as category_slug, c.icon as category_icon
-               FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE 1=1`;
-  const params = [];
-  if (category) { query += ' AND c.slug = ?'; params.push(category); }
-  if (type === 'rent') { query += ' AND p.available_for_rent = 1'; }
-  if (type === 'sale') { query += ' AND p.available_for_sale = 1'; }
-  if (search) { query += ' AND p.name LIKE ?'; params.push(`%${search}%`); }
-  const offset = (parseInt(page) - 1) * parseInt(limit);
-  let countQuery = 'SELECT COUNT(*) as total FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE 1=1';
-  if (category) countQuery += ' AND c.slug = ?';
-  if (type === 'rent') countQuery += ' AND p.available_for_rent = 1';
-  if (type === 'sale') countQuery += ' AND p.available_for_sale = 1';
-  if (search) countQuery += ' AND p.name LIKE ?';
-  const countResult = db.prepare(countQuery).get(...params);
-  const total = countResult ? countResult.total : 0;
-  query += ` LIMIT ? OFFSET ?`;
-  const products = db.prepare(query).all(...params, parseInt(limit), offset);
-  res.json({ products, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)) });
-});
+  let rows = products.all();
 
-router.get('/categories', (req, res) => {
-  const categories = db.prepare('SELECT * FROM categories').all();
-  res.json(categories);
+  if (category) {
+    const cat = categories.all(c => c.slug === category)[0];
+    if (cat) rows = rows.filter(p => p.category_id === cat.id);
+  }
+  if (type === 'rent') rows = rows.filter(p => p.available_for_rent);
+  if (type === 'sale') rows = rows.filter(p => p.available_for_sale);
+  if (search) rows = rows.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+
+  const total = rows.length;
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+  rows = rows.slice(offset, offset + parseInt(limit)).map(withCategory);
+
+  res.json({ products: rows, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)) || 1 });
 });
 
 router.get('/:id', (req, res) => {
-  const product = db.prepare(`
-    SELECT p.*, c.name as category_name, c.slug as category_slug
-    FROM products p LEFT JOIN categories c ON p.category_id = c.id
-    WHERE p.id = ?
-  `).get(req.params.id);
+  const product = withCategory(products.getById(req.params.id));
   if (!product) return res.status(404).json({ error: 'Produit non trouvé' });
 
-  // Get reservations for availability calendar
-  const reservations = db.prepare(`
-    SELECT start_date, end_date, quantity FROM reservations
-    WHERE product_id = ? AND status != 'cancelled' AND end_date >= date('now')
-  `).all(req.params.id);
-  res.json({ ...product, reservations });
+  const { reservations } = require('../database');
+  const today = new Date().toISOString().split('T')[0];
+  const res_list = reservations.all(r =>
+    r.product_id === product.id && r.status !== 'cancelled' && r.end_date >= today
+  ).map(r => ({ start_date: r.start_date, end_date: r.end_date, quantity: r.quantity }));
+
+  res.json({ ...product, reservations: res_list });
 });
 
-// Admin routes
 router.post('/', authMiddleware, (req, res) => {
   const { name, description, category_id, price_sale, price_day, price_week, stock, available_for_sale, available_for_rent, image } = req.body;
-  const result = db.prepare(`
-    INSERT INTO products (name, description, category_id, price_sale, price_day, price_week, stock, available_for_sale, available_for_rent, image)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(name, description, category_id, price_sale, price_day, price_week, stock, available_for_sale ? 1 : 0, available_for_rent ? 1 : 0, image || '/api/placeholder/400/300');
-  const product = db.prepare('SELECT * FROM products WHERE id = ?').get(result.lastInsertRowid);
-  res.status(201).json(product);
+  const result = products.insert({ name, description, category_id: Number(category_id), price_sale: Number(price_sale) || null, price_day: Number(price_day) || null, price_week: Number(price_week) || null, stock: Number(stock) || 0, available_for_sale: available_for_sale ? 1 : 0, available_for_rent: available_for_rent ? 1 : 0, image: image || '/api/placeholder/400/300' });
+  res.status(201).json(withCategory(products.getById(result.lastInsertRowid)));
 });
 
 router.put('/:id', authMiddleware, (req, res) => {
   const { name, description, category_id, price_sale, price_day, price_week, stock, available_for_sale, available_for_rent, image } = req.body;
-  db.prepare(`
-    UPDATE products SET name=?, description=?, category_id=?, price_sale=?, price_day=?, price_week=?,
-    stock=?, available_for_sale=?, available_for_rent=?, image=?, updated_at=datetime('now') WHERE id=?
-  `).run(name, description, category_id, price_sale, price_day, price_week, stock, available_for_sale ? 1 : 0, available_for_rent ? 1 : 0, image, req.params.id);
-  const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
-  res.json(product);
+  products.update(Number(req.params.id), { name, description, category_id: Number(category_id), price_sale: Number(price_sale) || null, price_day: Number(price_day) || null, price_week: Number(price_week) || null, stock: Number(stock) || 0, available_for_sale: available_for_sale ? 1 : 0, available_for_rent: available_for_rent ? 1 : 0, image });
+  res.json(withCategory(products.getById(Number(req.params.id))));
 });
 
 router.delete('/:id', authMiddleware, (req, res) => {
-  db.prepare('DELETE FROM products WHERE id = ?').run(req.params.id);
+  products.delete(Number(req.params.id));
   res.json({ success: true });
 });
 

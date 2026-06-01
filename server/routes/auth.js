@@ -1,12 +1,12 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('../database');
+const { users } = require('../database');
 const { JWT_SECRET } = require('../middleware/auth');
 
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const user = users.all(u => u.email === email)[0];
   if (!user || !bcrypt.compareSync(password, user.password)) {
     return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
   }

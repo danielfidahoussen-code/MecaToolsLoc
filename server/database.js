@@ -1,139 +1,60 @@
-const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
-const path = require('path');
+const db = require('./jsondb');
 
-const db = new Database(path.join(__dirname, 'mecatoolsloc.db'));
-
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS categories (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    slug TEXT NOT NULL UNIQUE,
-    icon TEXT DEFAULT '🔧'
-  );
-
-  CREATE TABLE IF NOT EXISTS products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    description TEXT,
-    category_id INTEGER REFERENCES categories(id),
-    price_sale REAL,
-    price_day REAL,
-    price_week REAL,
-    stock INTEGER DEFAULT 0,
-    available_for_sale INTEGER DEFAULT 1,
-    available_for_rent INTEGER DEFAULT 1,
-    image TEXT DEFAULT '/placeholder.jpg',
-    created_at TEXT DEFAULT (datetime('now')),
-    updated_at TEXT DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS reservations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    product_id INTEGER REFERENCES products(id),
-    customer_name TEXT NOT NULL,
-    customer_email TEXT NOT NULL,
-    customer_phone TEXT,
-    start_date TEXT NOT NULL,
-    end_date TEXT NOT NULL,
-    quantity INTEGER DEFAULT 1,
-    total_price REAL,
-    status TEXT DEFAULT 'pending',
-    created_at TEXT DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    customer_name TEXT NOT NULL,
-    customer_email TEXT NOT NULL,
-    customer_phone TEXT,
-    customer_address TEXT,
-    items TEXT NOT NULL,
-    total_price REAL NOT NULL,
-    payment_intent TEXT,
-    status TEXT DEFAULT 'pending',
-    type TEXT DEFAULT 'sale',
-    created_at TEXT DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
-    role TEXT DEFAULT 'admin',
-    created_at TEXT DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS faqs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    question TEXT NOT NULL,
-    answer TEXT NOT NULL,
-    category TEXT DEFAULT 'general',
-    sort_order INTEGER DEFAULT 0
-  );
-`);
+const categories = db.table('categories');
+const products   = db.table('products');
+const reservations = db.table('reservations');
+const orders     = db.table('orders');
+const users      = db.table('users');
+const faqs       = db.table('faqs');
 
 // Seed categories
-const catCount = db.prepare('SELECT COUNT(*) as c FROM categories').get();
-if (catCount.c === 0) {
-  const insertCat = db.prepare('INSERT INTO categories (name, slug, icon) VALUES (?, ?, ?)');
+if (categories.count() === 0) {
   [
-    ['Outillage à main', 'outillage-main', '🔧'],
-    ['Outillage électroportatif', 'outillage-electro', '⚡'],
-    ['Équipement de levage', 'levage', '🔩'],
-    ['Diagnostic auto', 'diagnostic', '🔍'],
-    ['Compresseurs & pneumatique', 'compresseurs', '💨'],
-    ['Équipement de sécurité', 'securite', '🦺'],
-  ].forEach(([name, slug, icon]) => insertCat.run(name, slug, icon));
+    { name: 'Outillage à main',         slug: 'outillage-main',  icon: '🔧' },
+    { name: 'Outillage électroportatif', slug: 'outillage-electro', icon: '⚡' },
+    { name: 'Équipement de levage',      slug: 'levage',          icon: '🔩' },
+    { name: 'Diagnostic auto',           slug: 'diagnostic',      icon: '🔍' },
+    { name: 'Compresseurs & pneumatique',slug: 'compresseurs',    icon: '💨' },
+    { name: 'Équipement de sécurité',    slug: 'securite',        icon: '🦺' },
+  ].forEach(c => categories.insert(c));
 }
 
 // Seed products
-const prodCount = db.prepare('SELECT COUNT(*) as c FROM products').get();
-if (prodCount.c === 0) {
-  const insertProd = db.prepare(`
-    INSERT INTO products (name, description, category_id, price_sale, price_day, price_week, stock, available_for_sale, available_for_rent, image)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
+if (products.count() === 0) {
   [
-    ['Coffret de clés mixtes 25 pièces', 'Coffret professionnel de clés mixtes en acier chrome-vanadium, tailles de 6 à 32mm.', 1, 89.90, 8.00, 35.00, 15, 1, 1, '/api/placeholder/400/300?text=Clés+Mixtes'],
-    ['Perceuse-visseuse sans fil 18V', 'Perceuse-visseuse à percussion 18V avec 2 batteries Li-Ion, chargeur et mallette.', 2, 149.00, 15.00, 60.00, 8, 1, 1, '/api/placeholder/400/300?text=Perceuse+18V'],
-    ['Cric hydraulique 3 tonnes', 'Cric rouleur hydraulique professionnel capacité 3T, course 135-500mm.', 3, 189.00, 20.00, 80.00, 5, 1, 1, '/api/placeholder/400/300?text=Cric+Hydraulique'],
-    ['Valise de diagnostic OBD2', 'Scanner multimarques compatible OBD2, lecture et effacement des codes défauts.', 4, 299.00, 25.00, 95.00, 6, 1, 1, '/api/placeholder/400/300?text=Valise+OBD2'],
-    ['Compresseur 50L 2CV', 'Compresseur à courroie 50 litres 2CV, débit 200L/min, pression max 10 bars.', 5, 329.00, 30.00, 110.00, 4, 1, 1, '/api/placeholder/400/300?text=Compresseur+50L'],
-    ['Clé à chocs pneumatique 1/2"', 'Clé à chocs pneumatique 1/2" couple max 1355Nm, idéale pour roues et boulons.', 5, 129.00, 12.00, 48.00, 10, 1, 1, '/api/placeholder/400/300?text=Clé+Impacts'],
-    ['Pont élévateur 2 colonnes 4T', 'Pont élévateur hydraulique 4 tonnes, 2 colonnes, hauteur de levage 1850mm.', 3, 2490.00, 80.00, 300.00, 2, 1, 1, '/api/placeholder/400/300?text=Pont+Élevateur'],
-    ['Jeu de tournevis 12 pièces', 'Jeu de 12 tournevis professionnels plats et cruciformes, manche bi-matière.', 1, 45.90, 5.00, 20.00, 20, 1, 1, '/api/placeholder/400/300?text=Tournevis'],
-    ['Meuleuse angulaire 125mm', 'Meuleuse angulaire 900W, disque 125mm, protection réglable, démarrage progressif.', 2, 79.00, 10.00, 40.00, 7, 1, 1, '/api/placeholder/400/300?text=Meuleuse'],
-    ['Établi pliable professionnel', 'Établi pliable acier avec plateau bois, capacité 200kg, hauteur réglable.', 1, 119.00, 12.00, 45.00, 6, 1, 1, '/api/placeholder/400/300?text=Étabi'],
-    ['Testeur de batterie 12/24V', 'Testeur de batterie et alternateur 12/24V, imprimante intégrée, affichage LCD.', 4, 189.00, 18.00, 70.00, 8, 1, 1, '/api/placeholder/400/300?text=Testeur+Batterie'],
-    ['Kit de protection EPI', 'Kit équipement de protection : lunettes, gants, casque, chaussures de sécurité.', 6, 65.00, 8.00, 30.00, 25, 1, 1, '/api/placeholder/400/300?text=Kit+EPI'],
-  ].forEach(args => insertProd.run(...args));
+    { name: 'Coffret de clés mixtes 25 pièces',    description: 'Coffret professionnel de clés mixtes en acier chrome-vanadium, tailles de 6 à 32mm.', category_id: 1, price_sale: 89.90,   price_day: 8,  price_week: 35,  stock: 15, available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Clés+Mixtes' },
+    { name: 'Perceuse-visseuse sans fil 18V',       description: 'Perceuse-visseuse à percussion 18V avec 2 batteries Li-Ion, chargeur et mallette.',    category_id: 2, price_sale: 149.00,  price_day: 15, price_week: 60,  stock: 8,  available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Perceuse+18V' },
+    { name: 'Cric hydraulique 3 tonnes',           description: 'Cric rouleur hydraulique professionnel capacité 3T, course 135-500mm.',                  category_id: 3, price_sale: 189.00,  price_day: 20, price_week: 80,  stock: 5,  available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Cric+Hydraulique' },
+    { name: 'Valise de diagnostic OBD2',           description: 'Scanner multimarques compatible OBD2, lecture et effacement des codes défauts.',          category_id: 4, price_sale: 299.00,  price_day: 25, price_week: 95,  stock: 6,  available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Valise+OBD2' },
+    { name: 'Compresseur 50L 2CV',                 description: 'Compresseur à courroie 50 litres 2CV, débit 200L/min, pression max 10 bars.',            category_id: 5, price_sale: 329.00,  price_day: 30, price_week: 110, stock: 4,  available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Compresseur+50L' },
+    { name: 'Clé à chocs pneumatique 1/2"',        description: 'Clé à chocs pneumatique 1/2" couple max 1355Nm, idéale pour roues et boulons.',          category_id: 5, price_sale: 129.00,  price_day: 12, price_week: 48,  stock: 10, available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Clé+Impacts' },
+    { name: 'Pont élévateur 2 colonnes 4T',        description: 'Pont élévateur hydraulique 4 tonnes, 2 colonnes, hauteur de levage 1850mm.',             category_id: 3, price_sale: 2490.00, price_day: 80, price_week: 300, stock: 2,  available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Pont+Élevateur' },
+    { name: 'Jeu de tournevis 12 pièces',           description: 'Jeu de 12 tournevis professionnels plats et cruciformes, manche bi-matière.',            category_id: 1, price_sale: 45.90,   price_day: 5,  price_week: 20,  stock: 20, available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Tournevis' },
+    { name: 'Meuleuse angulaire 125mm',             description: 'Meuleuse angulaire 900W, disque 125mm, protection réglable, démarrage progressif.',       category_id: 2, price_sale: 79.00,   price_day: 10, price_week: 40,  stock: 7,  available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Meuleuse' },
+    { name: 'Établi pliable professionnel',         description: 'Établi pliable acier avec plateau bois, capacité 200kg, hauteur réglable.',              category_id: 1, price_sale: 119.00,  price_day: 12, price_week: 45,  stock: 6,  available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Etabli' },
+    { name: 'Testeur de batterie 12/24V',           description: 'Testeur de batterie et alternateur 12/24V, imprimante intégrée, affichage LCD.',          category_id: 4, price_sale: 189.00,  price_day: 18, price_week: 70,  stock: 8,  available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Testeur+Batterie' },
+    { name: 'Kit de protection EPI',                description: 'Kit équipement de protection : lunettes, gants, casque, chaussures de sécurité.',         category_id: 6, price_sale: 65.00,   price_day: 8,  price_week: 30,  stock: 25, available_for_sale: 1, available_for_rent: 1, image: '/api/placeholder/400/300?text=Kit+EPI' },
+  ].forEach(p => products.insert(p));
 }
 
-// Seed admin user
-const adminCount = db.prepare('SELECT COUNT(*) as c FROM users').get();
-if (adminCount.c === 0) {
-  const hash = bcrypt.hashSync('admin123', 10);
-  db.prepare('INSERT INTO users (email, password, role) VALUES (?, ?, ?)').run('admin@mecatoolsloc.re', hash, 'admin');
+// Seed admin
+if (users.count() === 0) {
+  users.insert({ email: 'admin@mecatoolsloc.re', password: bcrypt.hashSync('admin123', 10), role: 'admin' });
 }
 
 // Seed FAQs
-const faqCount = db.prepare('SELECT COUNT(*) as c FROM faqs').get();
-if (faqCount.c === 0) {
-  const insertFaq = db.prepare('INSERT INTO faqs (question, answer, category, sort_order) VALUES (?, ?, ?, ?)');
+if (faqs.count() === 0) {
   [
-    ['Comment réserver du matériel ?', 'Sélectionnez le produit souhaité, choisissez vos dates de location sur le calendrier, ajoutez au panier et procédez au paiement. Vous recevrez une confirmation par email.', 'reservation', 1],
-    ['Quels modes de paiement acceptez-vous ?', 'Nous acceptons les paiements par carte bancaire (Visa, Mastercard), virement bancaire et espèces sur place.', 'paiement', 2],
-    ['Peut-on acheter et louer sur le même site ?', 'Oui ! Certains articles sont disponibles à l\'achat et/ou à la location. Vous pouvez filtrer le catalogue selon vos besoins.', 'general', 3],
-    ['Quelle est la durée minimale de location ?', 'La durée minimale de location est d\'une journée. Des tarifs dégressifs s\'appliquent pour les locations à la semaine.', 'reservation', 4],
-    ['Comment fonctionne la livraison ?', 'Nous proposons la livraison sur La Réunion (zone Sud et Est principalement). Vous pouvez aussi venir récupérer votre matériel directement chez nous.', 'livraison', 5],
-    ['Que se passe-t-il si le matériel est endommagé ?', 'Une caution est demandée à la réservation. En cas de dommage, les frais de réparation ou remplacement seront déduits de la caution.', 'reservation', 6],
-    ['Puis-je annuler une réservation ?', 'Oui, jusqu\'à 48h avant la date de début de location sans frais. Au-delà, 50% du montant sera retenu.', 'reservation', 7],
-    ['Comment contacter le service client ?', 'Vous pouvez nous joindre par téléphone au 06 93 83 96 54 ou par email à Locationautopresto@gmail.com. Nous répondons sous 24h.', 'contact', 8],
-  ].forEach(args => insertFaq.run(...args));
+    { question: 'Comment réserver du matériel ?',               answer: 'Sélectionnez le produit souhaité, choisissez vos dates de location sur le calendrier, ajoutez au panier et procédez au paiement. Vous recevrez une confirmation par email.', category: 'reservation', sort_order: 1 },
+    { question: 'Quels modes de paiement acceptez-vous ?',      answer: 'Nous acceptons les paiements par carte bancaire (Visa, Mastercard), virement bancaire et espèces sur place.', category: 'paiement', sort_order: 2 },
+    { question: 'Peut-on acheter et louer sur le même site ?',  answer: "Oui ! Certains articles sont disponibles à l'achat et/ou à la location. Vous pouvez filtrer le catalogue selon vos besoins.", category: 'general', sort_order: 3 },
+    { question: 'Quelle est la durée minimale de location ?',   answer: "La durée minimale de location est d'une journée. Des tarifs dégressifs s'appliquent pour les locations à la semaine.", category: 'reservation', sort_order: 4 },
+    { question: 'Comment fonctionne la livraison ?',            answer: "Nous proposons la livraison sur La Réunion (zone Sud et Est principalement). Vous pouvez aussi venir récupérer votre matériel directement chez nous.", category: 'livraison', sort_order: 5 },
+    { question: 'Que se passe-t-il si le matériel est endommagé ?', answer: "Une caution est demandée à la réservation. En cas de dommage, les frais de réparation ou remplacement seront déduits de la caution.", category: 'reservation', sort_order: 6 },
+    { question: 'Puis-je annuler une réservation ?',            answer: "Oui, jusqu'à 48h avant la date de début de location sans frais. Au-delà, 50% du montant sera retenu.", category: 'reservation', sort_order: 7 },
+    { question: 'Comment contacter le service client ?',        answer: 'Vous pouvez nous joindre par téléphone au 06 93 83 96 54 ou par email à Locationautopresto@gmail.com. Nous répondons sous 24h.', category: 'contact', sort_order: 8 },
+  ].forEach(f => faqs.insert(f));
 }
 
-module.exports = db;
+module.exports = { categories, products, reservations, orders, users, faqs };
