@@ -33,13 +33,41 @@ export default function ProductDetail() {
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
   if (!product) return <div style={{ padding: '80px 20px', textAlign: 'center' }}><p>Produit non trouvé</p><Link to="/catalogue" className="btn btn-primary" style={{ marginTop: 16 }}>Retour au catalogue</Link></div>;
 
-  // Build highlighted dates (reserved)
-  const reservedDates = [];
+  // Build a map: date string -> number of overlapping reservations
+  const reservationCountByDate = {};
   (product.reservations || []).forEach(res => {
     let d = new Date(res.start_date);
     const end = new Date(res.end_date);
-    while (d <= end) { reservedDates.push(new Date(d)); d = addDays(d, 1); }
+    while (d <= end) {
+      const key = d.toISOString().split('T')[0];
+      reservationCountByDate[key] = (reservationCountByDate[key] || 0) + (res.quantity || 1);
+      d = addDays(d, 1);
+    }
   });
+
+  // Dates fully booked (reservations >= stock) — blocked in calendar
+  const fullyBookedDates = Object.entries(reservationCountByDate)
+    .filter(([, count]) => count >= product.stock)
+    .map(([dateStr]) => new Date(dateStr));
+
+  // Partially reserved dates (highlighted in orange)
+  const partialDates = Object.entries(reservationCountByDate)
+    .filter(([, count]) => count < product.stock)
+    .map(([dateStr]) => new Date(dateStr));
+
+  // Check if selected range overlaps a fully booked date
+  const isRangeAvailable = () => {
+    if (!startDate || !endDate) return true;
+    let d = new Date(startDate);
+    while (d <= endDate) {
+      const key = d.toISOString().split('T')[0];
+      if ((reservationCountByDate[key] || 0) >= product.stock) return false;
+      d = addDays(d, 1);
+    }
+    return true;
+  };
+
+  const rangeAvailable = isRangeAvailable();
 
   const days = startDate && endDate ? Math.max(1, differenceInDays(endDate, startDate)) : 0;
   const rentPrice = days >= 7
@@ -179,19 +207,25 @@ export default function ProductDetail() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label">📅 Date de début</label>
-                      <DatePicker selected={startDate} onChange={d => { setStartDate(d); if (endDate && d > endDate) setEndDate(null); }}
-                        minDate={new Date()} highlightDates={reservedDates}
+                      <DatePicker selected={startDate}
+                        onChange={d => { setStartDate(d); if (endDate && d > endDate) setEndDate(null); }}
+                        minDate={new Date()}
+                        excludeDates={fullyBookedDates}
+                        highlightDates={[{ 'react-datepicker__day--highlighted': partialDates }]}
                         placeholderText="Choisir..." dateFormat="dd/MM/yyyy" className="form-control"/>
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label">📅 Date de fin</label>
-                      <DatePicker selected={endDate} onChange={setEndDate}
-                        minDate={startDate || new Date()} highlightDates={reservedDates}
+                      <DatePicker selected={endDate}
+                        onChange={setEndDate}
+                        minDate={startDate || new Date()}
+                        excludeDates={fullyBookedDates}
+                        highlightDates={[{ 'react-datepicker__day--highlighted': partialDates }]}
                         placeholderText="Choisir..." dateFormat="dd/MM/yyyy" className="form-control"/>
                     </div>
                   </div>
 
-                  {days > 0 && (
+                  {days > 0 && rangeAvailable && (
                     <div style={{ background: 'rgba(245,197,24,.1)', border: '1.5px solid rgba(245,197,24,.3)', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ fontWeight: 600, color: 'var(--gray-700)' }}>{days} jour{days > 1 ? 's' : ''}</span>
@@ -200,9 +234,16 @@ export default function ProductDetail() {
                     </div>
                   )}
 
-                  {reservedDates.length > 0 && (
+                  {days > 0 && !rangeAvailable && (
+                    <div style={{ background: '#fee2e2', border: '1.5px solid #fca5a5', borderRadius: 12, padding: '14px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 18 }}>🚫</span>
+                      <span style={{ fontWeight: 700, color: 'var(--danger)', fontSize: 14 }}>Ces dates sont déjà entièrement réservées. Veuillez choisir d'autres dates.</span>
+                    </div>
+                  )}
+
+                  {fullyBookedDates.length > 0 && (
                     <p style={{ fontSize: 12, color: 'var(--gray-500)', marginBottom: 12 }}>
-                      <Info size={12} style={{ verticalAlign: 'middle', marginRight: 4 }}/> Les dates en rouge sont déjà réservées
+                      <Info size={12} style={{ verticalAlign: 'middle', marginRight: 4 }}/> Les dates grisées sont complètes — sélection impossible
                     </p>
                   )}
 
@@ -221,9 +262,19 @@ export default function ProductDetail() {
                     <input className="form-control" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="vous@exemple.fr"/>
                   </div>
 
-                  <button className="btn btn-primary btn-lg" onClick={handleReserve} disabled={reserving || !startDate || !endDate || product.stock === 0} style={{ width: '100%', justifyContent: 'center' }}>
-                    <Calendar size={18}/> {reserving ? 'En cours...' : `Réserver — ${rentPrice || '?'} €`}
-                  </button>
+                  {product.stock === 0 ? (
+                    <button className="btn btn-lg" disabled style={{ width: '100%', justifyContent: 'center', background: '#fee2e2', color: 'var(--danger)', cursor: 'not-allowed' }}>
+                      🚫 Rupture de stock
+                    </button>
+                  ) : !rangeAvailable ? (
+                    <button className="btn btn-lg" disabled style={{ width: '100%', justifyContent: 'center', background: '#fee2e2', color: 'var(--danger)', cursor: 'not-allowed' }}>
+                      🚫 Dates non disponibles
+                    </button>
+                  ) : (
+                    <button className="btn btn-primary btn-lg" onClick={handleReserve} disabled={reserving || !startDate || !endDate} style={{ width: '100%', justifyContent: 'center' }}>
+                      <Calendar size={18}/> {reserving ? 'En cours...' : `Réserver — ${rentPrice || '?'} €`}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
