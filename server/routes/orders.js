@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { orders, products } = require('../database');
+const { orders, products, reservations } = require('../database');
 const { authMiddleware } = require('../middleware/auth');
 
 router.post('/', (req, res) => {
@@ -7,11 +7,24 @@ router.post('/', (req, res) => {
   try {
     const result = orders.insert({ customer_name, customer_email, customer_phone: customer_phone || '', customer_address: customer_address || '', items: JSON.stringify(items), total_price, type: type || 'mixed', status: 'paid' });
 
-    // Deduct stock for purchases
     (items || []).forEach(item => {
       if (item.type === 'sale') {
+        // Deduct stock for purchases
         const p = products.getById(item.id);
         if (p) products.update(item.id, { stock: Math.max(0, p.stock - item.quantity) });
+      } else if (item.type === 'rent' && item.rentDates) {
+        // Create a reservation entry for rental items
+        reservations.insert({
+          product_id: item.id,
+          customer_name,
+          customer_email,
+          customer_phone: customer_phone || '',
+          start_date: item.rentDates.startDate,
+          end_date: item.rentDates.endDate,
+          quantity: item.quantity,
+          total_price: item.price * item.quantity,
+          status: 'confirmed',
+        });
       }
     });
 

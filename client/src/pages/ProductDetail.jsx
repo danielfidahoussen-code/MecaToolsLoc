@@ -88,8 +88,20 @@ export default function ProductDetail() {
 
             {/* Left: Image */}
             <div>
-              <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid var(--gray-200)', marginBottom: 16 }}>
-                <img src={product.image} alt={product.name} style={{ width: '100%', height: 380, objectFit: 'cover' }}/>
+              <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid var(--gray-200)', marginBottom: 16, cursor: 'zoom-in' }}>
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  style={{ width: '100%', height: 380, objectFit: 'cover', transition: 'transform 0.4s ease' }}
+                  onMouseMove={e => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
+                    e.currentTarget.style.transform = 'scale(2)';
+                  }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                />
               </div>
               <div style={{ background: 'var(--light)', borderRadius: 14, padding: '16px 20px' }}>
                 <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)', marginBottom: 10 }}>📋 Détails</p>
