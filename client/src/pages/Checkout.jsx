@@ -29,7 +29,7 @@ export default function Checkout() {
         customer_email: form.email,
         customer_phone: form.phone,
         customer_address: `${form.address}, ${form.city}`,
-        items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price, type: i.type })),
+        items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price, type: i.type, rentDates: i.rentDates || null })),
         total_price: total,
         type: 'mixed',
       });
