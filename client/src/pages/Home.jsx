@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Wrench, Zap, Shield, Truck, Star, ChevronRight, ArrowRight } from 'lucide-react';
+import { Wrench, Zap, Shield, Truck, ChevronRight, ArrowRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import HeroLogo from '../components/HeroLogo';
 
@@ -191,34 +191,6 @@ export default function Home() {
           </div>
           <div className="grid-4">
             {products.map(p => <ProductCard key={p.id} product={p}/>)}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Avis clients ── */}
-      <section style={{ background: 'var(--primary)', padding: '70px 0' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <span className="section-label">Ils nous font confiance</span>
-          <h2 style={{ color: 'white', fontSize: 'clamp(24px,4vw,36px)', fontWeight: 800, marginBottom: 48 }}>
-            Ce que nos clients disent
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
-            {[
-              { name: 'Thomas M.', role: 'Mécanicien indépendant', text: 'Matériel impeccable, toujours propre et bien entretenu. La réservation en ligne est super pratique !', stars: 5 },
-              { name: 'Karim B.', role: 'Garage auto', text: 'Super service, livraison rapide et prix très compétitifs. Je recommande à tous mes confrères.', stars: 5 },
-              { name: 'Marie-Laure P.', role: 'Bricoleur passionné', text: "Enfin un service de location d'outillage pro à La Réunion ! Le patron connaît vraiment son métier.", stars: 5 },
-            ].map(({ name, role, text, stars }) => (
-              <div key={name} style={{ background: 'rgba(255,255,255,.08)', borderRadius: 16, padding: '24px', textAlign: 'left', border: '1px solid rgba(255,255,255,.1)' }}>
-                <div style={{ display: 'flex', gap: 2, marginBottom: 12 }}>
-                  {[...Array(stars)].map((_, i) => <Star key={i} size={16} fill="var(--accent)" color="var(--accent)"/>)}
-                </div>
-                <p style={{ color: 'rgba(255,255,255,.85)', fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>"{text}"</p>
-                <div>
-                  <p style={{ color: 'white', fontWeight: 700, fontSize: 14 }}>{name}</p>
-                  <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 12 }}>{role}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>

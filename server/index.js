@@ -31,6 +31,7 @@ app.use('/api/products', require('./routes/products'));
 app.use('/api/reservations', require('./routes/reservations'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/faqs', require('./routes/faqs'));
+app.use('/api/upload', require('./routes/upload'));
 
 // Serve React build in production
 if (process.env.NODE_ENV === 'production') {

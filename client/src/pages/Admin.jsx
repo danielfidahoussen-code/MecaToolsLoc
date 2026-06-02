@@ -62,7 +62,22 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
     stock: 0, available_for_sale: true, available_for_rent: true, image: ''
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const { data } = await axios.post('/api/upload', fd);
+      set('image', data.url);
+      toast.success('Image importée !');
+    } catch { toast.error("Erreur lors de l'import"); }
+    finally { setUploading(false); }
+  };
 
   const handleSave = async () => {
     if (!form.name) { toast.error('Le nom est requis'); return; }
@@ -120,8 +135,15 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
             <input className="form-control" type="number" step="0.01" value={form.price_week} onChange={e => set('price_week', parseFloat(e.target.value) || '')} placeholder="0.00"/>
           </div>
           <div className="form-group">
-            <label className="form-label">URL Image</label>
-            <input className="form-control" value={form.image} onChange={e => set('image', e.target.value)} placeholder="/api/placeholder/400/300"/>
+            <label className="form-label">Image</label>
+            {form.image && <img src={form.image} alt="aperçu" style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}/>}
+            <label style={{ display: 'block', cursor: uploading ? 'wait' : 'pointer', marginBottom: 6 }}>
+              <div className="btn btn-outline btn-sm" style={{ width: '100%', justifyContent: 'center', pointerEvents: 'none' }}>
+                {uploading ? '⏳ Import...' : '📁 Importer depuis l\'ordinateur'}
+              </div>
+              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} disabled={uploading}/>
+            </label>
+            <input className="form-control" value={form.image} onChange={e => set('image', e.target.value)} placeholder="Ou coller une URL..."/>
           </div>
           <div className="form-group" style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>

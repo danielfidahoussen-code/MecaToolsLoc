@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Wrench, Heart, Award, Users } from 'lucide-react';
+import { Wrench, Heart, Award } from 'lucide-react';
 
 export default function About() {
   return (
@@ -26,9 +26,9 @@ export default function About() {
                 besoin d'un outil pour longtemps.
               </p>
               <p style={{ color: 'var(--gray-600)', lineHeight: 1.8, marginBottom: 16 }}>
-                Fondée par un mécanicien de métier avec plus de 15 ans d'expérience dans l'automobile, notre entreprise
-                vous propose la location et la vente d'outillage professionnel de qualité, à des prix accessibles,
-                directement à La Réunion.
+                Fondée par un mécanicien de métier avec plus de 8 ans d'expérience en mécanique automobile, spécialisé
+                dans les véhicules hybrides, notre entreprise vous propose la location et la vente d'outillage
+                professionnel de qualité, à des prix accessibles, directement à La Réunion.
               </p>
               <p style={{ color: 'var(--gray-600)', lineHeight: 1.8, marginBottom: 28 }}>
                 Nous croyons que chaque mécanicien mérite d'avoir accès aux bons outils, sans se ruiner. C'est pourquoi
@@ -43,8 +43,8 @@ export default function About() {
               <img src="/api/placeholder/540/440?text=MecaToolsLoc+Atelier" alt="Notre atelier"
                 style={{ width: '100%', borderRadius: 20, boxShadow: 'var(--shadow-lg)' }}/>
               <div style={{ position: 'absolute', bottom: -20, left: -20, background: 'var(--accent)', borderRadius: 16, padding: '20px 28px', boxShadow: 'var(--shadow)' }}>
-                <p style={{ fontWeight: 900, fontSize: 32, color: 'var(--primary)', lineHeight: 1 }}>15+</p>
-                <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)' }}>Ans d'expérience</p>
+                <p style={{ fontWeight: 900, fontSize: 32, color: 'white', lineHeight: 1 }}>8+</p>
+                <p style={{ fontWeight: 700, fontSize: 13, color: 'white' }}>Ans d'expérience</p>
               </div>
             </div>
           </div>
@@ -58,11 +58,11 @@ export default function About() {
             <div className="grid-3">
               {[
                 { icon: <Wrench size={32}/>, title: 'Qualité avant tout', desc: 'Chaque outil est contrôlé, nettoyé et vérifié avant et après chaque utilisation. Nous ne proposons que du matériel en parfait état.' },
-                { icon: <Heart size={32}/>, title: 'Service client', desc: 'Vous avez une question ? Un problème ? Notre équipe est disponible pour vous répondre sous 24h maximum, 7j/7.' },
-                { icon: <Award size={32}/>, title: 'Prix honnêtes', desc: 'Pas de frais cachés, pas de mauvaises surprises. Nos tarifs sont transparents et adaptés à tous les budgets.' },
+                { icon: <Heart size={32}/>, title: 'Service client', desc: 'Vous avez une question ? Un problème ? Contactez-nous directement, nous répondons rapidement.' },
+                { icon: <Award size={32}/>, title: 'Prix honnêtes', desc: 'Pas de frais cachés, pas de mauvaises surprises. Nos tarifs sont transparents. Remise de 10 % pour le retrait sur place.' },
               ].map(({ icon, title, desc }) => (
                 <div key={title} style={{ textAlign: 'center', padding: 32 }}>
-                  <div style={{ width: 72, height: 72, borderRadius: 20, background: 'rgba(245,197,24,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-dark)', margin: '0 auto 20px' }}>
+                  <div style={{ width: 72, height: 72, borderRadius: 20, background: 'rgba(255,51,51,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', margin: '0 auto 20px' }}>
                     {icon}
                   </div>
                   <h3 style={{ fontWeight: 700, fontSize: 18, color: 'var(--primary)', marginBottom: 12 }}>{title}</h3>
@@ -74,16 +74,14 @@ export default function About() {
 
           {/* Stats */}
           <div style={{ background: 'var(--primary)', borderRadius: 24, padding: '60px 40px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 32, textAlign: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32, textAlign: 'center' }}>
               {[
-                { n: '100+', l: 'Références disponibles' },
-                { n: '15+', l: "Années d'expérience" },
-                { n: '500+', l: 'Clients satisfaits' },
-                { n: '98%', l: 'Taux de satisfaction' },
+                { n: '8+', l: "Années d'expérience en mécanique hybride" },
+                { n: '10%', l: 'De remise pour retrait sur place' },
               ].map(({ n, l }) => (
                 <div key={l}>
-                  <p style={{ fontSize: 44, fontWeight: 900, color: 'var(--accent)', lineHeight: 1 }}>{n}</p>
-                  <p style={{ color: 'rgba(255,255,255,.7)', fontSize: 14, marginTop: 8 }}>{l}</p>
+                  <p style={{ fontSize: 52, fontWeight: 900, color: 'var(--accent)', lineHeight: 1 }}>{n}</p>
+                  <p style={{ color: 'rgba(255,255,255,.7)', fontSize: 15, marginTop: 10 }}>{l}</p>
                 </div>
               ))}
             </div>

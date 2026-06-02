@@ -1,8 +1,25 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import Logo from './Logo';
+import toast from 'react-hot-toast';
+
+const PHONE = '0693839654';
+const EMAIL = 'Locationautopresto@gmail.com';
+
+function copyToClipboard(text, label) {
+  navigator.clipboard.writeText(text).then(() => toast.success(`${label} copié !`)).catch(() => {});
+}
 
 export default function Footer() {
+  const categories = [
+    { name: 'Outillage à main', slug: 'outillage-main' },
+    { name: 'Outillage électroportatif', slug: 'outillage-electro' },
+    { name: 'Équipement de levage', slug: 'levage' },
+    { name: 'Diagnostic auto', slug: 'diagnostic' },
+    { name: 'Compresseurs & pneumatique', slug: 'compresseurs' },
+    { name: 'Équipement de sécurité', slug: 'securite' },
+  ];
+
   return (
     <footer>
       {/* CTA Banner */}
@@ -55,9 +72,11 @@ export default function Footer() {
             <div>
               <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Navigation</h4>
               {[
-                { to: '/', l: 'Accueil' }, { to: '/catalogue', l: 'Catalogue' },
-                { to: '/catalogue?type=rent', l: 'Location' }, { to: '/catalogue?type=sale', l: 'Achat' },
-                { to: '/a-propos', l: 'À propos' }, { to: '/faq', l: 'FAQ' },
+                { to: '/', l: 'Accueil' },
+                { to: '/catalogue', l: 'Catalogue' },
+                { to: '/a-propos', l: 'À propos' },
+                { to: '/faq', l: 'FAQ' },
+                { to: '/contact', l: 'Contact' },
               ].map(({ to, l }) => (
                 <Link key={to} to={to} style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '5px 0', transition: 'var(--transition)' }}
                   onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
@@ -66,31 +85,46 @@ export default function Footer() {
               ))}
             </div>
 
-            {/* Services */}
+            {/* Categories */}
             <div>
               <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Catégories</h4>
-              {['Outillage à main', 'Outillage électroportatif', 'Équipement de levage', 'Diagnostic auto', 'Compresseurs', 'Équipement de sécurité'].map(c => (
-                <Link key={c} to={`/catalogue?search=${encodeURIComponent(c)}`}
+              {categories.map(({ name, slug }) => (
+                <Link key={slug} to={`/catalogue?category=${slug}`}
                   style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '5px 0', transition: 'var(--transition)' }}
                   onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
                   onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,.65)'}
-                >{c}</Link>
+                >{name}</Link>
               ))}
             </div>
 
             {/* Contact */}
             <div>
               <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Contact</h4>
-              {[
-                { icon: <Phone size={15}/>, text: '06 93 83 96 54' },
-                { icon: <Mail size={15}/>, text: 'Locationautopresto@gmail.com' },
-                { icon: <MapPin size={15}/>, text: 'La Réunion' },
-              ].map(({ icon, text }) => (
-                <div key={text} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14, color: 'rgba(255,255,255,.7)', fontSize: 14 }}>
-                  <span style={{ color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}>{icon}</span>
-                  {text}
-                </div>
-              ))}
+
+              {/* Phone — opens dialer on mobile, copies on desktop */}
+              <a href={`tel:+262${PHONE.slice(1)}`}
+                onClick={(e) => { if (!('ontouchstart' in window)) { e.preventDefault(); copyToClipboard(PHONE, 'Numéro'); } }}
+                style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14, color: 'rgba(255,255,255,.7)', fontSize: 14, textDecoration: 'none', cursor: 'pointer' }}>
+                <span style={{ color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}><Phone size={15}/></span>
+                {PHONE.replace(/(\d{2})(?=\d)/g, '$1 ').trim()}
+              </a>
+
+              {/* Email — copies to clipboard */}
+              <div onClick={() => copyToClipboard(EMAIL, 'Email')}
+                style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14, color: 'rgba(255,255,255,.7)', fontSize: 14, cursor: 'pointer' }}>
+                <span style={{ color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}><Mail size={15}/></span>
+                {EMAIL}
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14, color: 'rgba(255,255,255,.7)', fontSize: 14 }}>
+                <span style={{ color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}><MapPin size={15}/></span>
+                La Réunion
+              </div>
+
+              <div style={{ background: 'rgba(255,51,51,.15)', border: '1px solid rgba(255,51,51,.3)', borderRadius: 10, padding: '10px 14px', marginTop: 8 }}>
+                <p style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 13 }}>🏷️ -10% retrait sur place</p>
+                <p style={{ color: 'rgba(255,255,255,.6)', fontSize: 12, marginTop: 4 }}>Remise accordée à la récupération chez nous</p>
+              </div>
             </div>
           </div>
 
