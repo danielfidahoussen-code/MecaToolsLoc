@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 const API = (token) => ({ headers: { Authorization: `Bearer ${token}` } });
 
-function useIsMobile(bp = 768) {
+function useIsMobile(bp = 1024) {
   const [mobile, setMobile] = useState(() => window.innerWidth < bp);
   useEffect(() => {
     const h = () => setMobile(window.innerWidth < bp);
