@@ -16,6 +16,7 @@ import Admin from './pages/Admin';
 import MentionsLegales from './pages/MentionsLegales';
 import CGV from './pages/CGV';
 import Confidentialite from './pages/Confidentialite';
+import LogoPreview from './pages/LogoPreview';
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
                   <Route path="/mentions-legales" element={<MentionsLegales/>}/>
                   <Route path="/cgv" element={<CGV/>}/>
                   <Route path="/confidentialite" element={<Confidentialite/>}/>
+                  <Route path="/logo-preview" element={<LogoPreview/>}/>
                 </Routes>
                 <Footer/>
               </>
