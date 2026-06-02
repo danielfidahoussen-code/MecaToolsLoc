@@ -13,7 +13,7 @@ export default function Confidentialite() {
           <LegalSection title="1. Responsable du traitement">
             <p>Le responsable du traitement des données personnelles collectées via ce site est :</p>
             <ul>
-              <li><strong>MecaToolsLoc</strong></li>
+              <li><strong>LVTools</strong></li>
               <li>3 rue de la Guadeloupe, Moufia 97490 Saint-Denis, La Réunion</li>
               <li>Téléphone : 06 93 83 96 54</li>
               <li>Email : Locationautopresto@gmail.com</li>
@@ -61,7 +61,7 @@ export default function Confidentialite() {
           </LegalSection>
 
           <LegalSection title="6. Destinataires des données">
-            <p>Vos données sont destinées à MecaToolsLoc uniquement. Elles ne sont pas vendues ni cédées à des tiers, sauf obligations légales ou nécessité contractuelle (ex : prestataire de paiement).</p>
+            <p>Vos données sont destinées à LVTools uniquement. Elles ne sont pas vendues ni cédées à des tiers, sauf obligations légales ou nécessité contractuelle (ex : prestataire de paiement).</p>
           </LegalSection>
 
           <LegalSection title="7. Vos droits">
@@ -83,7 +83,7 @@ export default function Confidentialite() {
           </LegalSection>
 
           <LegalSection title="9. Sécurité">
-            <p>MecaToolsLoc met en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données contre tout accès non autorisé, perte ou divulgation. Les données transmises lors du paiement sont chiffrées via le protocole SSL.</p>
+            <p>LVTools met en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données contre tout accès non autorisé, perte ou divulgation. Les données transmises lors du paiement sont chiffrées via le protocole SSL.</p>
           </LegalSection>
 
           <LegalSection title="10. Modifications">

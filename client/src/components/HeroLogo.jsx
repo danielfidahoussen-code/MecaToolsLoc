@@ -64,12 +64,12 @@ export default function HeroLogo() {
 
         <g style={partStyle(-90, 60, -10, 0.3, 0.15)}>
           <text x="100" y="175" fontFamily="Inter,Arial,sans-serif" fontWeight="900" fontSize="36"
-            fill="white" letterSpacing="3" textAnchor="middle">MECA</text>
+            fill="white" letterSpacing="3" textAnchor="middle">LV</text>
         </g>
 
         <g style={partStyle(90, 70, 10, 0.3, 0.2)}>
           <text x="218" y="175" fontFamily="Inter,Arial,sans-serif" fontWeight="900" fontSize="36"
-            fill="#ff3333" letterSpacing="3" textAnchor="middle">TOOLS</text>
+            fill="#ff3333" letterSpacing="3" textAnchor="middle">Tools</text>
         </g>
 
         <g style={partStyle(60, -80, 30, 0.2, 0.08)}>

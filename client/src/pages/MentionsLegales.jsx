@@ -4,15 +4,15 @@ export default function MentionsLegales() {
       <div className="page-header">
         <div className="container">
           <h1>Mentions légales</h1>
-          <p>Informations légales relatives au site MecaToolsLoc</p>
+          <p>Informations légales relatives au site LVTools</p>
         </div>
       </div>
       <div className="page">
         <div className="container" style={{ maxWidth: 800 }}>
           <LegalSection title="1. Éditeur du site">
-            <p>Le site <strong>mecatoolsloc.re</strong> est édité par :</p>
+            <p>Le site <strong>lvtools.re</strong> est édité par :</p>
             <ul>
-              <li><strong>Raison sociale :</strong> MecaToolsLoc</li>
+              <li><strong>Raison sociale :</strong> LVTools</li>
               <li><strong>Forme juridique :</strong> Entreprise individuelle</li>
               <li><strong>Adresse :</strong> 3 rue de la Guadeloupe, Moufia 97490 Saint-Denis, La Réunion</li>
               <li><strong>Téléphone :</strong> 06 93 83 96 54</li>
@@ -21,25 +21,25 @@ export default function MentionsLegales() {
           </LegalSection>
 
           <LegalSection title="2. Directeur de la publication">
-            <p>Le directeur de la publication est le gérant de MecaToolsLoc.</p>
+            <p>Le directeur de la publication est le gérant de LVTools.</p>
           </LegalSection>
 
           <LegalSection title="3. Hébergement">
-            <p>Le site est hébergé par un prestataire d'hébergement web. Pour toute demande concernant l'hébergement, vous pouvez contacter MecaToolsLoc à l'adresse indiquée ci-dessus.</p>
+            <p>Le site est hébergé par un prestataire d'hébergement web. Pour toute demande concernant l'hébergement, vous pouvez contacter LVTools à l'adresse indiquée ci-dessus.</p>
           </LegalSection>
 
           <LegalSection title="4. Propriété intellectuelle">
-            <p>L'ensemble des contenus présents sur ce site (textes, images, logos, icônes, etc.) est la propriété exclusive de MecaToolsLoc ou de ses partenaires, et est protégé par les lois françaises et internationales relatives à la propriété intellectuelle.</p>
-            <p>Toute reproduction, représentation, modification, publication ou adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite sauf autorisation écrite préalable de MecaToolsLoc.</p>
+            <p>L'ensemble des contenus présents sur ce site (textes, images, logos, icônes, etc.) est la propriété exclusive de LVTools ou de ses partenaires, et est protégé par les lois françaises et internationales relatives à la propriété intellectuelle.</p>
+            <p>Toute reproduction, représentation, modification, publication ou adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite sauf autorisation écrite préalable de LVTools.</p>
           </LegalSection>
 
           <LegalSection title="5. Responsabilité">
-            <p>MecaToolsLoc s'efforce d'assurer au mieux l'exactitude et la mise à jour des informations diffusées sur ce site. Toutefois, MecaToolsLoc ne peut garantir l'exhaustivité et l'absence d'erreur des informations disponibles sur le site.</p>
-            <p>MecaToolsLoc ne pourra être tenu responsable des dommages directs ou indirects résultant de l'utilisation de ce site ou des informations qui y sont contenues.</p>
+            <p>LVTools s'efforce d'assurer au mieux l'exactitude et la mise à jour des informations diffusées sur ce site. Toutefois, LVTools ne peut garantir l'exhaustivité et l'absence d'erreur des informations disponibles sur le site.</p>
+            <p>LVTools ne pourra être tenu responsable des dommages directs ou indirects résultant de l'utilisation de ce site ou des informations qui y sont contenues.</p>
           </LegalSection>
 
           <LegalSection title="6. Liens hypertextes">
-            <p>Le site peut contenir des liens vers d'autres sites internet. MecaToolsLoc n'est pas responsable du contenu de ces sites tiers et ne peut être tenu responsable des dommages qui pourraient résulter de leur consultation.</p>
+            <p>Le site peut contenir des liens vers d'autres sites internet. LVTools n'est pas responsable du contenu de ces sites tiers et ne peut être tenu responsable des dommages qui pourraient résulter de leur consultation.</p>
           </LegalSection>
 
           <LegalSection title="7. Droit applicable">

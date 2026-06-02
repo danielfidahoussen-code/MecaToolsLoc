@@ -6,7 +6,7 @@ export default function About() {
     <div>
       <div className="page-header">
         <div className="container">
-          <h1>À propos de MecaToolsLoc</h1>
+          <h1>À propos de LVTools</h1>
           <p>"Par un mécanicien, pour les mécaniciens"</p>
         </div>
       </div>
@@ -21,7 +21,7 @@ export default function About() {
                 Né de la passion<br/>de la mécanique
               </h2>
               <p style={{ color: 'var(--gray-600)', lineHeight: 1.8, marginBottom: 16 }}>
-                MecaToolsLoc est née d'un constat simple : le matériel d'outillage professionnel coûte cher à l'achat,
+                LVTools est née d'un constat simple : le matériel d'outillage professionnel coûte cher à l'achat,
                 et de nombreux mécaniciens — qu'ils soient indépendants ou amateurs passionnés — n'ont pas toujours
                 besoin d'un outil pour longtemps.
               </p>
@@ -40,7 +40,7 @@ export default function About() {
               </Link>
             </div>
             <div style={{ position: 'relative' }}>
-              <img src="/api/placeholder/540/440?text=MecaToolsLoc+Atelier" alt="Notre atelier"
+              <img src="/api/placeholder/540/440?text=LVTools+Atelier" alt="Notre atelier"
                 style={{ width: '100%', borderRadius: 20, boxShadow: 'var(--shadow-lg)' }}/>
               <div style={{ position: 'absolute', bottom: -20, left: -20, background: 'var(--accent)', borderRadius: 16, padding: '20px 28px', boxShadow: 'var(--shadow)' }}>
                 <p style={{ fontWeight: 900, fontSize: 32, color: 'white', lineHeight: 1 }}>8+</p>

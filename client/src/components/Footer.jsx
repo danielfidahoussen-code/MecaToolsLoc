@@ -46,7 +46,7 @@ export default function Footer() {
             <div>
               <Logo size={38} light/>
               <p style={{ color: 'rgba(255,255,255,.6)', fontSize: 14, marginTop: 16, lineHeight: 1.7 }}>
-                MecaToolsLoc — Location et vente de matériel d'outillage professionnel à La Réunion.
+                LVTools — Location et vente de matériel d'outillage professionnel à La Réunion.
               </p>
               <p style={{ color: 'var(--accent)', fontStyle: 'italic', fontSize: 13, marginTop: 10, fontWeight: 600 }}>
                 "Par un mécanicien, pour les mécaniciens"
@@ -138,7 +138,7 @@ export default function Footer() {
           </div>
 
           <div style={{ borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <p style={{ color: 'rgba(255,255,255,.4)', fontSize: 13 }}>© 2025 MecaToolsLoc. Tous droits réservés.</p>
+            <p style={{ color: 'rgba(255,255,255,.4)', fontSize: 13 }}>© 2025 LVTools. Tous droits réservés.</p>
             <div style={{ display: 'flex', gap: 24 }}>
               {[
                 { l: 'Mentions légales', to: '/mentions-legales' },

@@ -9,7 +9,7 @@ const API = (token) => ({
 });
 
 function LoginForm({ onLogin }) {
-  const [email, setEmail] = useState('admin@mecatoolsloc.re');
+  const [email, setEmail] = useState('admin@lvtools.re');
   const [pass, setPass] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -49,7 +49,7 @@ function LoginForm({ onLogin }) {
           <button type="submit" className="btn btn-primary btn-lg" disabled={loading} style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>
             {loading ? 'Connexion...' : 'Se connecter'}
           </button>
-          <p style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 16 }}>Démo: admin@mecatoolsloc.re / admin123</p>
+          <p style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 16 }}>Démo: admin@lvtools.re / admin123</p>
         </form>
       </div>
     </div>
@@ -244,7 +244,7 @@ export default function Admin() {
       <div style={{ background: 'var(--primary)', color: 'white', padding: '24px 0' }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h1 style={{ fontWeight: 800, fontSize: 24 }}>Administration MecaToolsLoc</h1>
+            <h1 style={{ fontWeight: 800, fontSize: 24 }}>Administration LVTools</h1>
             <p style={{ opacity: 0.7, fontSize: 13 }}>Gestion du catalogue et des commandes</p>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
