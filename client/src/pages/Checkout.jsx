@@ -1,9 +1,17 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ShoppingBag, CreditCard, Lock, CheckCircle, ArrowLeft } from 'lucide-react';
+import { ShoppingBag, CreditCard, Lock, CheckCircle, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
+
+const ZONES = [
+  { id: '0-10',  label: '0 – 10 km  (Saint-Denis et alentours)', fee: 0 },
+  { id: '10-15', label: '10 – 15 km', fee: 14.99 },
+  { id: '16-25', label: '16 – 25 km', fee: 19.99 },
+  { id: '26-35', label: '26 – 35 km', fee: 29.99 },
+  { id: '36+',   label: '36 km et plus', fee: 39 },
+];
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
@@ -11,12 +19,35 @@ export default function Checkout() {
   const [step, setStep] = useState(1);
   const [paying, setPaying] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [deliveryMode, setDeliveryMode] = useState('delivery'); // 'delivery' | 'pickup'
+  const [deliveryZone, setDeliveryZone] = useState('0-10');
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', city: '', cardNumber: '', cardExpiry: '', cardCVC: '' });
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+  const hasRentals = items.some(i => i.type === 'rent');
+  const isPickup = deliveryMode === 'pickup';
+
+  // Livraison gratuite si achat uniquement ET total > 150€
+  const allSales = items.every(i => i.type === 'sale');
+  const freeShipping = allSales && total > 150;
+
+  const deliveryFee = (() => {
+    if (isPickup) return 0;
+    if (freeShipping) return 0;
+    return ZONES.find(z => z.id === deliveryZone)?.fee ?? 0;
+  })();
+
+  // -10% si retrait sur place
+  const discount = isPickup ? total * 0.1 : 0;
+  const finalTotal = total - discount + deliveryFee;
+
+  // Location bloquée au-delà de 10 km
+  const rentalZoneError = !isPickup && hasRentals && deliveryZone !== '0-10';
+
   const validateStep1 = () => {
     if (!form.name || !form.email || !form.phone) { toast.error('Remplissez tous les champs obligatoires'); return; }
+    if (rentalZoneError) { toast.error('La livraison des locations est limitée à 10 km'); return; }
     setStep(2);
   };
 
@@ -28,18 +59,18 @@ export default function Checkout() {
         customer_name: form.name,
         customer_email: form.email,
         customer_phone: form.phone,
-        customer_address: `${form.address}, ${form.city}`,
+        customer_address: isPickup ? 'Retrait sur place' : `${form.address}, ${form.city}`,
+        delivery_mode: isPickup ? 'pickup' : `delivery-${deliveryZone}`,
+        delivery_fee: deliveryFee,
+        discount: discount,
         items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price, type: i.type, rentDates: i.rentDates || null })),
-        total_price: total,
+        total_price: finalTotal,
         type: 'mixed',
       });
       clearCart();
       setSuccess(true);
-    } catch (e) {
-      toast.error('Erreur lors du paiement. Réessayez.');
-    } finally {
-      setPaying(false);
-    }
+    } catch { toast.error('Erreur lors du paiement. Réessayez.'); }
+    finally { setPaying(false); }
   };
 
   if (items.length === 0 && !success) return (
@@ -98,6 +129,82 @@ export default function Checkout() {
               {step === 1 && (
                 <div className="card" style={{ padding: 28 }}>
                   <h3 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 24 }}>Vos coordonnées</h3>
+
+                  {/* Toggle Livraison / Retrait */}
+                  <div className="form-group">
+                    <label className="form-label">Mode de récupération</label>
+                    <div style={{ display: 'flex', background: 'var(--gray-100)', borderRadius: 14, padding: 4, gap: 4 }}>
+                      <button onClick={() => setDeliveryMode('delivery')} style={{
+                        flex: 1, padding: '11px 16px', borderRadius: 10, fontWeight: 700, fontSize: 14, transition: 'all 0.2s',
+                        background: !isPickup ? 'white' : 'transparent',
+                        boxShadow: !isPickup ? '0 2px 8px rgba(0,0,0,.1)' : 'none',
+                        color: !isPickup ? 'var(--primary)' : 'var(--gray-500)',
+                      }}>🚚 Livraison</button>
+                      <button onClick={() => setDeliveryMode('pickup')} style={{
+                        flex: 1, padding: '11px 16px', borderRadius: 10, fontWeight: 700, fontSize: 14, transition: 'all 0.2s',
+                        background: isPickup ? '#16a34a' : 'transparent',
+                        boxShadow: isPickup ? '0 4px 12px rgba(22,163,74,.35)' : 'none',
+                        color: isPickup ? 'white' : 'var(--gray-500)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      }}>
+                        🏪 Retrait sur place
+                        {isPickup && <span style={{ background: 'rgba(255,255,255,.25)', borderRadius: 6, padding: '2px 7px', fontSize: 12, fontWeight: 800 }}>-10%</span>}
+                      </button>
+                    </div>
+                    {isPickup && (
+                      <p style={{ fontSize: 13, color: '#16a34a', fontWeight: 600, marginTop: 8 }}>
+                        ✓ Remise de 10 % appliquée — 3 rue de la Guadeloupe, Moufia 97490
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Zone de livraison */}
+                  {!isPickup && (
+                    <div className="form-group">
+                      <label className="form-label">Zone de livraison</label>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {ZONES.map(z => {
+                          const blocked = hasRentals && z.id !== '0-10';
+                          return (
+                            <label key={z.id} style={{
+                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                              padding: '12px 16px', borderRadius: 10, cursor: blocked ? 'not-allowed' : 'pointer',
+                              border: `2px solid ${deliveryZone === z.id ? 'var(--accent)' : 'var(--gray-200)'}`,
+                              background: deliveryZone === z.id ? 'rgba(255,51,51,.05)' : blocked ? 'var(--gray-100)' : 'white',
+                              opacity: blocked ? 0.45 : 1,
+                              transition: 'all 0.18s',
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <input type="radio" name="zone" value={z.id} checked={deliveryZone === z.id}
+                                  disabled={blocked}
+                                  onChange={() => !blocked && setDeliveryZone(z.id)}
+                                  style={{ accentColor: 'var(--accent)', width: 16, height: 16 }}/>
+                                <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--gray-800)' }}>{z.label}</span>
+                                {blocked && <span style={{ fontSize: 11, color: 'var(--danger)', fontWeight: 700 }}>Location : retrait uniquement</span>}
+                              </div>
+                              <span style={{ fontWeight: 800, color: freeShipping || z.fee === 0 ? 'var(--success)' : 'var(--primary)', fontSize: 14 }}>
+                                {freeShipping || z.fee === 0 ? 'Gratuit' : `+${z.fee.toFixed(2)} €`}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      {rentalZoneError && (
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 8, padding: '10px 14px', marginTop: 8 }}>
+                          <AlertTriangle size={16} color="var(--danger)"/>
+                          <p style={{ fontSize: 13, color: 'var(--danger)', fontWeight: 600 }}>
+                            La livraison des locations est limitée à 10 km autour de Saint-Denis. Choisissez le retrait sur place ou une zone 0-10 km.
+                          </p>
+                        </div>
+                      )}
+                      {freeShipping && (
+                        <p style={{ fontSize: 13, color: 'var(--success)', fontWeight: 600, marginTop: 8 }}>
+                          ✓ Livraison gratuite — achat supérieur à 150 €
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   <div className="grid-2">
                     <div className="form-group">
                       <label className="form-label">Nom complet *</label>
@@ -112,14 +219,18 @@ export default function Checkout() {
                     <label className="form-label">Email *</label>
                     <input className="form-control" type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="vous@exemple.fr"/>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Adresse</label>
-                    <input className="form-control" value={form.address} onChange={e => set('address', e.target.value)} placeholder="34 Rue Exemple"/>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Ville</label>
-                    <input className="form-control" value={form.city} onChange={e => set('city', e.target.value)} placeholder="Saint-Denis"/>
-                  </div>
+                  {!isPickup && (
+                    <>
+                      <div className="form-group">
+                        <label className="form-label">Adresse</label>
+                        <input className="form-control" value={form.address} onChange={e => set('address', e.target.value)} placeholder="34 Rue Exemple"/>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Ville</label>
+                        <input className="form-control" value={form.city} onChange={e => set('city', e.target.value)} placeholder="Saint-Denis"/>
+                      </div>
+                    </>
+                  )}
                   <button className="btn btn-primary btn-lg" onClick={validateStep1} style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>
                     Continuer vers le paiement →
                   </button>
@@ -134,13 +245,11 @@ export default function Checkout() {
                       <Lock size={14}/> SSL sécurisé
                     </div>
                   </div>
-
                   <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
                     {['VISA', 'MC', 'CB'].map(c => (
                       <div key={c} style={{ padding: '6px 14px', border: '1.5px solid var(--gray-200)', borderRadius: 8, fontSize: 12, fontWeight: 800, color: 'var(--gray-600)' }}>{c}</div>
                     ))}
                   </div>
-
                   <div className="form-group">
                     <label className="form-label">Numéro de carte</label>
                     <input className="form-control" value={form.cardNumber}
@@ -159,13 +268,11 @@ export default function Checkout() {
                       <input className="form-control" value={form.cardCVC} onChange={e => set('cardCVC', e.target.value.replace(/\D/g, '').slice(0, 3))} placeholder="123" maxLength={3}/>
                     </div>
                   </div>
-
                   <div style={{ background: 'var(--light)', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: 'var(--gray-600)', display: 'flex', gap: 8, alignItems: 'center' }}>
                     <Lock size={14}/> Vos données sont chiffrées et sécurisées. Nous ne stockons pas vos informations bancaires.
                   </div>
-
                   <button className="btn btn-primary btn-lg" onClick={handlePay} disabled={paying} style={{ width: '100%', justifyContent: 'center' }}>
-                    <CreditCard size={18}/> {paying ? 'Traitement...' : `Payer ${total.toFixed(2)} €`}
+                    <CreditCard size={18}/> {paying ? 'Traitement...' : `Payer ${finalTotal.toFixed(2)} €`}
                   </button>
                   <button className="btn" style={{ width: '100%', justifyContent: 'center', marginTop: 10, background: 'var(--gray-100)', color: 'var(--gray-700)' }} onClick={() => setStep(1)}>
                     <ArrowLeft size={14}/> Retour
@@ -195,16 +302,25 @@ export default function Checkout() {
                   <span style={{ color: 'var(--gray-600)' }}>Sous-total</span>
                   <span>{total.toFixed(2)} €</span>
                 </div>
+                {discount > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
+                    <span style={{ color: '#16a34a', fontWeight: 700 }}>🏷️ Remise retrait (-10%)</span>
+                    <span style={{ color: '#16a34a', fontWeight: 700 }}>-{discount.toFixed(2)} €</span>
+                  </div>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
                   <span style={{ color: 'var(--gray-600)' }}>Livraison</span>
-                  <span style={{ color: 'var(--success)' }}>Gratuite</span>
+                  <span style={{ color: deliveryFee === 0 ? 'var(--success)' : 'var(--primary)', fontWeight: 600 }}>
+                    {deliveryFee === 0 ? (isPickup ? '—' : 'Gratuite') : `${deliveryFee.toFixed(2)} €`}
+                  </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 18, color: 'var(--primary)', borderTop: '2px solid var(--gray-200)', paddingTop: 12, marginTop: 8 }}>
                   <span>Total TTC</span>
-                  <span>{total.toFixed(2)} €</span>
+                  <span>{finalTotal.toFixed(2)} €</span>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
