@@ -59,31 +59,44 @@ export default function Checkout() {
 
   // Géocodage de l'adresse + calcul distance
   const calculateDistance = async () => {
-    if (!form.address || !form.city) {
-      toast.error('Entrez votre adresse et votre ville');
+    if (!form.city) {
+      toast.error('Entrez au moins votre ville');
       return;
     }
     setGeoLoading(true);
-    try {
-      const q = encodeURIComponent(`${form.address}, ${form.city}, La Réunion`);
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
-        { headers: { 'Accept-Language': 'fr', 'User-Agent': 'MecaToolsLoc/1.0' } }
-      );
-      const data = await res.json();
-      if (data.length === 0) {
-        toast.error('Adresse introuvable — vérifiez votre saisie');
-        setGeoLoading(false);
-        return;
-      }
-      const km = haversineKm(SHOP_LAT, SHOP_LNG, parseFloat(data[0].lat), parseFloat(data[0].lon));
-      const zone = kmToZone(km);
-      setDetectedKm(km);
-      setDeliveryZone(zone);
-      toast.success(`Distance estimée : ${km.toFixed(1)} km`);
-    } catch {
-      toast.error('Impossible de calculer la distance, vérifiez votre connexion');
+
+    // Essaie plusieurs combinaisons pour trouver l'adresse
+    const attempts = [
+      `${form.address}, ${form.city}, La Réunion, France`,
+      `${form.city}, La Réunion, France`,
+      `${form.city}, 974, France`,
+    ];
+
+    let found = null;
+    for (const q of attempts) {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=fr`,
+          { headers: { 'Accept-Language': 'fr' } }
+        );
+        const data = await res.json();
+        if (data.length > 0) { found = data[0]; break; }
+      } catch { /* continue */ }
     }
+
+    if (!found) {
+      toast.error('Ville introuvable — vérifiez la saisie');
+      setGeoLoading(false);
+      return;
+    }
+
+    const km = haversineKm(SHOP_LAT, SHOP_LNG, parseFloat(found.lat), parseFloat(found.lon));
+    const zone = kmToZone(km);
+    setDetectedKm(km);
+    setDeliveryZone(zone);
+    // Si on n'a pu géocoder que la ville, prévenir
+    const usedCity = found.display_name.toLowerCase().includes(form.city.toLowerCase());
+    toast.success(`Distance estimée : ${km.toFixed(1)} km${usedCity && form.address ? ' (basé sur la ville)' : ''}`);
     setGeoLoading(false);
   };
 
