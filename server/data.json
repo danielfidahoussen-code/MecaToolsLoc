@@ -237,7 +237,7 @@
     {
       "id": 1,
       "email": "admin@mecatoolsloc.re",
-      "password": "$2a$10$yqZ0iksglzMOHyQPsAnO1.J14.1xoJ0p0lL8gek2EVxvQqk562LUO",
+      "password": "$2a$10$VZPeNn7dx1MDaRffw0jG3.WqVAOMO1IcbrOZBhrQaOXSRwPP9nnYy",
       "role": "admin",
       "created_at": "2026-06-01 11:36:37",
       "updated_at": "2026-06-01 11:36:37"
