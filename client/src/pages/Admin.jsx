@@ -154,20 +154,20 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
                 <input type="checkbox" checked={!!form.available_for_rent} onChange={e => set('available_for_rent', e.target.checked)} style={{ width: 16, height: 16 }}/> Location
               </label>
             </div>
-            <label style={{
+            <div onClick={() => set('has_qr_notice', !form.has_qr_notice)} style={{
               display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
               padding: '10px 14px', borderRadius: 10, border: '1.5px solid',
               borderColor: form.has_qr_notice ? 'var(--accent)' : 'var(--gray-200)',
               background: form.has_qr_notice ? 'rgba(255,51,51,.06)' : 'var(--gray-100)',
               transition: 'all .2s',
             }}>
-              <input type="checkbox" checked={!!form.has_qr_notice} onChange={e => set('has_qr_notice', e.target.checked)} style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}/>
-              <span style={{ fontSize: 18 }}>📱</span>
+              <input type="checkbox" checked={!!form.has_qr_notice} onChange={e => { e.stopPropagation(); set('has_qr_notice', e.target.checked); }} style={{ width: 16, height: 16, accentColor: 'var(--accent)', flexShrink: 0 }}/>
+              <span style={{ fontSize: 18 }}>🎬</span>
               <div>
                 <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)' }}>Vidéo notice d'utilisation disponible</p>
                 <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Le badge "🎬 Vidéo notice d'utilisation offerte" apparaîtra dans le récapitulatif de commande</p>
               </div>
-            </label>
+            </div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>

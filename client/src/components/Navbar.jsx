@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { ShoppingCart, Menu, X, Phone } from 'lucide-react';
+import { ShoppingCart, Menu, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import Logo from './Logo';
@@ -35,14 +35,12 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Top bar — simplifié sur mobile */}
-      <div style={{ background: 'var(--primary)', color: 'white', padding: '7px 0', fontSize: 13 }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-          <a href="tel:+262693839654" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'white', textDecoration: 'none', fontWeight: 600 }}>
-            <Phone size={13}/> 06 93 83 96 54
-          </a>
-          <span style={{ opacity: 0.65 }} className="topbar-slogan">Par un mécanicien, pour les mécaniciens</span>
-          <span className="topbar-email" style={{ opacity: 0.8, fontSize: 12 }}>Locationautopresto@gmail.com</span>
+      {/* Top bar */}
+      <div style={{ background: 'var(--primary)', color: 'white', padding: '7px 0' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <span style={{ color: 'rgba(255,255,255,.7)', fontStyle: 'italic', fontSize: 13, letterSpacing: '0.4px' }}>
+            Par un mécanicien, pour les mécaniciens
+          </span>
         </div>
       </div>
 
@@ -153,14 +151,10 @@ export default function Navbar() {
         .desktop-nav { display: flex !important; }
         .mobile-only { display: none !important; }
         .cart-label { display: inline; }
-        .topbar-slogan { display: inline; }
-        .topbar-email { display: inline; }
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
           .mobile-only { display: flex !important; }
           .cart-label { display: none; }
-          .topbar-slogan { display: none; }
-          .topbar-email { display: none; }
         }
       `}</style>
     </>
