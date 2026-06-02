@@ -5,12 +5,12 @@ import { ShoppingBag, CreditCard, Lock, CheckCircle, ArrowLeft, AlertTriangle, M
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
+// Prix par trajet (aller seul = 1 trajet, aller-retour = 2 trajets)
 const ZONES = [
-  { id: '0-10',  label: '0 – 10 km', fee: 0 },
-  { id: '10-15', label: '10 – 15 km', fee: 14.99 },
-  { id: '16-25', label: '16 – 25 km', fee: 19.99 },
-  { id: '26-35', label: '26 – 35 km', fee: 29.99 },
-  { id: '36+',   label: '36 km et plus', fee: 39 },
+  { id: '0-15',  label: '0 – 15 km',   fee: 14.99 },
+  { id: '16-35', label: '16 – 35 km',  fee: 24.99 },
+  { id: '36-50', label: '36 – 50 km',  fee: 39.99 },
+  { id: '50+',   label: '50 km et +',  fee: 49.99 },
 ];
 
 // Coordonnées de l'adresse du magasin (Auto Presto, Moufia)
@@ -26,11 +26,10 @@ function haversineKm(lat1, lon1, lat2, lon2) {
 }
 
 function kmToZone(km) {
-  if (km <= 10) return '0-10';
-  if (km <= 15) return '10-15';
-  if (km <= 25) return '16-25';
-  if (km <= 35) return '26-35';
-  return '36+';
+  if (km <= 15) return '0-15';
+  if (km <= 35) return '16-35';
+  if (km <= 50) return '36-50';
+  return '50+';
 }
 
 export default function Checkout() {
@@ -39,6 +38,7 @@ export default function Checkout() {
   const [paying, setPaying] = useState(false);
   const [success, setSuccess] = useState(false);
   const [deliveryMode, setDeliveryMode] = useState('delivery');
+  const [deliveryTrips, setDeliveryTrips] = useState({ aller: true, retour: false });
   const [deliveryZone, setDeliveryZone] = useState(null); // null = pas encore calculé
   const [detectedKm, setDetectedKm] = useState(null);
   const [geoLoading, setGeoLoading] = useState(false);
@@ -99,14 +99,13 @@ export default function Checkout() {
 
   const hasRentals = items.some(i => i.type === 'rent');
   const isPickup = deliveryMode === 'pickup';
-  const allSales = items.every(i => i.type === 'sale');
-  const freeShipping = allSales && total > 150;
 
   const currentZone = ZONES.find(z => z.id === deliveryZone);
-  const deliveryFee = isPickup ? 0 : freeShipping ? 0 : (currentZone?.fee ?? 0);
+  const tripCount = isPickup ? 0 : ((deliveryTrips.aller ? 1 : 0) + (deliveryTrips.retour ? 1 : 0));
+  const deliveryFee = isPickup ? 0 : (currentZone?.fee ?? 0) * tripCount;
   const discount = isPickup ? total * 0.1 : 0;
   const finalTotal = total - discount + deliveryFee;
-  const rentalZoneError = !isPickup && hasRentals && deliveryZone && deliveryZone !== '0-10';
+  const rentalZoneError = !isPickup && hasRentals && deliveryZone && deliveryZone !== '0-15';
 
   const [geoResult, setGeoResult] = useState(null); // { km, label, precise }
 
@@ -179,7 +178,8 @@ export default function Checkout() {
   const validateStep1 = () => {
     if (!form.name || !form.email || !form.phone) { toast.error('Remplissez tous les champs obligatoires'); return; }
     if (!isPickup && !deliveryZone) { toast.error('Calculez d\'abord votre zone de livraison'); return; }
-    if (rentalZoneError) { toast.error('La livraison des locations est limitée à 10 km'); return; }
+    if (!isPickup && !deliveryTrips.aller && !deliveryTrips.retour) { toast.error('Sélectionnez au moins un trajet (aller ou retour)'); return; }
+    if (rentalZoneError) { toast.error('La livraison des locations est limitée à 15 km'); return; }
     setStep(2);
   };
 
@@ -192,7 +192,7 @@ export default function Checkout() {
         customer_email: form.email,
         customer_phone: form.phone,
         customer_address: isPickup ? 'Retrait sur place' : [form.address, detectedCity].filter(Boolean).join(', '),
-        delivery_mode: isPickup ? 'pickup' : `delivery-${deliveryZone}`,
+        delivery_mode: isPickup ? 'pickup' : `delivery-${deliveryZone}-${[deliveryTrips.aller && 'aller', deliveryTrips.retour && 'retour'].filter(Boolean).join('+')}`,
         delivery_fee: deliveryFee,
         discount,
         items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price, type: i.type, rentDates: i.rentDates || null })),
@@ -353,7 +353,7 @@ export default function Checkout() {
                         <div style={{
                           background: rentalZoneError ? 'rgba(239,68,68,.06)' : 'rgba(16,185,129,.06)',
                           border: `1px solid ${rentalZoneError ? 'rgba(239,68,68,.3)' : 'rgba(16,185,129,.3)'}`,
-                          borderRadius: 10, padding: '14px 16px', marginBottom: 16,
+                          borderRadius: 10, padding: '14px 16px', marginBottom: 12,
                         }}>
                           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                             <MapPin size={15} color={rentalZoneError ? 'var(--danger)' : 'var(--success)'} style={{ flexShrink: 0, marginTop: 2 }}/>
@@ -364,11 +364,11 @@ export default function Checkout() {
                               <p style={{ fontSize: 13, color: 'var(--gray-600)', marginTop: 2 }}>
                                 Distance estimée : <strong>{geoResult.km.toFixed(1)} km</strong>
                                 &nbsp;→&nbsp;
-                                <strong>{freeShipping || currentZone?.fee === 0 ? 'Livraison gratuite' : `${currentZone?.fee.toFixed(2)} €`}</strong>
+                                <strong>{currentZone?.fee.toFixed(2)} € / trajet</strong>
                               </p>
                               {!geoResult.precise && (
                                 <p style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 4 }}>
-                                  ⚠️ Adresse exacte non trouvée — estimation basée sur votre ville
+                                  ⚠️ Adresse exacte non trouvée — estimation basée sur votre quartier
                                 </p>
                               )}
                             </div>
@@ -377,9 +377,39 @@ export default function Checkout() {
                             <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(239,68,68,.2)' }}>
                               <AlertTriangle size={15} color="var(--danger)" style={{ flexShrink: 0, marginTop: 1 }}/>
                               <p style={{ fontSize: 13, color: 'var(--danger)', fontWeight: 600 }}>
-                                La livraison des locations est limitée à 10 km. Optez pour le retrait sur place (−10% !) ou ne commandez que des achats.
+                                La livraison des locations est limitée à 15 km. Optez pour le retrait sur place (−10% !) ou ne commandez que des achats.
                               </p>
                             </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Sélection aller / retour */}
+                      {deliveryZone && !rentalZoneError && (
+                        <div className="form-group">
+                          <label className="form-label">Trajets souhaités</label>
+                          <div style={{ display: 'flex', gap: 10 }}>
+                            {[
+                              { key: 'aller', label: '🚚 Livraison aller', desc: `${currentZone?.fee.toFixed(2)} €` },
+                              { key: 'retour', label: '↩️ Retour / récupération', desc: `${currentZone?.fee.toFixed(2)} €` },
+                            ].map(({ key, label, desc }) => (
+                              <button key={key} onClick={() => setDeliveryTrips(t => ({ ...t, [key]: !t[key] }))}
+                                style={{
+                                  flex: 1, padding: '12px 14px', borderRadius: 10, border: '1.5px solid',
+                                  borderColor: deliveryTrips[key] ? 'var(--accent)' : 'var(--gray-200)',
+                                  background: deliveryTrips[key] ? 'rgba(255,51,51,.06)' : 'white',
+                                  textAlign: 'left', transition: 'all .2s',
+                                }}>
+                                <p style={{ fontWeight: 700, fontSize: 13, color: deliveryTrips[key] ? 'var(--accent)' : 'var(--gray-600)' }}>{label}</p>
+                                <p style={{ fontSize: 12, color: 'var(--gray-500)', marginTop: 2 }}>{desc}</p>
+                              </button>
+                            ))}
+                          </div>
+                          {(deliveryTrips.aller || deliveryTrips.retour) && (
+                            <p style={{ fontSize: 12, color: 'var(--gray-500)', marginTop: 6 }}>
+                              Total livraison : <strong>{deliveryFee.toFixed(2)} €</strong>
+                              {deliveryTrips.aller && deliveryTrips.retour && ' (aller + retour)'}
+                            </p>
                           )}
                         </div>
                       )}
@@ -474,8 +504,8 @@ export default function Checkout() {
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
                   <span style={{ color: 'var(--gray-600)' }}>Livraison {geoResult && !isPickup ? `(${geoResult.km.toFixed(1)} km)` : ''}</span>
-                  <span style={{ color: deliveryFee === 0 ? 'var(--success)' : 'var(--primary)', fontWeight: 600 }}>
-                    {isPickup ? '—' : deliveryFee === 0 ? 'Gratuite' : `${deliveryFee.toFixed(2)} €`}
+                  <span style={{ color: 'var(--primary)', fontWeight: 600 }}>
+                    {isPickup ? '—' : deliveryZone ? `${deliveryFee.toFixed(2)} €` : 'À calculer'}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 18, color: 'var(--primary)', borderTop: '2px solid var(--gray-200)', paddingTop: 12, marginTop: 8 }}>

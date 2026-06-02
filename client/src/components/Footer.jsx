@@ -140,8 +140,14 @@ export default function Footer() {
           <div style={{ borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <p style={{ color: 'rgba(255,255,255,.4)', fontSize: 13 }}>© 2025 MecaToolsLoc. Tous droits réservés.</p>
             <div style={{ display: 'flex', gap: 24 }}>
-              {['Mentions légales', 'CGV', 'Politique de confidentialité'].map(l => (
-                <Link key={l} to="#" style={{ color: 'rgba(255,255,255,.4)', fontSize: 13 }}>{l}</Link>
+              {[
+                { l: 'Mentions légales', to: '/mentions-legales' },
+                { l: 'CGV', to: '/cgv' },
+                { l: 'Politique de confidentialité', to: '/confidentialite' },
+              ].map(({ l, to }) => (
+                <Link key={l} to={to} style={{ color: 'rgba(255,255,255,.4)', fontSize: 13, transition: 'color .2s' }}
+                  onMouseOver={e => e.currentTarget.style.color = 'rgba(255,255,255,.8)'}
+                  onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,.4)'}>{l}</Link>
               ))}
             </div>
           </div>

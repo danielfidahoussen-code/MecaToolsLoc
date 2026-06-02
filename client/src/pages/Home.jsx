@@ -136,15 +136,15 @@ export default function Home() {
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24 }}>
             {[
-              { icon: <Wrench size={28}/>, title: 'Matériel pro', desc: 'Outils de qualité professionnelle, entretenus et vérifiés avant chaque location.' },
-              { icon: <Zap size={28}/>, title: 'Disponibilité rapide', desc: 'Réservation en ligne 24/7 avec confirmation immédiate et calendrier en temps réel.' },
-              { icon: <Truck size={28}/>, title: 'Livraison sur île', desc: 'Livraison possible sur La Réunion. Retrait sur place également disponible.' },
-              { icon: <Shield size={28}/>, title: 'Paiement sécurisé', desc: 'Paiement en ligne sécurisé par carte bancaire. Caution remboursée à la restitution.' },
+              { icon: <Wrench size={24}/>, title: 'Matériel pro', desc: 'Outils de qualité professionnelle, entretenus et vérifiés avant chaque location.' },
+              { icon: <Zap size={24}/>, title: 'Disponibilité rapide', desc: 'Réservation en ligne 24/7 avec confirmation immédiate et calendrier en temps réel.' },
+              { icon: <Truck size={24}/>, title: 'Livraison sur île', desc: 'Livraison possible sur La Réunion. Retrait sur place également disponible.' },
+              { icon: <Shield size={24}/>, title: 'Paiement sécurisé', desc: 'Paiement en ligne sécurisé par carte bancaire. Chèque de caution en ligne — sans blocage de fonds, contrat fourni.' },
             ].map(({ icon, title, desc }) => (
               <div key={title} className="card" style={{ padding: '28px 24px', transition: 'var(--transition)' }}
                 onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--shadow)'; }}
                 onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}>
-                <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(255,40,40,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', marginBottom: 16 }}>
+                <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(255,40,40,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', marginBottom: 16, flexShrink: 0 }}>
                   {icon}
                 </div>
                 <h3 style={{ fontWeight: 700, fontSize: 16, color: 'var(--primary)', marginBottom: 8 }}>{title}</h3>

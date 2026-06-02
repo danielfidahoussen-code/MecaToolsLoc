@@ -25,6 +25,7 @@ export default function Catalogue() {
   };
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setLoading(true);
     const params = { type, category, search, page, limit: 12 };
     axios.get('/api/products', { params }).then(r => {

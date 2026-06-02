@@ -13,6 +13,9 @@ import About from './pages/About';
 import FAQ from './pages/FAQ';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
+import MentionsLegales from './pages/MentionsLegales';
+import CGV from './pages/CGV';
+import Confidentialite from './pages/Confidentialite';
 
 export default function App() {
   return (
@@ -34,6 +37,9 @@ export default function App() {
                   <Route path="/a-propos" element={<About/>}/>
                   <Route path="/faq" element={<FAQ/>}/>
                   <Route path="/contact" element={<Contact/>}/>
+                  <Route path="/mentions-legales" element={<MentionsLegales/>}/>
+                  <Route path="/cgv" element={<CGV/>}/>
+                  <Route path="/confidentialite" element={<Confidentialite/>}/>
                 </Routes>
                 <Footer/>
               </>

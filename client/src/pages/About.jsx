@@ -26,9 +26,9 @@ export default function About() {
                 besoin d'un outil pour longtemps.
               </p>
               <p style={{ color: 'var(--gray-600)', lineHeight: 1.8, marginBottom: 16 }}>
-                Fondée par un mécanicien de métier avec plus de 8 ans d'expérience en mécanique automobile, spécialisé
-                dans les véhicules hybrides, notre entreprise vous propose la location et la vente d'outillage
-                professionnel de qualité, à des prix accessibles, directement à La Réunion.
+                Fondée par un mécanicien de métier avec plus de 8 ans d'expérience en mécanique automobile,
+                notre entreprise vous propose la location et la vente d'outillage professionnel de qualité,
+                à des prix accessibles, directement à La Réunion.
               </p>
               <p style={{ color: 'var(--gray-600)', lineHeight: 1.8, marginBottom: 28 }}>
                 Nous croyons que chaque mécanicien mérite d'avoir accès aux bons outils, sans se ruiner. C'est pourquoi
@@ -76,7 +76,7 @@ export default function About() {
           <div style={{ background: 'var(--primary)', borderRadius: 24, padding: '60px 40px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32, textAlign: 'center' }}>
               {[
-                { n: '8+', l: "Années d'expérience en mécanique hybride" },
+                { n: '8+', l: "Années d'expérience en mécanique automobile" },
                 { n: '10%', l: 'De remise pour retrait sur place' },
               ].map(({ n, l }) => (
                 <div key={l}>
