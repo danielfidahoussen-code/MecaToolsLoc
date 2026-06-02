@@ -40,7 +40,7 @@ if (products.count() === 0) {
 
 // Seed admin
 if (users.count() === 0) {
-  users.insert({ email: 'admin@mecatoolsloc.re', password: bcrypt.hashSync('admin123', 10), role: 'admin' });
+  users.insert({ email: 'admin@lvtools.re', password: bcrypt.hashSync('admin123', 10), role: 'admin' });
 }
 
 // Seed FAQs

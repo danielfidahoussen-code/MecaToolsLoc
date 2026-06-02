@@ -1,7 +1,7 @@
 {
-  "name": "mecatoolsloc",
+  "name": "lvtools",
   "version": "1.0.0",
-  "description": "MecaToolsLoc - Location et vente d'outillage",
+  "description": "LVTools - Location et vente d'outillage",
   "engines": {
     "node": ">=20.19.0"
   },

@@ -236,7 +236,7 @@
   "users": [
     {
       "id": 1,
-      "email": "admin@mecatoolsloc.re",
+      "email": "admin@lvtools.re",
       "password": "$2a$10$VZPeNn7dx1MDaRffw0jG3.WqVAOMO1IcbrOZBhrQaOXSRwPP9nnYy",
       "role": "admin",
       "created_at": "2026-06-01 11:36:37",
