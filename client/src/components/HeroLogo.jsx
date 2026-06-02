@@ -83,8 +83,15 @@ export default function HeroLogo() {
         </g>
 
         <g style={partStyle(0, 90, 0, 0.5, 0.3)}>
-          <text x="160" y="205" fontFamily="Inter,Arial,sans-serif" fontWeight="500" fontSize="13"
-            fill="rgba(255,255,255,0.5)" textAnchor="middle" letterSpacing="1">by Autopresto</text>
+          <image href="/autopresto-logo.jpeg" x="136" y="192" width="22" height="22"
+            style={{ borderRadius: '50%' }} clipPath="url(#apCircle)"/>
+          <defs>
+            <clipPath id="apCircle">
+              <circle cx="147" cy="203" r="11"/>
+            </clipPath>
+          </defs>
+          <text x="164" y="207" fontFamily="Inter,Arial,sans-serif" fontWeight="600" fontSize="12"
+            fill="rgba(255,255,255,0.55)" letterSpacing="0.5">by AutoPresto</text>
         </g>
       </svg>
     </div>

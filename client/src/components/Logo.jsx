@@ -1,11 +1,10 @@
 export default function Logo({ size = 44, light = false }) {
   const c = light ? '#ffffff' : '#220404';
   const red = '#ff3333';
-  const imgSize = size * 0.7;
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      {/* Icône engrenage + clé */}
+      {/* Icône engrenage */}
       <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="24" cy="24" r="9" stroke={red} strokeWidth="2.5" fill="none"/>
         <circle cx="24" cy="24" r="3.5" fill={red}/>
@@ -19,20 +18,9 @@ export default function Logo({ size = 44, light = false }) {
       </svg>
 
       {/* Texte LVTools */}
-      <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
-          <span style={{ fontFamily: 'Inter,Arial,sans-serif', fontWeight: 900, fontSize: size * 0.38, color: c, letterSpacing: 1 }}>LV</span>
-          <span style={{ fontFamily: 'Inter,Arial,sans-serif', fontWeight: 900, fontSize: size * 0.38, color: red, letterSpacing: 1 }}>Tools</span>
-        </div>
-        {/* Séparateur + logo AutoPresto */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}>
-          <div style={{ height: 1, width: size * 0.9, background: `${red}66` }}/>
-          <img
-            src="/autopresto-logo.jpeg"
-            alt="AutoPresto"
-            style={{ width: imgSize, height: imgSize, borderRadius: '50%', objectFit: 'cover', border: `1px solid ${light ? 'rgba(255,255,255,0.3)' : 'rgba(34,4,4,0.15)'}` }}
-          />
-        </div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+        <span style={{ fontFamily: 'Inter,Arial,sans-serif', fontWeight: 900, fontSize: size * 0.4, color: c, letterSpacing: 1 }}>LV</span>
+        <span style={{ fontFamily: 'Inter,Arial,sans-serif', fontWeight: 900, fontSize: size * 0.4, color: red, letterSpacing: 1 }}>Tools</span>
       </div>
     </div>
   );
