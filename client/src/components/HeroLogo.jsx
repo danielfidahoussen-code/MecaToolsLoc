@@ -61,9 +61,9 @@ export default function HeroLogo() {
           })}
         </g>
 
-        {/* ── Clé à molette (coin bas-gauche, loin du texte) ── */}
+        {/* ── Clé à molette (coin bas-gauche, relevée) ── */}
         <g style={partStyle(-80, 40, -45, 0.2, 0.08)}>
-          <path d="M127 145 L109 163 M109 163 C104 168 96 167 96 161 C96 155 104 154 109 154 L127 136"
+          <path d="M127 128 L109 146 M109 146 C104 151 96 150 96 144 C96 138 104 137 109 137 L127 119"
             stroke="rgba(255,255,255,0.65)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
         </g>
 
@@ -84,14 +84,14 @@ export default function HeroLogo() {
           <line x1="75" y1="202" x2="265" y2="202" stroke="#ff3333" strokeWidth="1.5" opacity="0.4"/>
         </g>
 
-        {/* ── By AutoPresto ── */}
+        {/* ── By AutoPresto (côté droit) ── */}
         <g style={partStyle(0, 90, 0, 0.5, 0.3)}>
-          <image href="/autopresto-logo.jpeg" x="133" y="208" width="24" height="24" clipPath="url(#apHero)"/>
+          <text x="176" y="224" fontFamily="Inter,Arial,sans-serif" fontWeight="600" fontSize="13"
+            fill="rgba(255,255,255,0.5)" letterSpacing="0.5" textAnchor="end">by AutoPresto</text>
+          <image href="/autopresto-logo.jpeg" x="179" y="208" width="24" height="24" clipPath="url(#apHero)"/>
           <defs>
-            <clipPath id="apHero"><circle cx="145" cy="220" r="12"/></clipPath>
+            <clipPath id="apHero"><circle cx="191" cy="220" r="12"/></clipPath>
           </defs>
-          <text x="165" y="224" fontFamily="Inter,Arial,sans-serif" fontWeight="600" fontSize="13"
-            fill="rgba(255,255,255,0.5)" letterSpacing="0.5">by AutoPresto</text>
         </g>
 
       </svg>
