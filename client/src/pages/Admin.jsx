@@ -366,7 +366,7 @@ export default function Admin() {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <thead>
                       <tr style={{ background: 'var(--primary)', color: 'white' }}>
-                        {['#', 'Produit', 'Client', 'Dates', 'Total', 'Statut', 'Actions'].map(h => (
+                        {['#', 'Produit', 'Client', 'Téléphone', 'Dates', 'Total', 'Statut', 'Actions'].map(h => (
                           <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 700 }}>{h}</th>
                         ))}
                       </tr>
@@ -379,6 +379,9 @@ export default function Admin() {
                           <td style={{ padding: '12px 16px' }}>
                             <p style={{ fontWeight: 600 }}>{r.customer_name}</p>
                             <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{r.customer_email}</p>
+                          </td>
+                          <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--primary)' }}>
+                            {r.customer_phone || <span style={{ color: 'var(--gray-400)', fontWeight: 400 }}>—</span>}
                           </td>
                           <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--gray-600)' }}>
                             {r.start_date} → {r.end_date}

@@ -1,22 +1,68 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Wrench, Zap, Shield, Truck, Star, ChevronRight, ArrowRight } from 'lucide-react';
+import { Wrench, Zap, Shield, Truck, Star, ChevronRight, ArrowRight, ChevronLeft } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+
+function ProductCarousel({ products }) {
+  const trackRef = useRef(null);
+  const [offset, setOffset] = useState(0);
+  const CARD_WIDTH = 220; // px including gap
+
+  useEffect(() => {
+    if (!products.length) return;
+    const interval = setInterval(() => {
+      setOffset(prev => {
+        const maxOffset = products.length * CARD_WIDTH;
+        return (prev + 1) % maxOffset;
+      });
+    }, 20);
+    return () => clearInterval(interval);
+  }, [products]);
+
+  // Duplicate items for infinite loop effect
+  const doubled = [...products, ...products];
+
+  return (
+    <div style={{ overflow: 'hidden', width: '100%', position: 'relative' }}>
+      {/* Fade edges */}
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to right, var(--primary), transparent)', zIndex: 2, pointerEvents: 'none' }}/>
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to left, var(--primary), transparent)', zIndex: 2, pointerEvents: 'none' }}/>
+
+      <div ref={trackRef} style={{ display: 'flex', gap: 20, transform: `translateX(-${offset}px)`, transition: 'none', willChange: 'transform' }}>
+        {doubled.map((p, i) => (
+          <Link key={`${p.id}-${i}`} to={`/produit/${p.id}`} style={{ flexShrink: 0, width: 200, textDecoration: 'none' }}>
+            <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(255,255,255,.12)', background: 'rgba(255,255,255,.06)', transition: 'var(--transition)' }}
+              onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,.12)'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,.06)'; e.currentTarget.style.transform = ''; }}>
+              <img src={p.image} alt={p.name} style={{ width: '100%', height: 130, objectFit: 'cover' }}/>
+              <div style={{ padding: '10px 12px' }}>
+                <p style={{ color: 'white', fontWeight: 700, fontSize: 12, lineHeight: 1.3, marginBottom: 4 }}>{p.name}</p>
+                <p style={{ color: 'var(--accent)', fontWeight: 800, fontSize: 13 }}>
+                  {p.price_day ? `${p.price_day} €/j` : p.price_sale ? `${p.price_sale} €` : ''}
+                </p>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    axios.get('/api/products?limit=8').then(r => setProducts(r.data.products));
+    axios.get('/api/products?limit=12').then(r => setProducts(r.data.products));
     axios.get('/api/products/categories').then(r => setCategories(r.data));
   }, []);
 
   return (
     <div>
-      {/* Hero */}
-      <section style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 60%, #2d4a7a 100%)', color: 'white', padding: '100px 0 80px', position: 'relative', overflow: 'hidden' }}>
+      {/* Hero with integrated carousel */}
+      <section style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 60%, #2d4a7a 100%)', color: 'white', padding: '80px 0 60px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 70% 50%, rgba(245,197,24,.08) 0%, transparent 60%)', pointerEvents: 'none' }}/>
         <div style={{ position: 'absolute', top: -60, right: -60, width: 300, height: 300, borderRadius: '50%', background: 'rgba(245,197,24,.05)', pointerEvents: 'none' }}/>
         <div className="container" style={{ position: 'relative' }}>
@@ -51,6 +97,16 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Carousel directly in hero */}
+        {products.length > 0 && (
+          <div style={{ marginTop: 48 }}>
+            <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.5)', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
+              ✦ Nos produits phares ✦
+            </p>
+            <ProductCarousel products={products}/>
+          </div>
+        )}
       </section>
 
       {/* Why us */}

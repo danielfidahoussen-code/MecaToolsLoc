@@ -4,6 +4,7 @@ import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Catalogue from './pages/Catalogue';
 import ProductDetail from './pages/ProductDetail';
@@ -18,6 +19,7 @@ export default function App() {
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
+          <ScrollToTop/>
           <Toaster position="top-right" toastOptions={{ duration: 3000, style: { fontFamily: 'Inter, sans-serif', fontWeight: 600 } }}/>
           <Routes>
             <Route path="/admin" element={<><Navbar/><Admin/><Footer/></>}/>
