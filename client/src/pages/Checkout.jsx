@@ -57,35 +57,55 @@ export default function Checkout() {
   const finalTotal = total - discount + deliveryFee;
   const rentalZoneError = !isPickup && hasRentals && deliveryZone && deliveryZone !== '0-10';
 
+  const [geoResult, setGeoResult] = useState(null); // { km, label, precise }
+
   // Géocodage de l'adresse + calcul distance
   const calculateDistance = async () => {
-    if (!form.city) {
-      toast.error('Entrez au moins votre ville');
+    if (!form.address && !form.city) {
+      toast.error('Entrez votre adresse ou votre ville');
       return;
     }
     setGeoLoading(true);
+    setGeoResult(null);
 
-    // Essaie plusieurs combinaisons pour trouver l'adresse
+    const addr = form.address.trim();
+    const city = form.city.trim();
+
+    // Séquence de tentatives : du plus précis au plus large
     const attempts = [
-      `${form.address}, ${form.city}, La Réunion, France`,
-      `${form.city}, La Réunion, France`,
-      `${form.city}, 974, France`,
-    ];
+      // 1. Adresse complète avec ville
+      addr && city ? `${addr}, ${city}, La Réunion` : null,
+      // 2. Lieu/quartier seul sur l'île (utile pour "hôpital bellepierre", "Saint-Pierre", etc.)
+      addr ? `${addr}, La Réunion` : null,
+      // 3. Juste le lieu sans accent et sans ponctuation (robustesse)
+      addr ? `${addr.normalize('NFD').replace(/[̀-ͯ]/g, '')}, Reunion` : null,
+      // 4. Ville seule
+      city ? `${city}, La Réunion` : null,
+      // 5. Ville sans accent
+      city ? `${city.normalize('NFD').replace(/[̀-ͯ]/g, '')}, Reunion` : null,
+    ].filter(Boolean);
+
+    const geo = async (q) => {
+      const r = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=fr`,
+        { headers: { 'Accept-Language': 'fr' } }
+      );
+      const d = await r.json();
+      return d.length > 0 ? d[0] : null;
+    };
 
     let found = null;
+    let attemptIndex = 0;
     for (const q of attempts) {
       try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=fr`,
-          { headers: { 'Accept-Language': 'fr' } }
-        );
-        const data = await res.json();
-        if (data.length > 0) { found = data[0]; break; }
+        found = await geo(q);
+        if (found) break;
       } catch { /* continue */ }
+      attemptIndex++;
     }
 
     if (!found) {
-      toast.error('Ville introuvable — vérifiez la saisie');
+      toast.error('Adresse introuvable — essayez avec juste le nom de votre ville (ex: Saint-Denis)');
       setGeoLoading(false);
       return;
     }
@@ -94,9 +114,12 @@ export default function Checkout() {
     const zone = kmToZone(km);
     setDetectedKm(km);
     setDeliveryZone(zone);
-    // Si on n'a pu géocoder que la ville, prévenir
-    const usedCity = found.display_name.toLowerCase().includes(form.city.toLowerCase());
-    toast.success(`Distance estimée : ${km.toFixed(1)} km${usedCity && form.address ? ' (basé sur la ville)' : ''}`);
+
+    // Extrait le nom court du résultat Nominatim
+    const shortName = found.display_name.split(',').slice(0, 2).join(',').trim();
+    const precise = attemptIndex <= 1; // trouvé via l'adresse complète ou le lieu
+    setGeoResult({ km, label: shortName, precise });
+    toast.success(`📍 ${shortName} — ${km.toFixed(1)} km`);
     setGeoLoading(false);
   };
 
@@ -252,21 +275,32 @@ export default function Checkout() {
                       </div>
 
                       {/* Résultat du calcul */}
-                      {deliveryZone && detectedKm !== null && (
+                      {geoResult && (
                         <div style={{
                           background: rentalZoneError ? 'rgba(239,68,68,.06)' : 'rgba(16,185,129,.06)',
                           border: `1px solid ${rentalZoneError ? 'rgba(239,68,68,.3)' : 'rgba(16,185,129,.3)'}`,
                           borderRadius: 10, padding: '14px 16px', marginBottom: 16,
                         }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: rentalZoneError ? 8 : 0 }}>
-                            <MapPin size={15} color={rentalZoneError ? 'var(--danger)' : 'var(--success)'}/>
-                            <p style={{ fontWeight: 700, fontSize: 14, color: rentalZoneError ? 'var(--danger)' : 'var(--success)' }}>
-                              Distance estimée : {detectedKm.toFixed(1)} km
-                              &nbsp;→&nbsp;{freeShipping ? 'Livraison gratuite' : currentZone?.fee === 0 ? 'Livraison gratuite' : `Frais : ${currentZone?.fee.toFixed(2)} €`}
-                            </p>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                            <MapPin size={15} color={rentalZoneError ? 'var(--danger)' : 'var(--success)'} style={{ flexShrink: 0, marginTop: 2 }}/>
+                            <div>
+                              <p style={{ fontWeight: 700, fontSize: 14, color: rentalZoneError ? 'var(--danger)' : 'var(--success)' }}>
+                                📍 {geoResult.label}
+                              </p>
+                              <p style={{ fontSize: 13, color: 'var(--gray-600)', marginTop: 2 }}>
+                                Distance estimée : <strong>{geoResult.km.toFixed(1)} km</strong>
+                                &nbsp;→&nbsp;
+                                <strong>{freeShipping || currentZone?.fee === 0 ? 'Livraison gratuite' : `${currentZone?.fee.toFixed(2)} €`}</strong>
+                              </p>
+                              {!geoResult.precise && (
+                                <p style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 4 }}>
+                                  ⚠️ Adresse exacte non trouvée — estimation basée sur votre ville
+                                </p>
+                              )}
+                            </div>
                           </div>
                           {rentalZoneError && (
-                            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(239,68,68,.2)' }}>
                               <AlertTriangle size={15} color="var(--danger)" style={{ flexShrink: 0, marginTop: 1 }}/>
                               <p style={{ fontSize: 13, color: 'var(--danger)', fontWeight: 600 }}>
                                 La livraison des locations est limitée à 10 km. Optez pour le retrait sur place (−10% !) ou ne commandez que des achats.
@@ -360,7 +394,7 @@ export default function Checkout() {
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
-                  <span style={{ color: 'var(--gray-600)' }}>Livraison {detectedKm && !isPickup ? `(${detectedKm.toFixed(1)} km)` : ''}</span>
+                  <span style={{ color: 'var(--gray-600)' }}>Livraison {geoResult && !isPickup ? `(${geoResult.km.toFixed(1)} km)` : ''}</span>
                   <span style={{ color: deliveryFee === 0 ? 'var(--success)' : 'var(--primary)', fontWeight: 600 }}>
                     {isPickup ? '—' : deliveryFee === 0 ? 'Gratuite' : `${deliveryFee.toFixed(2)} €`}
                   </span>
