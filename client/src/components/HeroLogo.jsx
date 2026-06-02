@@ -56,19 +56,19 @@ export default function HeroLogo() {
           })}
         </g>
 
-        <g style={partStyle(90, -40, 60, 0.3, 0.1)}>
-          <path d="M180 80 L210 50 M210 50 C216 44 226 46 226 54 C226 62 216 64 210 64 L180 94"
+        <g style={partStyle(-90, -40, -60, 0.3, 0.1)}>
+          <path d="M140 80 L110 50 M110 50 C104 44 94 46 94 54 C94 62 104 64 110 64 L140 94"
             stroke="white" strokeWidth="4" strokeLinecap="round" fill="none"/>
-          <rect x="176" y="90" width="8" height="24" rx="3" transform="rotate(45 180 94)" fill="white" opacity="0.6"/>
+          <rect x="136" y="90" width="8" height="24" rx="3" transform="rotate(-45 140 94)" fill="white" opacity="0.6"/>
         </g>
 
         <g style={partStyle(-90, 60, -10, 0.3, 0.15)}>
-          <text x="100" y="175" fontFamily="Inter,Arial,sans-serif" fontWeight="900" fontSize="36"
+          <text x="118" y="175" fontFamily="Inter,Arial,sans-serif" fontWeight="900" fontSize="36"
             fill="white" letterSpacing="3" textAnchor="middle">LV</text>
         </g>
 
         <g style={partStyle(90, 70, 10, 0.3, 0.2)}>
-          <text x="218" y="175" fontFamily="Inter,Arial,sans-serif" fontWeight="900" fontSize="36"
+          <text x="205" y="175" fontFamily="Inter,Arial,sans-serif" fontWeight="900" fontSize="36"
             fill="#ff3333" letterSpacing="3" textAnchor="middle">Tools</text>
         </g>
 
