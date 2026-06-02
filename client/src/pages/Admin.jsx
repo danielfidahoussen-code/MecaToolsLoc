@@ -4,10 +4,19 @@ import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
-const API = (token) => ({
-  headers: { Authorization: `Bearer ${token}` }
-});
+const API = (token) => ({ headers: { Authorization: `Bearer ${token}` } });
 
+function useIsMobile(bp = 768) {
+  const [mobile, setMobile] = useState(() => window.innerWidth < bp);
+  useEffect(() => {
+    const h = () => setMobile(window.innerWidth < bp);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, [bp]);
+  return mobile;
+}
+
+/* ─── LOGIN ─────────────────────────────────────────────────────────────── */
 function LoginForm({ onLogin }) {
   const [email, setEmail] = useState('admin@lvtools.re');
   const [pass, setPass] = useState('');
@@ -24,19 +33,17 @@ function LoginForm({ onLogin }) {
       toast.success('Connexion réussie !');
     } catch {
       toast.error('Email ou mot de passe incorrect');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '80px auto', padding: '0 20px' }}>
-      <div className="card" style={{ padding: 36, textAlign: 'center' }}>
-        <div style={{ width: 64, height: 64, borderRadius: 18, background: 'rgba(245,197,24,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-          <LogIn size={28} color="var(--accent-dark)"/>
+    <div style={{ maxWidth: 400, margin: '60px auto', padding: '0 16px' }}>
+      <div className="card" style={{ padding: '28px 24px', textAlign: 'center' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,51,51,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+          <LogIn size={26} color="var(--primary)"/>
         </div>
-        <h2 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 6 }}>Administration</h2>
-        <p style={{ color: 'var(--gray-500)', fontSize: 14, marginBottom: 28 }}>Connexion espace admin</p>
+        <h2 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 4 }}>Administration</h2>
+        <p style={{ color: 'var(--gray-500)', fontSize: 13, marginBottom: 24 }}>Connexion espace admin</p>
         <form onSubmit={handleLogin}>
           <div className="form-group" style={{ textAlign: 'left' }}>
             <label className="form-label">Email</label>
@@ -44,18 +51,18 @@ function LoginForm({ onLogin }) {
           </div>
           <div className="form-group" style={{ textAlign: 'left' }}>
             <label className="form-label">Mot de passe</label>
-            <input className="form-control" type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="admin123"/>
+            <input className="form-control" type="password" value={pass} onChange={e => setPass(e.target.value)}/>
           </div>
           <button type="submit" className="btn btn-primary btn-lg" disabled={loading} style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>
             {loading ? 'Connexion...' : 'Se connecter'}
           </button>
-          <p style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 16 }}>Démo: admin@lvtools.re / admin123</p>
         </form>
       </div>
     </div>
   );
 }
 
+/* ─── PRODUCT FORM MODAL ─────────────────────────────────────────────────── */
 function ProductForm({ product, categories, token, onSave, onClose }) {
   const [form, setForm] = useState(product || {
     name: '', description: '', category_id: '', price_sale: '', price_day: '', price_week: '',
@@ -64,6 +71,7 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const isMobile = useIsMobile();
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -96,20 +104,21 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div className="card" style={{ width: '100%', maxWidth: 680, maxHeight: '90vh', overflow: 'auto', padding: 28 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h3 style={{ fontWeight: 800, color: 'var(--primary)' }}>{product ? 'Modifier' : 'Ajouter'} un produit</h3>
-          <button onClick={onClose} style={{ padding: 6, borderRadius: 8, background: 'var(--gray-100)' }}><X size={18}/></button>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 2000, display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center', padding: isMobile ? 0 : 16 }}>
+      <div className="card" style={{ width: '100%', maxWidth: 680, maxHeight: isMobile ? '92vh' : '90vh', overflow: 'auto', padding: isMobile ? '20px 16px' : 28, borderRadius: isMobile ? '16px 16px 0 0' : 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: isMobile ? 17 : 20 }}>{product ? 'Modifier' : 'Ajouter'} un produit</h3>
+          <button onClick={onClose} style={{ padding: 6, borderRadius: 8, background: 'var(--gray-100)', flexShrink: 0 }}><X size={18}/></button>
         </div>
-        <div className="grid-2">
+
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
             <label className="form-label">Nom du produit *</label>
             <input className="form-control" value={form.name} onChange={e => set('name', e.target.value)} placeholder="Ex: Clé à chocs 1/2"/>
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
             <label className="form-label">Description</label>
-            <textarea className="form-control" value={form.description} onChange={e => set('description', e.target.value)} placeholder="Description détaillée..."/>
+            <textarea className="form-control" value={form.description} onChange={e => set('description', e.target.value)} rows={3}/>
           </div>
           <div className="form-group">
             <label className="form-label">Catégorie</label>
@@ -130,16 +139,16 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
             <label className="form-label">Prix location/jour (€)</label>
             <input className="form-control" type="number" step="0.01" value={form.price_day} onChange={e => set('price_day', parseFloat(e.target.value) || '')} placeholder="0.00"/>
           </div>
-          <div className="form-group">
+          <div className="form-group" style={{ gridColumn: isMobile ? '1' : undefined }}>
             <label className="form-label">Prix location/semaine (€)</label>
             <input className="form-control" type="number" step="0.01" value={form.price_week} onChange={e => set('price_week', parseFloat(e.target.value) || '')} placeholder="0.00"/>
           </div>
           <div className="form-group">
             <label className="form-label">Image</label>
-            {form.image && <img src={form.image} alt="aperçu" style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}/>}
+            {form.image && <img src={form.image} alt="aperçu" style={{ width: '100%', height: 90, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}/>}
             <label style={{ display: 'block', cursor: uploading ? 'wait' : 'pointer', marginBottom: 6 }}>
               <div className="btn btn-outline btn-sm" style={{ width: '100%', justifyContent: 'center', pointerEvents: 'none' }}>
-                {uploading ? '⏳ Import...' : '📁 Importer depuis l\'ordinateur'}
+                {uploading ? '⏳ Import...' : '📁 Importer une image'}
               </div>
               <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} disabled={uploading}/>
             </label>
@@ -156,31 +165,56 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
             </div>
             <div onClick={() => set('has_qr_notice', !form.has_qr_notice)} style={{
               display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
-              padding: '10px 14px', borderRadius: 10, border: '1.5px solid',
+              padding: '10px 12px', borderRadius: 10, border: '1.5px solid',
               borderColor: form.has_qr_notice ? 'var(--accent)' : 'var(--gray-200)',
               background: form.has_qr_notice ? 'rgba(255,51,51,.06)' : 'var(--gray-100)',
-              transition: 'all .2s',
             }}>
               <input type="checkbox" checked={!!form.has_qr_notice} onChange={e => { e.stopPropagation(); set('has_qr_notice', e.target.checked); }} style={{ width: 16, height: 16, accentColor: 'var(--accent)', flexShrink: 0 }}/>
               <span style={{ fontSize: 18 }}>🎬</span>
               <div>
-                <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)' }}>Vidéo notice d'utilisation disponible</p>
-                <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Le badge "🎬 Vidéo notice d'utilisation offerte" apparaîtra dans le récapitulatif de commande</p>
+                <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)' }}>Vidéo notice disponible</p>
+                <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Badge "🎬 Vidéo notice offerte" dans le récapitulatif</p>
               </div>
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+
+        <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+          <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ flex: 1, justifyContent: 'center' }}>
             <Save size={16}/> {saving ? 'Sauvegarde...' : 'Sauvegarder'}
           </button>
-          <button className="btn btn-outline" onClick={onClose}>Annuler</button>
+          <button className="btn btn-outline" onClick={onClose} style={{ flex: 1, justifyContent: 'center' }}>Annuler</button>
         </div>
       </div>
     </div>
   );
 }
 
+/* ─── PRODUCT CARD (mobile) ──────────────────────────────────────────────── */
+function ProductCard({ p, onEdit, onDelete }) {
+  return (
+    <div className="card" style={{ padding: 14, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+      <img src={p.image} alt={p.name} style={{ width: 56, height: 48, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}/>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontWeight: 700, color: 'var(--primary)', fontSize: 14, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</p>
+        <p style={{ fontSize: 12, color: 'var(--gray-500)', marginBottom: 6 }}>{p.category_icon} {p.category_name}</p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 12, marginBottom: 6 }}>
+          {p.price_sale ? <span style={{ background: 'var(--gray-100)', padding: '2px 8px', borderRadius: 4 }}>Achat : <b>{p.price_sale} €</b></span> : null}
+          {p.price_day  ? <span style={{ background: 'var(--gray-100)', padding: '2px 8px', borderRadius: 4 }}>Loc/j : <b>{p.price_day} €</b></span> : null}
+          <span style={{ padding: '2px 8px', borderRadius: 4, fontWeight: 700, background: p.stock === 0 ? '#fee2e2' : p.stock < 3 ? '#fef3c7' : '#d1fae5', color: p.stock === 0 ? '#991b1b' : p.stock < 3 ? '#92400e' : '#065f46' }}>
+            Stock : {p.stock}
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button className="btn btn-sm btn-outline" onClick={() => onEdit(p)} style={{ flex: 1, justifyContent: 'center' }}><Edit2 size={13}/> Modifier</button>
+          <button className="btn btn-sm btn-danger" onClick={() => onDelete(p.id)} style={{ flex: 1, justifyContent: 'center' }}><Trash2 size={13}/> Supprimer</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── MAIN ADMIN ─────────────────────────────────────────────────────────── */
 export default function Admin() {
   const { isAdmin, token } = useAuth();
   const [loggedIn, setLoggedIn] = useState(isAdmin);
@@ -192,6 +226,7 @@ export default function Admin() {
   const [editProduct, setEditProduct] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => { setLoggedIn(isAdmin); }, [isAdmin]);
 
@@ -231,25 +266,36 @@ export default function Admin() {
   if (!loggedIn) return <LoginForm onLogin={() => setLoggedIn(true)}/>;
 
   const tabs = [
-    { id: 'products', label: 'Produits', icon: <Package size={16}/> },
-    { id: 'orders', label: 'Commandes', icon: <ShoppingBag size={16}/> },
-    { id: 'reservations', label: 'Réservations', icon: <Calendar size={16}/> },
-    { id: 'stats', label: 'Tableau de bord', icon: <BarChart3 size={16}/> },
+    { id: 'products',     label: 'Produits',       icon: <Package size={15}/> },
+    { id: 'orders',       label: 'Commandes',       icon: <ShoppingBag size={15}/> },
+    { id: 'reservations', label: 'Réservations',    icon: <Calendar size={15}/> },
+    { id: 'stats',        label: 'Tableau de bord', icon: <BarChart3 size={15}/> },
   ];
 
   const revenue = orders.filter(o => o.status === 'paid').reduce((s, o) => s + o.total_price, 0);
 
   return (
     <div>
-      <div style={{ background: 'var(--primary)', color: 'white', padding: '24px 0' }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h1 style={{ fontWeight: 800, fontSize: 24 }}>Administration LVTools</h1>
-            <p style={{ opacity: 0.7, fontSize: 13 }}>Gestion du catalogue et des commandes</p>
+      {/* ── Header ── */}
+      <div style={{ background: 'var(--primary)', color: 'white', padding: isMobile ? '16px 0 0' : '20px 0 0' }}>
+        <div className="container">
+          <div style={{ marginBottom: 14 }}>
+            <h1 style={{ fontWeight: 800, fontSize: isMobile ? 20 : 24 }}>Administration LVTools</h1>
+            <p style={{ opacity: 0.7, fontSize: 12, marginTop: 2 }}>Gestion du catalogue et des commandes</p>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          {/* Tabs — toujours avec labels, scrollable sur mobile */}
+          <div style={{ display: 'flex', gap: 4, overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             {tabs.map(t => (
-              <button key={t.id} className={`btn btn-sm ${tab === t.id ? 'btn-primary' : 'btn-outline-light'}`} onClick={() => setTab(t.id)}>
+              <button key={t.id} onClick={() => setTab(t.id)} style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: isMobile ? '9px 12px' : '10px 18px',
+                fontSize: isMobile ? 11 : 13,
+                fontWeight: 700, border: 'none', cursor: 'pointer',
+                whiteSpace: 'nowrap', flexShrink: 0,
+                borderRadius: '8px 8px 0 0',
+                background: tab === t.id ? 'white' : 'rgba(255,255,255,0.1)',
+                color: tab === t.id ? 'var(--primary)' : 'rgba(255,255,255,0.8)',
+              }}>
                 {t.icon} {t.label}
               </button>
             ))}
@@ -257,93 +303,103 @@ export default function Admin() {
         </div>
       </div>
 
-      <div style={{ padding: '40px 0' }}>
+      <div style={{ padding: isMobile ? '20px 0' : '32px 0' }}>
         <div className="container">
 
-          {/* Stats tab */}
+          {/* ── Stats ── */}
           {tab === 'stats' && (
             <div>
-              <div className="grid-4" style={{ marginBottom: 40 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4,1fr)', gap: 14, marginBottom: 28 }}>
                 {[
-                  { label: 'Produits', value: products.length, icon: '📦', color: 'var(--primary)' },
-                  { label: 'Commandes', value: orders.length, icon: '🛒', color: '#7c3aed' },
-                  { label: 'Réservations', value: reservations.length, icon: '📅', color: '#0891b2' },
-                  { label: 'CA Total', value: `${revenue.toFixed(0)} €`, icon: '💰', color: 'var(--success)' },
+                  { label: 'Produits',     value: products.length,         icon: '📦', color: 'var(--primary)' },
+                  { label: 'Commandes',    value: orders.length,            icon: '🛒', color: '#7c3aed' },
+                  { label: 'Réservations', value: reservations.length,      icon: '📅', color: '#0891b2' },
+                  { label: 'CA Total',     value: `${revenue.toFixed(0)} €`,icon: '💰', color: 'var(--success)' },
                 ].map(({ label, value, icon, color }) => (
-                  <div key={label} className="card" style={{ padding: 24 }}>
-                    <div style={{ fontSize: 32, marginBottom: 10 }}>{icon}</div>
-                    <p style={{ fontSize: 28, fontWeight: 900, color }}>{value}</p>
-                    <p style={{ fontSize: 13, color: 'var(--gray-500)' }}>{label}</p>
+                  <div key={label} className="card" style={{ padding: isMobile ? 16 : 22, textAlign: 'center' }}>
+                    <div style={{ fontSize: isMobile ? 26 : 32, marginBottom: 8 }}>{icon}</div>
+                    <p style={{ fontSize: isMobile ? 22 : 28, fontWeight: 900, color }}>{value}</p>
+                    <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{label}</p>
                   </div>
                 ))}
               </div>
-              <div className="grid-2">
-                <div className="card" style={{ padding: 24 }}>
-                  <h3 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: 16 }}>Produits en rupture</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+                <div className="card" style={{ padding: isMobile ? 16 : 22 }}>
+                  <h3 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: 14, fontSize: 15 }}>Produits en rupture</h3>
                   {products.filter(p => p.stock === 0).map(p => (
-                    <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--gray-100)', fontSize: 14 }}>
-                      <span>{p.name}</span>
-                      <span style={{ color: 'var(--danger)', fontWeight: 700 }}>Rupture</span>
+                    <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--gray-100)', fontSize: 13 }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '75%' }}>{p.name}</span>
+                      <span style={{ color: 'var(--danger)', fontWeight: 700, flexShrink: 0 }}>Rupture</span>
                     </div>
                   ))}
-                  {products.filter(p => p.stock === 0).length === 0 && <p style={{ color: 'var(--success)', fontSize: 14 }}>✅ Tous les produits sont en stock</p>}
+                  {products.filter(p => p.stock === 0).length === 0 && <p style={{ color: 'var(--success)', fontSize: 13 }}>✅ Tous les produits sont en stock</p>}
                 </div>
-                <div className="card" style={{ padding: 24 }}>
-                  <h3 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: 16 }}>Réservations en attente</h3>
+                <div className="card" style={{ padding: isMobile ? 16 : 22 }}>
+                  <h3 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: 14, fontSize: 15 }}>Réservations en attente</h3>
                   {reservations.filter(r => r.status === 'pending').slice(0, 5).map(r => (
-                    <div key={r.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--gray-100)', fontSize: 14 }}>
+                    <div key={r.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--gray-100)', fontSize: 13 }}>
                       <p style={{ fontWeight: 600 }}>{r.customer_name}</p>
-                      <p style={{ color: 'var(--gray-500)', fontSize: 12 }}>{r.product_name} — {r.start_date} → {r.end_date}</p>
+                      <p style={{ color: 'var(--gray-500)', fontSize: 12, marginTop: 2 }}>{r.product_name} — {r.start_date} → {r.end_date}</p>
                     </div>
                   ))}
-                  {reservations.filter(r => r.status === 'pending').length === 0 && <p style={{ color: 'var(--success)', fontSize: 14 }}>✅ Aucune réservation en attente</p>}
+                  {reservations.filter(r => r.status === 'pending').length === 0 && <p style={{ color: 'var(--success)', fontSize: 13 }}>✅ Aucune réservation en attente</p>}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Products tab */}
+          {/* ── Products ── */}
           {tab === 'products' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                <h2 style={{ fontWeight: 800, color: 'var(--primary)' }}>Catalogue ({products.length} produits)</h2>
-                <button className="btn btn-primary" onClick={() => { setEditProduct(null); setShowForm(true); }}>
-                  <Plus size={16}/> Ajouter un produit
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 10 }}>
+                <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: isMobile ? 17 : 22 }}>Catalogue ({products.length} produits)</h2>
+                <button className="btn btn-primary btn-sm" onClick={() => { setEditProduct(null); setShowForm(true); }} style={{ flexShrink: 0 }}>
+                  <Plus size={15}/> {isMobile ? 'Ajouter' : 'Ajouter un produit'}
                 </button>
               </div>
-              {loading ? <div className="loading-center"><div className="spinner"/></div> : (
+              {loading ? <div className="loading-center"><div className="spinner"/></div> : isMobile ? (
+                /* Mobile: cards */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {products.map(p => (
+                    <ProductCard key={p.id} p={p}
+                      onEdit={p => { setEditProduct(p); setShowForm(true); }}
+                      onDelete={handleDelete}/>
+                  ))}
+                </div>
+              ) : (
+                /* Desktop: table */
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <thead>
                       <tr style={{ background: 'var(--primary)', color: 'white' }}>
                         {['Produit', 'Catégorie', 'Stock', 'Achat', 'Loc/j', 'Loc/sem', 'Type', 'Actions'].map(h => (
-                          <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
+                          <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {products.map((p, i) => (
-                        <tr key={p.id} style={{ background: i % 2 ? 'var(--light)' : 'white', transition: 'var(--transition)' }}
-                          onMouseOver={e => e.currentTarget.style.background = 'rgba(245,197,24,.07)'}
+                        <tr key={p.id} style={{ background: i % 2 ? 'var(--light)' : 'white' }}
+                          onMouseOver={e => e.currentTarget.style.background = 'rgba(255,51,51,.05)'}
                           onMouseOut={e => e.currentTarget.style.background = i % 2 ? 'var(--light)' : 'white'}>
-                          <td style={{ padding: '12px 16px' }}>
+                          <td style={{ padding: '11px 14px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                              <img src={p.image} alt={p.name} style={{ width: 40, height: 32, objectFit: 'cover', borderRadius: 6 }}/>
+                              <img src={p.image} alt={p.name} style={{ width: 40, height: 32, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }}/>
                               <span style={{ fontWeight: 600, color: 'var(--primary)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
                             </div>
                           </td>
-                          <td style={{ padding: '12px 16px', color: 'var(--gray-600)' }}>{p.category_icon} {p.category_name}</td>
-                          <td style={{ padding: '12px 16px', fontWeight: 700, color: p.stock === 0 ? 'var(--danger)' : p.stock < 3 ? 'var(--warning)' : 'var(--success)' }}>{p.stock}</td>
-                          <td style={{ padding: '12px 16px' }}>{p.price_sale ? `${p.price_sale} €` : '—'}</td>
-                          <td style={{ padding: '12px 16px' }}>{p.price_day ? `${p.price_day} €` : '—'}</td>
-                          <td style={{ padding: '12px 16px' }}>{p.price_week ? `${p.price_week} €` : '—'}</td>
-                          <td style={{ padding: '12px 16px' }}>
+                          <td style={{ padding: '11px 14px', color: 'var(--gray-600)', whiteSpace: 'nowrap' }}>{p.category_icon} {p.category_name}</td>
+                          <td style={{ padding: '11px 14px', fontWeight: 700, color: p.stock === 0 ? 'var(--danger)' : p.stock < 3 ? 'var(--warning)' : 'var(--success)' }}>{p.stock}</td>
+                          <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>{p.price_sale ? `${p.price_sale} €` : '—'}</td>
+                          <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>{p.price_day ? `${p.price_day} €` : '—'}</td>
+                          <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>{p.price_week ? `${p.price_week} €` : '—'}</td>
+                          <td style={{ padding: '11px 14px' }}>
                             <div style={{ display: 'flex', gap: 4 }}>
-                              {p.available_for_sale ? <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#d1fae5', color: '#065f46', fontWeight: 700 }}>Vente</span> : null}
-                              {p.available_for_rent ? <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#fef3c7', color: '#92400e', fontWeight: 700 }}>Loc.</span> : null}
+                              {p.available_for_sale ? <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#d1fae5', color: '#065f46', fontWeight: 700, whiteSpace: 'nowrap' }}>Vente</span> : null}
+                              {p.available_for_rent ? <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#fef3c7', color: '#92400e', fontWeight: 700, whiteSpace: 'nowrap' }}>Loc.</span> : null}
                             </div>
                           </td>
-                          <td style={{ padding: '12px 16px' }}>
+                          <td style={{ padding: '11px 14px' }}>
                             <div style={{ display: 'flex', gap: 6 }}>
                               <button className="btn btn-sm btn-outline" onClick={() => { setEditProduct(p); setShowForm(true); }}><Edit2 size={13}/></button>
                               <button className="btn btn-sm btn-danger" onClick={() => handleDelete(p.id)}><Trash2 size={13}/></button>
@@ -358,34 +414,54 @@ export default function Admin() {
             </div>
           )}
 
-          {/* Orders tab */}
+          {/* ── Orders ── */}
           {tab === 'orders' && (
             <div>
-              <h2 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 24 }}>Commandes ({orders.length})</h2>
-              {orders.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucune commande pour le moment</p> : (
+              <h2 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 20, fontSize: isMobile ? 17 : 22 }}>Commandes ({orders.length})</h2>
+              {orders.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucune commande pour le moment</p> : isMobile ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {orders.map(o => (
+                    <div key={o.id} className="card" style={{ padding: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                        <div>
+                          <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--primary)' }}>#{o.id} — {o.customer_name}</p>
+                          <p style={{ fontSize: 12, color: 'var(--gray-500)', marginTop: 2 }}>{o.customer_email}</p>
+                        </div>
+                        <span style={{ padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, flexShrink: 0, background: o.status === 'paid' ? '#d1fae5' : '#fef3c7', color: o.status === 'paid' ? '#065f46' : '#92400e' }}>
+                          {o.status === 'paid' ? '✅ Payé' : '⏳ ' + o.status}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                        <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{o.total_price.toFixed(2)} €</span>
+                        <span style={{ color: 'var(--gray-400)' }}>{new Date(o.created_at).toLocaleDateString('fr-FR')}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <thead>
                       <tr style={{ background: 'var(--primary)', color: 'white' }}>
                         {['#', 'Client', 'Email', 'Total', 'Type', 'Statut', 'Date'].map(h => (
-                          <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 700 }}>{h}</th>
+                          <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700 }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {orders.map((o, i) => (
                         <tr key={o.id} style={{ background: i % 2 ? 'var(--light)' : 'white' }}>
-                          <td style={{ padding: '12px 16px', fontWeight: 700 }}>#{o.id}</td>
-                          <td style={{ padding: '12px 16px', fontWeight: 600 }}>{o.customer_name}</td>
-                          <td style={{ padding: '12px 16px', color: 'var(--gray-500)' }}>{o.customer_email}</td>
-                          <td style={{ padding: '12px 16px', fontWeight: 800, color: 'var(--primary)' }}>{o.total_price.toFixed(2)} €</td>
-                          <td style={{ padding: '12px 16px' }}>{o.type}</td>
-                          <td style={{ padding: '12px 16px' }}>
+                          <td style={{ padding: '11px 14px', fontWeight: 700 }}>#{o.id}</td>
+                          <td style={{ padding: '11px 14px', fontWeight: 600 }}>{o.customer_name}</td>
+                          <td style={{ padding: '11px 14px', color: 'var(--gray-500)' }}>{o.customer_email}</td>
+                          <td style={{ padding: '11px 14px', fontWeight: 800, color: 'var(--primary)' }}>{o.total_price.toFixed(2)} €</td>
+                          <td style={{ padding: '11px 14px' }}>{o.type}</td>
+                          <td style={{ padding: '11px 14px' }}>
                             <span style={{ padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, background: o.status === 'paid' ? '#d1fae5' : '#fef3c7', color: o.status === 'paid' ? '#065f46' : '#92400e' }}>
                               {o.status === 'paid' ? '✅ Payé' : '⏳ ' + o.status}
                             </span>
                           </td>
-                          <td style={{ padding: '12px 16px', color: 'var(--gray-500)', fontSize: 12 }}>{new Date(o.created_at).toLocaleDateString('fr-FR')}</td>
+                          <td style={{ padding: '11px 14px', color: 'var(--gray-500)', fontSize: 12 }}>{new Date(o.created_at).toLocaleDateString('fr-FR')}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -395,37 +471,59 @@ export default function Admin() {
             </div>
           )}
 
-          {/* Reservations tab */}
+          {/* ── Reservations ── */}
           {tab === 'reservations' && (
             <div>
-              <h2 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 24 }}>Réservations ({reservations.length})</h2>
-              {reservations.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucune réservation pour le moment</p> : (
+              <h2 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 20, fontSize: isMobile ? 17 : 22 }}>Réservations ({reservations.length})</h2>
+              {reservations.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucune réservation pour le moment</p> : isMobile ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {reservations.map(r => (
+                    <div key={r.id} className="card" style={{ padding: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.product_name}</p>
+                          <p style={{ fontSize: 13, fontWeight: 600, marginTop: 2 }}>{r.customer_name}</p>
+                          <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{r.customer_email}</p>
+                          {r.customer_phone && <p style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600, marginTop: 2 }}>📞 {r.customer_phone}</p>}
+                          <p style={{ fontSize: 12, color: 'var(--gray-500)', marginTop: 4 }}>📅 {r.start_date} → {r.end_date}</p>
+                        </div>
+                        <div style={{ flexShrink: 0, textAlign: 'right', marginLeft: 10 }}>
+                          <p style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 15 }}>{r.total_price?.toFixed(2)} €</p>
+                        </div>
+                      </div>
+                      <select style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1.5px solid var(--gray-200)', fontSize: 13, fontWeight: 700 }}
+                        value={r.status} onChange={e => updateReservationStatus(r.id, e.target.value)}>
+                        <option value="pending">⏳ En attente</option>
+                        <option value="confirmed">✅ Confirmée</option>
+                        <option value="cancelled">❌ Annulée</option>
+                        <option value="completed">🏁 Terminée</option>
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              ) : (
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <thead>
                       <tr style={{ background: 'var(--primary)', color: 'white' }}>
-                        {['#', 'Produit', 'Client', 'Téléphone', 'Dates', 'Total', 'Statut', 'Actions'].map(h => (
-                          <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 700 }}>{h}</th>
+                        {['#', 'Produit', 'Client', 'Téléphone', 'Dates', 'Total', 'Statut', 'Date'].map(h => (
+                          <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700 }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {reservations.map((r, i) => (
                         <tr key={r.id} style={{ background: i % 2 ? 'var(--light)' : 'white' }}>
-                          <td style={{ padding: '12px 16px', fontWeight: 700 }}>#{r.id}</td>
-                          <td style={{ padding: '12px 16px', fontWeight: 600, maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.product_name}</td>
-                          <td style={{ padding: '12px 16px' }}>
+                          <td style={{ padding: '11px 14px', fontWeight: 700 }}>#{r.id}</td>
+                          <td style={{ padding: '11px 14px', fontWeight: 600, maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.product_name}</td>
+                          <td style={{ padding: '11px 14px' }}>
                             <p style={{ fontWeight: 600 }}>{r.customer_name}</p>
                             <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{r.customer_email}</p>
                           </td>
-                          <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--primary)' }}>
-                            {r.customer_phone || <span style={{ color: 'var(--gray-400)', fontWeight: 400 }}>—</span>}
-                          </td>
-                          <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--gray-600)' }}>
-                            {r.start_date} → {r.end_date}
-                          </td>
-                          <td style={{ padding: '12px 16px', fontWeight: 800, color: 'var(--primary)' }}>{r.total_price?.toFixed(2)} €</td>
-                          <td style={{ padding: '12px 16px' }}>
+                          <td style={{ padding: '11px 14px', fontSize: 13, fontWeight: 600, color: 'var(--primary)' }}>{r.customer_phone || '—'}</td>
+                          <td style={{ padding: '11px 14px', fontSize: 12, color: 'var(--gray-600)', whiteSpace: 'nowrap' }}>{r.start_date} → {r.end_date}</td>
+                          <td style={{ padding: '11px 14px', fontWeight: 800, color: 'var(--primary)' }}>{r.total_price?.toFixed(2)} €</td>
+                          <td style={{ padding: '11px 14px' }}>
                             <select style={{ padding: '4px 8px', borderRadius: 6, border: '1.5px solid var(--gray-200)', fontSize: 12, fontWeight: 700 }}
                               value={r.status} onChange={e => updateReservationStatus(r.id, e.target.value)}>
                               <option value="pending">⏳ En attente</option>
@@ -434,9 +532,7 @@ export default function Admin() {
                               <option value="completed">🏁 Terminée</option>
                             </select>
                           </td>
-                          <td style={{ padding: '12px 16px' }}>
-                            <p style={{ fontSize: 12, color: 'var(--gray-400)' }}>{new Date(r.created_at).toLocaleDateString('fr-FR')}</p>
-                          </td>
+                          <td style={{ padding: '11px 14px', fontSize: 12, color: 'var(--gray-400)' }}>{new Date(r.created_at).toLocaleDateString('fr-FR')}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -445,17 +541,14 @@ export default function Admin() {
               )}
             </div>
           )}
+
         </div>
       </div>
 
       {showForm && (
-        <ProductForm
-          product={editProduct}
-          categories={categories}
-          token={token}
+        <ProductForm product={editProduct} categories={categories} token={token}
           onSave={() => { loadData(); setShowForm(false); }}
-          onClose={() => setShowForm(false)}
-        />
+          onClose={() => setShowForm(false)}/>
       )}
     </div>
   );
