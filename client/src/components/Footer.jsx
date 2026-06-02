@@ -104,22 +104,31 @@ export default function Footer() {
               {/* Phone — opens dialer on mobile, copies on desktop */}
               <a href={`tel:+262${PHONE.slice(1)}`}
                 onClick={(e) => { if (!('ontouchstart' in window)) { e.preventDefault(); copyToClipboard(PHONE, 'Numéro'); } }}
-                style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14, color: 'rgba(255,255,255,.7)', fontSize: 14, textDecoration: 'none', cursor: 'pointer' }}>
+                style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14, color: 'rgba(255,255,255,.7)', fontSize: 14, textDecoration: 'none', cursor: 'pointer', borderRadius: 6, padding: '2px 6px', marginLeft: -6, transition: 'background 0.2s, color 0.2s' }}
+                onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,51,51,.18)'; e.currentTarget.style.color = 'white'; }}
+                onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,.7)'; }}>
                 <span style={{ color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}><Phone size={15}/></span>
                 {PHONE.replace(/(\d{2})(?=\d)/g, '$1 ').trim()}
               </a>
 
               {/* Email — copies to clipboard */}
               <div onClick={() => copyToClipboard(EMAIL, 'Email')}
-                style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14, color: 'rgba(255,255,255,.7)', fontSize: 14, cursor: 'pointer' }}>
+                style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14, color: 'rgba(255,255,255,.7)', fontSize: 14, cursor: 'pointer', borderRadius: 6, padding: '2px 6px', marginLeft: -6, transition: 'background 0.2s, color 0.2s' }}
+                onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,51,51,.18)'; e.currentTarget.style.color = 'white'; }}
+                onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,.7)'; }}>
                 <span style={{ color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}><Mail size={15}/></span>
                 {EMAIL}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14, color: 'rgba(255,255,255,.7)', fontSize: 14 }}>
+              <a
+                href="https://www.google.com/maps/place/Auto+Presto/@-20.9048811,55.4930903,17z/data=!3m1!4b1!4m6!3m5!1s0x217881e974a69313:0x172d7cd13ab5eca3!8m2!3d-20.9048811!4d55.4930903!16s%2Fg%2F11k5sgjzsp?entry=ttu&g_ep=EgoyMDI2MDUyNy4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14, color: 'rgba(255,255,255,.7)', fontSize: 14, textDecoration: 'none', borderRadius: 6, padding: '2px 6px', marginLeft: -6, transition: 'background 0.2s, color 0.2s' }}
+                onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,51,51,.18)'; e.currentTarget.style.color = 'white'; }}
+                onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,.7)'; }}>
                 <span style={{ color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}><MapPin size={15}/></span>
-                La Réunion
-              </div>
+                3 rue de la Guadeloupe,<br/>Moufia 97490 — La Réunion
+              </a>
 
               <div style={{ background: 'rgba(255,51,51,.15)', border: '1px solid rgba(255,51,51,.3)', borderRadius: 10, padding: '10px 14px', marginTop: 8 }}>
                 <p style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 13 }}>🏷️ -10% retrait sur place</p>
