@@ -1,46 +1,64 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Wrench, Zap, Shield, Truck, Star, ChevronRight, ArrowRight, ChevronLeft } from 'lucide-react';
+import { Wrench, Zap, Shield, Truck, Star, ChevronRight, ArrowRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import HeroLogo from '../components/HeroLogo';
 
 function ProductCarousel({ products }) {
+  const [paused, setPaused] = useState(false);
+  const offsetRef = useRef(0);
+  const animRef = useRef(null);
   const trackRef = useRef(null);
-  const [offset, setOffset] = useState(0);
-  const CARD_WIDTH = 220; // px including gap
+  const CARD_WIDTH = 230;
 
   useEffect(() => {
     if (!products.length) return;
-    const interval = setInterval(() => {
-      setOffset(prev => {
-        const maxOffset = products.length * CARD_WIDTH;
-        return (prev + 1) % maxOffset;
-      });
-    }, 20);
-    return () => clearInterval(interval);
-  }, [products]);
+    const total = products.length * CARD_WIDTH;
+    const step = () => {
+      if (!paused) {
+        offsetRef.current = (offsetRef.current + 0.7) % total;
+        if (trackRef.current) {
+          trackRef.current.style.transform = `translateX(-${offsetRef.current}px)`;
+        }
+      }
+      animRef.current = requestAnimationFrame(step);
+    };
+    animRef.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animRef.current);
+  }, [products, paused]);
 
-  // Duplicate items for infinite loop effect
-  const doubled = [...products, ...products];
+  const doubled = [...products, ...products, ...products];
 
   return (
-    <div style={{ overflow: 'hidden', width: '100%', position: 'relative' }}>
-      {/* Fade edges */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to right, var(--primary), transparent)', zIndex: 2, pointerEvents: 'none' }}/>
-      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to left, var(--primary), transparent)', zIndex: 2, pointerEvents: 'none' }}/>
-
-      <div ref={trackRef} style={{ display: 'flex', gap: 20, transform: `translateX(-${offset}px)`, transition: 'none', willChange: 'transform' }}>
+    <div style={{ overflow: 'hidden', width: '100%', position: 'relative', padding: '8px 0' }}>
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 100, background: 'linear-gradient(to right, var(--primary), transparent)', zIndex: 2, pointerEvents: 'none' }}/>
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 100, background: 'linear-gradient(to left, var(--primary), transparent)', zIndex: 2, pointerEvents: 'none' }}/>
+      <div ref={trackRef} style={{ display: 'flex', gap: 16, willChange: 'transform' }}>
         {doubled.map((p, i) => (
-          <Link key={`${p.id}-${i}`} to={`/produit/${p.id}`} style={{ flexShrink: 0, width: 200, textDecoration: 'none' }}>
-            <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(255,255,255,.12)', background: 'rgba(255,255,255,.06)', transition: 'var(--transition)' }}
-              onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,.12)'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
-              onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,.06)'; e.currentTarget.style.transform = ''; }}>
-              <img src={p.image} alt={p.name} style={{ width: '100%', height: 130, objectFit: 'cover' }}/>
-              <div style={{ padding: '10px 12px' }}>
-                <p style={{ color: 'white', fontWeight: 700, fontSize: 12, lineHeight: 1.3, marginBottom: 4 }}>{p.name}</p>
-                <p style={{ color: 'var(--accent)', fontWeight: 800, fontSize: 13 }}>
-                  {p.price_day ? `${p.price_day} €/j` : p.price_sale ? `${p.price_sale} €` : ''}
-                </p>
+          <Link key={`${p.id}-${i}`} to={`/produit/${p.id}`} style={{ flexShrink: 0, width: 214, textDecoration: 'none' }}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}>
+            <div style={{
+              borderRadius: 16, overflow: 'hidden',
+              border: '1px solid rgba(255,255,255,.1)',
+              background: 'rgba(255,255,255,.06)',
+              transition: 'all 0.25s ease',
+              boxShadow: '0 4px 20px rgba(0,0,0,.3)',
+            }}
+              onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,32,32,.12)'; e.currentTarget.style.transform = 'translateY(-6px) scale(1.03)'; e.currentTarget.style.borderColor = 'rgba(255,32,32,.4)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(255,32,32,.2)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,.06)'; e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = 'rgba(255,255,255,.1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.3)'; }}>
+              <div style={{ height: 150, overflow: 'hidden' }}>
+                <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .4s ease' }}
+                  onMouseOver={e => e.currentTarget.style.transform = 'scale(1.08)'}
+                  onMouseOut={e => e.currentTarget.style.transform = ''}/>
+              </div>
+              <div style={{ padding: '12px 14px' }}>
+                <p style={{ color: 'white', fontWeight: 700, fontSize: 13, lineHeight: 1.3, marginBottom: 6 }}>{p.name}</p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {p.price_day && <span style={{ color: 'var(--accent)', fontWeight: 800, fontSize: 13 }}>{p.price_day} €/j</span>}
+                  {p.price_sale && <span style={{ color: 'rgba(255,255,255,.5)', fontWeight: 600, fontSize: 12 }}>{p.price_sale} € achat</span>}
+                </div>
               </div>
             </div>
           </Link>
@@ -61,52 +79,39 @@ export default function Home() {
 
   return (
     <div>
-      {/* Hero with integrated carousel */}
-      <section style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 60%, #2d4a7a 100%)', color: 'white', padding: '80px 0 60px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 70% 50%, rgba(245,197,24,.08) 0%, transparent 60%)', pointerEvents: 'none' }}/>
-        <div style={{ position: 'absolute', top: -60, right: -60, width: 300, height: 300, borderRadius: '50%', background: 'rgba(245,197,24,.05)', pointerEvents: 'none' }}/>
-        <div className="container" style={{ position: 'relative' }}>
-          <div style={{ maxWidth: 640 }}>
-            <span className="section-label" style={{ color: 'var(--accent)' }}>🔧 MecaToolsLoc — La Réunion</span>
-            <h1 style={{ fontSize: 'clamp(32px,5.5vw,58px)', fontWeight: 900, lineHeight: 1.1, marginBottom: 20 }}>
-              L'outillage pro,<br/>
-              <span style={{ color: 'var(--accent)' }}>au bon prix.</span>
-            </h1>
-            <p style={{ fontSize: 18, opacity: 0.85, marginBottom: 12, lineHeight: 1.7 }}>
-              Location et vente d'outillage professionnel à La Réunion.
-              <br/>Des outils de qualité pour les mécaniciens exigeants.
-            </p>
-            <p style={{ fontStyle: 'italic', color: 'var(--accent)', fontWeight: 600, fontSize: 15, marginBottom: 36 }}>
-              "Par un mécanicien, pour les mécaniciens"
-            </p>
-            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-              <Link to="/catalogue" className="btn btn-primary btn-lg">
-                Voir le catalogue <ArrowRight size={18}/>
-              </Link>
-              <Link to="/catalogue?type=rent" className="btn btn-outline-light btn-lg">
-                📅 Louer du matériel
-              </Link>
-            </div>
-            <div style={{ display: 'flex', gap: 30, marginTop: 44, flexWrap: 'wrap' }}>
-              {[['100+', 'Références'], ['⭐ 5/5', 'Satisfaction'], ['48h', 'Réponse max']].map(([v, l]) => (
-                <div key={l}>
-                  <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--accent)' }}>{v}</p>
-                  <p style={{ fontSize: 13, opacity: 0.7 }}>{l}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Hero — logo 3D + texte + carrousel immédiat */}
+      <section style={{ background: 'linear-gradient(160deg, #110000 0%, #1e0505 50%, #0d0000 100%)', color: 'white', paddingTop: 40, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 50% 30%, rgba(255,32,32,.08) 0%, transparent 55%)', pointerEvents: 'none' }}/>
+
+        {/* Logo 3D animé au scroll */}
+        <HeroLogo />
+
+        {/* Texte centré */}
+        <div style={{ textAlign: 'center', padding: '0 20px 40px' }}>
+          <p style={{ fontSize: 'clamp(15px,2vw,18px)', opacity: 0.75, marginBottom: 8, lineHeight: 1.7 }}>
+            Location et vente d'outillage professionnel à La Réunion.<br/>
+            Des outils de qualité pour les mécaniciens de l'auto.
+          </p>
+          <p style={{ fontStyle: 'italic', color: 'var(--accent)', fontWeight: 700, fontSize: 'clamp(16px,2.5vw,22px)' }}>
+            "Par un mécanicien, pour les mécaniciens"
+          </p>
         </div>
 
-        {/* Carousel directly in hero */}
+        {/* Carrousel produits — visible dès l'arrivée */}
         {products.length > 0 && (
-          <div style={{ marginTop: 48 }}>
-            <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.5)', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
+          <div>
+            <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.4)', fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 14 }}>
               ✦ Nos produits phares ✦
             </p>
             <ProductCarousel products={products}/>
           </div>
         )}
+
+        {/* CTA sous le carrousel */}
+        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', padding: '32px 20px 48px' }}>
+          <Link to="/catalogue" className="btn btn-primary btn-lg">Voir le catalogue <ArrowRight size={18}/></Link>
+          <Link to="/catalogue?type=rent" className="btn btn-outline-light btn-lg">📅 Louer du matériel</Link>
+        </div>
       </section>
 
       {/* Why us */}
