@@ -1,9 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Wrench, Zap, Shield, Truck, ChevronRight, ArrowRight } from 'lucide-react';
+import { ChevronRight, ArrowRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import HeroLogo from '../components/HeroLogo';
+
+const BASE = 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets';
+const CAT_ICONS = {
+  'outillage-main':    `${BASE}/Hammer%20and%20wrench/3D/hammer_and_wrench_3d.png`,
+  'outillage-electro': `${BASE}/Electric%20plug/3D/electric_plug_3d.png`,
+  'levage':            `${BASE}/Construction/3D/construction_3d.png`,
+  'diagnostic':        `${BASE}/Magnifying%20glass%20tilted%20left/3D/magnifying_glass_tilted_left_3d.png`,
+  'compresseurs':      `${BASE}/Wind%20face/3D/wind_face_3d.png`,
+  'securite':          `${BASE}/Rescue%20worker%27s%20helmet/3D/rescue_worker%27s_helmet_3d.png`,
+  'default':           `${BASE}/Toolbox/3D/toolbox_3d.png`,
+};
 
 const CARD_W = 234;
 
@@ -136,16 +147,16 @@ export default function Home() {
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24 }}>
             {[
-              { icon: <Wrench size={24}/>, title: 'Matériel pro', desc: 'Outils de qualité professionnelle, entretenus et vérifiés avant chaque location.' },
-              { icon: <Zap size={24}/>, title: 'Disponibilité rapide', desc: 'Réservation en ligne 24/7 avec confirmation immédiate et calendrier en temps réel.' },
-              { icon: <Truck size={24}/>, title: 'Livraison sur île', desc: 'Livraison possible sur La Réunion. Retrait sur place également disponible.' },
-              { icon: <Shield size={24}/>, title: 'Paiement sécurisé', desc: 'Paiement en ligne sécurisé par carte bancaire. Chèque de caution en ligne — sans blocage de fonds, contrat fourni.' },
-            ].map(({ icon, title, desc }) => (
+              { img: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/Wrench/3D/wrench_3d.png', title: 'Matériel pro', desc: 'Outils de qualité professionnelle, entretenus et vérifiés avant chaque location.' },
+              { img: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/Alarm%20clock/3D/alarm_clock_3d.png', title: 'Disponibilité rapide', desc: 'Réservation en ligne 24/7 avec confirmation immédiate et calendrier en temps réel.' },
+              { img: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/Delivery%20truck/3D/delivery_truck_3d.png', title: 'Livraison sur île', desc: 'Livraison possible sur La Réunion. Retrait sur place également disponible.' },
+              { img: 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/Locked%20with%20key/3D/locked_with_key_3d.png', title: 'Paiement sécurisé', desc: 'Paiement en ligne sécurisé par carte bancaire. Chèque de caution en ligne — sans blocage de fonds, contrat fourni.' },
+            ].map(({ img, title, desc }) => (
               <div key={title} className="card" style={{ padding: '28px 24px', transition: 'var(--transition)' }}
                 onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--shadow)'; }}
                 onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}>
-                <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(255,40,40,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', marginBottom: 16, flexShrink: 0 }}>
-                  {icon}
+                <div style={{ width: 56, height: 56, marginBottom: 16, flexShrink: 0 }}>
+                  <img src={img} alt={title} style={{ width: 56, height: 56, objectFit: 'contain' }}/>
                 </div>
                 <h3 style={{ fontWeight: 700, fontSize: 16, color: 'var(--primary)', marginBottom: 8 }}>{title}</h3>
                 <p style={{ fontSize: 14, color: 'var(--gray-600)', lineHeight: 1.6 }}>{desc}</p>
@@ -168,7 +179,10 @@ export default function Home() {
                 <div style={{ padding: '24px 16px', borderRadius: 14, border: '1.5px solid var(--gray-200)', textAlign: 'center', background: 'white', transition: 'var(--transition)' }}
                   onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.background = 'rgba(255,40,40,.05)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
                   onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--gray-200)'; e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = ''; }}>
-                  <div style={{ fontSize: 36, marginBottom: 10 }}>{cat.icon}</div>
+                  <div style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                    <img src={CAT_ICONS[cat.slug] || CAT_ICONS.default} alt={cat.name}
+                      style={{ width: 52, height: 52, objectFit: 'contain' }}/>
+                  </div>
                   <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)', lineHeight: 1.3 }}>{cat.name}</p>
                 </div>
               </Link>

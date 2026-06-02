@@ -483,8 +483,8 @@ export default function Checkout() {
                     <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{item.type === 'sale' ? '🛒 Achat' : '📅 Location'} × {item.quantity}</p>
                     {item.rentDates && <p style={{ fontSize: 11, color: 'var(--gray-400)' }}>{new Date(item.rentDates.startDate).toLocaleDateString('fr-FR')} → {new Date(item.rentDates.endDate).toLocaleDateString('fr-FR')}</p>}
                     {item.has_qr_notice && (
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 11, fontWeight: 700, color: 'var(--primary)', background: 'var(--gray-100)', borderRadius: 6, padding: '2px 7px' }}>
-                        📱 Notice QR disponible
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 5, fontSize: 11, fontWeight: 700, color: '#7c3aed', background: 'rgba(124,58,237,.1)', border: '1px solid rgba(124,58,237,.25)', borderRadius: 6, padding: '3px 8px' }}>
+                        🎬 Vidéo notice d'utilisation offerte
                       </span>
                     )}
                   </div>

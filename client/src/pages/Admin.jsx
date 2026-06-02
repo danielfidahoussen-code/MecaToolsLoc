@@ -164,8 +164,8 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
               <input type="checkbox" checked={!!form.has_qr_notice} onChange={e => set('has_qr_notice', e.target.checked)} style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}/>
               <span style={{ fontSize: 18 }}>📱</span>
               <div>
-                <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)' }}>QR code notice d'utilisation disponible</p>
-                <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Un badge QR code s'affichera sur la fiche produit et dans le récapitulatif de commande</p>
+                <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)' }}>Vidéo notice d'utilisation disponible</p>
+                <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Le badge "🎬 Vidéo notice d'utilisation offerte" apparaîtra dans le récapitulatif de commande</p>
               </div>
             </label>
           </div>
