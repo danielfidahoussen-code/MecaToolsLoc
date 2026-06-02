@@ -44,7 +44,8 @@ export default function Checkout() {
   const [geoLoading, setGeoLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', city: '', cardNumber: '', cardExpiry: '', cardCVC: '' });
+  const [detectedCity, setDetectedCity] = useState('');
+  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', cardNumber: '', cardExpiry: '', cardCVC: '' });
   const debounceRef = useRef(null);
   const suggestionsRef = useRef(null);
 
@@ -84,7 +85,8 @@ export default function Checkout() {
 
   const selectSuggestion = (s) => {
     const addr = [s.number, s.road].filter(Boolean).join(' ') || s.label.split(',')[0];
-    setForm(f => ({ ...f, address: addr, city: s.city || f.city }));
+    setDetectedCity(s.city || '');
+    setForm(f => ({ ...f, address: addr }));
     setSuggestions([]);
     setShowSuggestions(false);
     // Auto-calcul distance
@@ -110,28 +112,25 @@ export default function Checkout() {
 
   // Géocodage de l'adresse + calcul distance
   const calculateDistance = async () => {
-    if (!form.address && !form.city) {
-      toast.error('Entrez votre adresse ou votre ville');
+    if (!form.address) {
+      toast.error('Entrez votre adresse de livraison');
       return;
     }
     setGeoLoading(true);
     setGeoResult(null);
 
     const addr = form.address.trim();
-    const city = form.city.trim();
 
     // Séquence de tentatives : du plus précis au plus large
     const attempts = [
-      // 1. Adresse complète avec ville
-      addr && city ? `${addr}, ${city}, La Réunion` : null,
-      // 2. Lieu/quartier seul sur l'île (utile pour "hôpital bellepierre", "Saint-Pierre", etc.)
-      addr ? `${addr}, La Réunion` : null,
-      // 3. Juste le lieu sans accent et sans ponctuation (robustesse)
-      addr ? `${addr.normalize('NFD').replace(/[̀-ͯ]/g, '')}, Reunion` : null,
-      // 4. Ville seule
-      city ? `${city}, La Réunion` : null,
-      // 5. Ville sans accent
-      city ? `${city.normalize('NFD').replace(/[̀-ͯ]/g, '')}, Reunion` : null,
+      // 1. Adresse complète avec île
+      `${addr}, La Réunion`,
+      // 2. Sans accents
+      `${addr.normalize('NFD').replace(/[̀-ͯ]/g, '')}, Reunion`,
+      // 3. Juste les premiers mots (lieu, quartier)
+      addr.split(',')[0] ? `${addr.split(',')[0].trim()}, La Réunion` : null,
+      // 4. Idem sans accents
+      addr.split(',')[0] ? `${addr.split(',')[0].trim().normalize('NFD').replace(/[̀-ͯ]/g, '')}, Reunion` : null,
     ].filter(Boolean);
 
     const geo = async (q) => {
@@ -164,9 +163,14 @@ export default function Checkout() {
     setDetectedKm(km);
     setDeliveryZone(zone);
 
-    // Extrait le nom court du résultat Nominatim
-    const shortName = found.display_name.split(',').slice(0, 2).join(',').trim();
-    const precise = attemptIndex <= 1; // trouvé via l'adresse complète ou le lieu
+    // Extrait ville depuis la réponse Nominatim
+    const parts = found.display_name.split(',');
+    const shortName = parts.slice(0, 2).join(',').trim();
+    // Cherche la ville dans les parts (généralement position 2-4)
+    const cityPart = parts.find(p => /saint|port|tampon|saint-pierre|sainte|entre|cilaos|salazie|plaine/i.test(p.trim())) || parts[2] || '';
+    if (cityPart) setDetectedCity(cityPart.trim());
+
+    const precise = attemptIndex <= 1;
     setGeoResult({ km, label: shortName, precise });
     toast.success(`📍 ${shortName} — ${km.toFixed(1)} km`);
     setGeoLoading(false);
@@ -187,7 +191,7 @@ export default function Checkout() {
         customer_name: form.name,
         customer_email: form.email,
         customer_phone: form.phone,
-        customer_address: isPickup ? 'Retrait sur place' : `${form.address}, ${form.city}`,
+        customer_address: isPickup ? 'Retrait sur place' : [form.address, detectedCity].filter(Boolean).join(', '),
         delivery_mode: isPickup ? 'pickup' : `delivery-${deliveryZone}`,
         delivery_fee: deliveryFee,
         discount,
@@ -313,7 +317,7 @@ export default function Checkout() {
                             searchSuggestions(e.target.value);
                           }}
                           onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                          placeholder="Ex: Hôpital Bellepierre, 12 rue des Fleurs…"
+                          placeholder="Ex: 12 rue des Fleurs, Saint-Denis…"
                           autoComplete="off"/>
                         {showSuggestions && suggestions.length > 0 && (
                           <div style={{
@@ -338,18 +342,10 @@ export default function Checkout() {
                             ))}
                           </div>
                         )}
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Ville</label>
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <input className="form-control" value={form.city}
-                            onChange={e => { set('city', e.target.value); setDeliveryZone(null); setDetectedKm(null); }}
-                            placeholder="Saint-Denis" style={{ flex: 1 }}/>
-                          <button className="btn btn-outline btn-sm" onClick={calculateDistance} disabled={geoLoading}
-                            style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
-                            {geoLoading ? <><Loader size={14} style={{ animation: 'spin .8s linear infinite' }}/> Calcul...</> : <><MapPin size={14}/> Calculer</>}
-                          </button>
-                        </div>
+                        <button className="btn btn-outline btn-sm" onClick={calculateDistance} disabled={geoLoading}
+                          style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {geoLoading ? <><Loader size={14} style={{ animation: 'spin .8s linear infinite' }}/> Calcul en cours...</> : <><MapPin size={14}/> Calculer la livraison</>}
+                        </button>
                       </div>
 
                       {/* Résultat du calcul */}
@@ -390,7 +386,7 @@ export default function Checkout() {
 
                       {!deliveryZone && (
                         <p style={{ fontSize: 13, color: 'var(--gray-500)', marginBottom: 16 }}>
-                          ↑ Entrez votre adresse et cliquez sur <strong>Calculer</strong> — les frais de livraison seront calculés automatiquement.
+                          ↑ Entrez votre adresse complète — choisissez une suggestion ou cliquez sur <strong>Calculer la livraison</strong>.
                         </p>
                       )}
                     </>
