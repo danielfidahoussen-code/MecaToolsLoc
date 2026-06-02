@@ -13,7 +13,8 @@ export default function CartDrawer() {
         position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 1998, backdropFilter: 'blur(3px)'
       }}/>
       <div style={{
-        position: 'fixed', right: 0, top: 0, bottom: 0, width: 420, maxWidth: '95vw',
+        position: 'fixed', right: 0, top: 0, bottom: 0,
+        width: 'min(420px, 100vw)',
         background: 'white', zIndex: 1999, display: 'flex', flexDirection: 'column',
         boxShadow: 'var(--shadow-lg)', animation: 'slideIn .25s ease'
       }}>
