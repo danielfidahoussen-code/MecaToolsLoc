@@ -1,6 +1,6 @@
 export default function Logo({ size = 44, light = false }) {
-  const c = light ? '#ffffff' : '#110000';
-  const red = '#ff2020';
+  const c = light ? '#ffffff' : '#220404';
+  const red = '#ff3333';
   return (
     <svg width={size * 3.2} height={size} viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Gear body */}

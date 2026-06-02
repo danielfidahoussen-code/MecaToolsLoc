@@ -39,14 +39,14 @@ export default function HeroLogo() {
 
         {/* Outer ring */}
         <g style={partStyle(0, -60, 360, 0.2)}>
-          <circle cx="160" cy="110" r="72" stroke="#ff2020" strokeWidth="2" fill="none" strokeDasharray="8 4" opacity="0.4"/>
+          <circle cx="160" cy="110" r="72" stroke="#ff3333" strokeWidth="2" fill="none" strokeDasharray="8 4" opacity="0.4"/>
         </g>
 
         {/* Gear body */}
         <g style={partStyle(-30, -80, -180, 0.1)}>
-          <circle cx="160" cy="110" r="44" stroke="#ff2020" strokeWidth="3" fill="rgba(17,0,0,0.9)"/>
-          <circle cx="160" cy="110" r="16" fill="#ff2020" opacity="0.9"/>
-          <circle cx="160" cy="110" r="8" fill="#110000"/>
+          <circle cx="160" cy="110" r="44" stroke="#ff3333" strokeWidth="3" fill="rgba(34,4,4,0.9)"/>
+          <circle cx="160" cy="110" r="16" fill="#ff3333" opacity="0.9"/>
+          <circle cx="160" cy="110" r="8" fill="#220404"/>
         </g>
 
         {/* Gear teeth - top */}
@@ -55,7 +55,7 @@ export default function HeroLogo() {
             const rad = (deg * Math.PI) / 180;
             const x1 = 160 + 44 * Math.cos(rad), y1 = 110 + 44 * Math.sin(rad);
             const x2 = 160 + 60 * Math.cos(rad), y2 = 110 + 60 * Math.sin(rad);
-            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#ff2020" strokeWidth="5" strokeLinecap="round"/>;
+            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#ff3333" strokeWidth="5" strokeLinecap="round"/>;
           })}
         </g>
 
@@ -75,19 +75,19 @@ export default function HeroLogo() {
         {/* TOOLS text */}
         <g style={partStyle(90, 70, 10, 0.3, 0.2)}>
           <text x="218" y="175" fontFamily="Inter,Arial,sans-serif" fontWeight="900" fontSize="36"
-            fill="#ff2020" letterSpacing="3" textAnchor="middle">TOOLS</text>
+            fill="#ff3333" letterSpacing="3" textAnchor="middle">TOOLS</text>
         </g>
 
         {/* LOC badge */}
         <g style={partStyle(60, -80, 30, 0.2, 0.08)}>
-          <rect x="195" y="85" width="36" height="18" rx="4" fill="#ff2020"/>
+          <rect x="195" y="85" width="36" height="18" rx="4" fill="#ff3333"/>
           <text x="213" y="97" fontFamily="Inter,Arial,sans-serif" fontWeight="800" fontSize="10"
             fill="white" textAnchor="middle">LOC</text>
         </g>
 
         {/* Separator line */}
         <g style={partStyle(0, 80, 0, 0.1, 0.25)}>
-          <line x1="80" y1="188" x2="240" y2="188" stroke="#ff2020" strokeWidth="2" opacity="0.5"/>
+          <line x1="80" y1="188" x2="240" y2="188" stroke="#ff3333" strokeWidth="2" opacity="0.5"/>
         </g>
 
         {/* by Autopresto */}

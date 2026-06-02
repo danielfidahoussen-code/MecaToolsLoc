@@ -5,19 +5,21 @@ import { Wrench, Zap, Shield, Truck, Star, ChevronRight, ArrowRight } from 'luci
 import ProductCard from '../components/ProductCard';
 import HeroLogo from '../components/HeroLogo';
 
+const CARD_W = 234;
+
 function ProductCarousel({ products }) {
   const [paused, setPaused] = useState(false);
   const offsetRef = useRef(0);
   const animRef = useRef(null);
   const trackRef = useRef(null);
-  const CARD_WIDTH = 230;
 
   useEffect(() => {
     if (!products.length) return;
-    const total = products.length * CARD_WIDTH;
+    const total = products.length * CARD_W;
     const step = () => {
       if (!paused) {
-        offsetRef.current = (offsetRef.current + 0.7) % total;
+        offsetRef.current += 0.8;
+        if (offsetRef.current >= total) offsetRef.current -= total;
         if (trackRef.current) {
           trackRef.current.style.transform = `translateX(-${offsetRef.current}px)`;
         }
@@ -28,35 +30,47 @@ function ProductCarousel({ products }) {
     return () => cancelAnimationFrame(animRef.current);
   }, [products, paused]);
 
-  const doubled = [...products, ...products, ...products];
+  const tripled = [...products, ...products, ...products];
 
   return (
-    <div style={{ overflow: 'hidden', width: '100%', position: 'relative', padding: '8px 0' }}>
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 100, background: 'linear-gradient(to right, var(--primary), transparent)', zIndex: 2, pointerEvents: 'none' }}/>
-      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 100, background: 'linear-gradient(to left, var(--primary), transparent)', zIndex: 2, pointerEvents: 'none' }}/>
+    <div style={{ overflow: 'hidden', width: '100%', position: 'relative', padding: '6px 0 12px' }}>
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to right, #220404, transparent)', zIndex: 2, pointerEvents: 'none' }}/>
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to left, #220404, transparent)', zIndex: 2, pointerEvents: 'none' }}/>
       <div ref={trackRef} style={{ display: 'flex', gap: 16, willChange: 'transform' }}>
-        {doubled.map((p, i) => (
-          <Link key={`${p.id}-${i}`} to={`/produit/${p.id}`} style={{ flexShrink: 0, width: 214, textDecoration: 'none' }}
+        {tripled.map((p, i) => (
+          <Link key={`${p.id}-${i}`} to={`/produit/${p.id}`}
+            style={{ flexShrink: 0, width: 218, textDecoration: 'none' }}
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}>
             <div style={{
               borderRadius: 16, overflow: 'hidden',
-              border: '1px solid rgba(255,255,255,.1)',
-              background: 'rgba(255,255,255,.06)',
+              border: '1px solid rgba(255,255,255,.12)',
+              background: 'rgba(255,255,255,.07)',
               transition: 'all 0.25s ease',
-              boxShadow: '0 4px 20px rgba(0,0,0,.3)',
+              boxShadow: '0 4px 20px rgba(0,0,0,.35)',
             }}
-              onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,32,32,.12)'; e.currentTarget.style.transform = 'translateY(-6px) scale(1.03)'; e.currentTarget.style.borderColor = 'rgba(255,32,32,.4)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(255,32,32,.2)'; }}
-              onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,.06)'; e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = 'rgba(255,255,255,.1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.3)'; }}>
-              <div style={{ height: 150, overflow: 'hidden' }}>
-                <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .4s ease' }}
-                  onMouseOver={e => e.currentTarget.style.transform = 'scale(1.08)'}
+              onMouseOver={e => {
+                e.currentTarget.style.background = 'rgba(255,40,40,.14)';
+                e.currentTarget.style.transform = 'translateY(-8px) scale(1.04)';
+                e.currentTarget.style.borderColor = 'rgba(255,40,40,.45)';
+                e.currentTarget.style.boxShadow = '0 16px 40px rgba(255,40,40,.22)';
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,.07)';
+                e.currentTarget.style.transform = '';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,.12)';
+                e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,.35)';
+              }}>
+              <div style={{ height: 170, overflow: 'hidden' }}>
+                <img src={p.image} alt={p.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .4s ease' }}
+                  onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
                   onMouseOut={e => e.currentTarget.style.transform = ''}/>
               </div>
               <div style={{ padding: '12px 14px' }}>
                 <p style={{ color: 'white', fontWeight: 700, fontSize: 13, lineHeight: 1.3, marginBottom: 6 }}>{p.name}</p>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {p.price_day && <span style={{ color: 'var(--accent)', fontWeight: 800, fontSize: 13 }}>{p.price_day} €/j</span>}
+                  {p.price_day && <span style={{ color: '#ff4444', fontWeight: 800, fontSize: 13 }}>{p.price_day} €/j</span>}
                   {p.price_sale && <span style={{ color: 'rgba(255,255,255,.5)', fontWeight: 600, fontSize: 12 }}>{p.price_sale} € achat</span>}
                 </div>
               </div>
@@ -79,42 +93,45 @@ export default function Home() {
 
   return (
     <div>
-      {/* Hero — logo 3D + texte + carrousel immédiat */}
-      <section style={{ background: 'linear-gradient(160deg, #110000 0%, #1e0505 50%, #0d0000 100%)', color: 'white', paddingTop: 40, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 50% 30%, rgba(255,32,32,.08) 0%, transparent 55%)', pointerEvents: 'none' }}/>
+      {/* ── HERO ── */}
+      <section style={{
+        background: 'linear-gradient(160deg, #220404 0%, #380808 50%, #1a0202 100%)',
+        color: 'white',
+        position: 'relative',
+        overflow: 'hidden',
+        paddingTop: 28,
+      }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 50% 40%, rgba(255,40,40,.1) 0%, transparent 60%)', pointerEvents: 'none' }}/>
 
-        {/* Logo 3D animé au scroll */}
+        {/* ① CARROUSEL — première chose visible */}
+        <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.45)', fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 10 }}>
+          ✦ Nos produits phares ✦
+        </p>
+        {products.length > 0
+          ? <ProductCarousel products={products}/>
+          : <div style={{ height: 210 }}/>}
+
+        {/* ② Logo 3D animé + slogan */}
         <HeroLogo />
 
-        {/* Texte centré */}
-        <div style={{ textAlign: 'center', padding: '0 20px 40px' }}>
-          <p style={{ fontSize: 'clamp(15px,2vw,18px)', opacity: 0.75, marginBottom: 8, lineHeight: 1.7 }}>
+        <div style={{ textAlign: 'center', padding: '0 20px 20px' }}>
+          <p style={{ fontSize: 'clamp(15px,2vw,18px)', opacity: 0.7, lineHeight: 1.7, marginBottom: 6 }}>
             Location et vente d'outillage professionnel à La Réunion.<br/>
             Des outils de qualité pour les mécaniciens de l'auto.
           </p>
-          <p style={{ fontStyle: 'italic', color: 'var(--accent)', fontWeight: 700, fontSize: 'clamp(16px,2.5vw,22px)' }}>
+          <p style={{ fontStyle: 'italic', color: '#ff4444', fontWeight: 700, fontSize: 'clamp(16px,2.5vw,22px)' }}>
             "Par un mécanicien, pour les mécaniciens"
           </p>
         </div>
 
-        {/* Carrousel produits — visible dès l'arrivée */}
-        {products.length > 0 && (
-          <div>
-            <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.4)', fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 14 }}>
-              ✦ Nos produits phares ✦
-            </p>
-            <ProductCarousel products={products}/>
-          </div>
-        )}
-
-        {/* CTA sous le carrousel */}
-        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', padding: '32px 20px 48px' }}>
+        {/* ③ CTA */}
+        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', padding: '20px 20px 48px' }}>
           <Link to="/catalogue" className="btn btn-primary btn-lg">Voir le catalogue <ArrowRight size={18}/></Link>
           <Link to="/catalogue?type=rent" className="btn btn-outline-light btn-lg">📅 Louer du matériel</Link>
         </div>
       </section>
 
-      {/* Why us */}
+      {/* ── Pourquoi nous ── */}
       <section style={{ padding: '70px 0', background: 'var(--light)' }}>
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24 }}>
@@ -127,7 +144,7 @@ export default function Home() {
               <div key={title} className="card" style={{ padding: '28px 24px', transition: 'var(--transition)' }}
                 onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--shadow)'; }}
                 onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}>
-                <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(245,197,24,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-dark)', marginBottom: 16 }}>
+                <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(255,40,40,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', marginBottom: 16 }}>
                   {icon}
                 </div>
                 <h3 style={{ fontWeight: 700, fontSize: 16, color: 'var(--primary)', marginBottom: 8 }}>{title}</h3>
@@ -138,7 +155,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* ── Catégories ── */}
       <section style={{ padding: '70px 0' }}>
         <div className="container">
           <div className="section-header">
@@ -147,13 +164,9 @@ export default function Home() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
             {categories.map(cat => (
-              <Link key={cat.id} to={`/catalogue?category=${cat.slug}`}
-                style={{ textDecoration: 'none' }}>
-                <div style={{
-                  padding: '24px 16px', borderRadius: 14, border: '1.5px solid var(--gray-200)',
-                  textAlign: 'center', background: 'white', transition: 'var(--transition)'
-                }}
-                  onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.background = 'rgba(245,197,24,.05)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
+              <Link key={cat.id} to={`/catalogue?category=${cat.slug}`} style={{ textDecoration: 'none' }}>
+                <div style={{ padding: '24px 16px', borderRadius: 14, border: '1.5px solid var(--gray-200)', textAlign: 'center', background: 'white', transition: 'var(--transition)' }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.background = 'rgba(255,40,40,.05)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
                   onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--gray-200)'; e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = ''; }}>
                   <div style={{ fontSize: 36, marginBottom: 10 }}>{cat.icon}</div>
                   <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)', lineHeight: 1.3 }}>{cat.name}</p>
@@ -164,7 +177,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured products */}
+      {/* ── Sélection produits ── */}
       <section style={{ padding: '70px 0', background: 'var(--light)' }}>
         <div className="container">
           <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', textAlign: 'left' }}>
@@ -182,7 +195,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonial / Trust */}
+      {/* ── Avis clients ── */}
       <section style={{ background: 'var(--primary)', padding: '70px 0' }}>
         <div className="container" style={{ textAlign: 'center' }}>
           <span className="section-label">Ils nous font confiance</span>
@@ -193,7 +206,7 @@ export default function Home() {
             {[
               { name: 'Thomas M.', role: 'Mécanicien indépendant', text: 'Matériel impeccable, toujours propre et bien entretenu. La réservation en ligne est super pratique !', stars: 5 },
               { name: 'Karim B.', role: 'Garage auto', text: 'Super service, livraison rapide et prix très compétitifs. Je recommande à tous mes confrères.', stars: 5 },
-              { name: 'Marie-Laure P.', role: 'Bricoleur passionné', text: 'Enfin un service de location d\'outillage pro à La Réunion ! Le patron connaît vraiment son métier.', stars: 5 },
+              { name: 'Marie-Laure P.', role: 'Bricoleur passionné', text: "Enfin un service de location d'outillage pro à La Réunion ! Le patron connaît vraiment son métier.", stars: 5 },
             ].map(({ name, role, text, stars }) => (
               <div key={name} style={{ background: 'rgba(255,255,255,.08)', borderRadius: 16, padding: '24px', textAlign: 'left', border: '1px solid rgba(255,255,255,.1)' }}>
                 <div style={{ display: 'flex', gap: 2, marginBottom: 12 }}>
@@ -210,7 +223,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How it works */}
+      {/* ── Comment ça marche ── */}
       <section style={{ padding: '70px 0' }}>
         <div className="container">
           <div className="section-header">
@@ -219,13 +232,13 @@ export default function Home() {
           </div>
           <div className="grid-4">
             {[
-              { n: '01', title: 'Choisissez', desc: 'Parcourez notre catalogue et sélectionnez l\'outil souhaité' },
+              { n: '01', title: 'Choisissez', desc: "Parcourez notre catalogue et sélectionnez l'outil souhaité" },
               { n: '02', title: 'Réservez', desc: 'Choisissez vos dates sur le calendrier de disponibilité' },
               { n: '03', title: 'Payez', desc: 'Paiement sécurisé en ligne par carte bancaire' },
               { n: '04', title: 'Récupérez', desc: 'Venez chercher votre matériel ou optez pour la livraison' },
             ].map(({ n, title, desc }) => (
               <div key={n} style={{ textAlign: 'center', padding: 24 }}>
-                <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--accent)', color: 'var(--primary)', fontWeight: 900, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>{n}</div>
+                <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--accent)', color: 'white', fontWeight: 900, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>{n}</div>
                 <h3 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: 8 }}>{title}</h3>
                 <p style={{ fontSize: 14, color: 'var(--gray-600)', lineHeight: 1.6 }}>{desc}</p>
               </div>
