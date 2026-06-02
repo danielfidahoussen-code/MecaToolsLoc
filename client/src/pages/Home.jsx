@@ -12,7 +12,7 @@ const CAT_ICONS = {
   'levage':            `${BASE}/Construction/3D/construction_3d.png`,
   'diagnostic':        `${BASE}/Magnifying%20glass%20tilted%20left/3D/magnifying_glass_tilted_left_3d.png`,
   'compresseurs':      `${BASE}/Wind%20face/3D/wind_face_3d.png`,
-  'securite':          `${BASE}/Rescue%20worker%27s%20helmet/3D/rescue_worker%27s_helmet_3d.png`,
+  'securite':          `${BASE}/Safety%20vest/3D/safety_vest_3d.png`,
   'default':           `${BASE}/Toolbox/3D/toolbox_3d.png`,
 };
 
