@@ -2,6 +2,9 @@
   "name": "mecatoolsloc",
   "version": "1.0.0",
   "description": "MecaToolsLoc - Location et vente d'outillage",
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "install:all": "npm install && cd client && npm install",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
