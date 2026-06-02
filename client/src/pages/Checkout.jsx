@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { ShoppingBag, CreditCard, Lock, CheckCircle, ArrowLeft, AlertTriangle, MapPin, Loader } from 'lucide-react';
@@ -42,9 +42,58 @@ export default function Checkout() {
   const [deliveryZone, setDeliveryZone] = useState(null); // null = pas encore calculé
   const [detectedKm, setDetectedKm] = useState(null);
   const [geoLoading, setGeoLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', city: '', cardNumber: '', cardExpiry: '', cardCVC: '' });
+  const debounceRef = useRef(null);
+  const suggestionsRef = useRef(null);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  // Ferme les suggestions si clic en dehors
+  useEffect(() => {
+    const handler = (e) => { if (suggestionsRef.current && !suggestionsRef.current.contains(e.target)) setShowSuggestions(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Recherche de suggestions (debounce 400ms)
+  const searchSuggestions = useCallback((value) => {
+    clearTimeout(debounceRef.current);
+    if (value.length < 3) { setSuggestions([]); setShowSuggestions(false); return; }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const q = encodeURIComponent(`${value}, La Réunion`);
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=5&countrycodes=fr&addressdetails=1`,
+          { headers: { 'Accept-Language': 'fr' } }
+        );
+        const data = await res.json();
+        setSuggestions(data.map(d => ({
+          label: d.display_name.split(', ').slice(0, 3).join(', '),
+          full: d.display_name,
+          city: d.address?.city || d.address?.town || d.address?.village || d.address?.municipality || '',
+          road: d.address?.road || d.address?.pedestrian || '',
+          number: d.address?.house_number || '',
+          lat: d.lat, lon: d.lon,
+        })));
+        setShowSuggestions(data.length > 0);
+      } catch { /* silently ignore */ }
+    }, 400);
+  }, []);
+
+  const selectSuggestion = (s) => {
+    const addr = [s.number, s.road].filter(Boolean).join(' ') || s.label.split(',')[0];
+    setForm(f => ({ ...f, address: addr, city: s.city || f.city }));
+    setSuggestions([]);
+    setShowSuggestions(false);
+    // Auto-calcul distance
+    const km = haversineKm(SHOP_LAT, SHOP_LNG, parseFloat(s.lat), parseFloat(s.lon));
+    const zone = kmToZone(km);
+    setDetectedKm(km);
+    setDeliveryZone(zone);
+    setGeoResult({ km, label: s.label.split(', ').slice(0, 2).join(', '), precise: true });
+  };
 
   const hasRentals = items.some(i => i.type === 'rent');
   const isPickup = deliveryMode === 'pickup';
@@ -255,11 +304,40 @@ export default function Checkout() {
                   {/* Adresse + calcul distance automatique */}
                   {!isPickup && (
                     <>
-                      <div className="form-group">
+                      <div className="form-group" ref={suggestionsRef} style={{ position: 'relative' }}>
                         <label className="form-label">Adresse de livraison</label>
                         <input className="form-control" value={form.address}
-                          onChange={e => { set('address', e.target.value); setDeliveryZone(null); setDetectedKm(null); }}
-                          placeholder="34 Rue Exemple"/>
+                          onChange={e => {
+                            set('address', e.target.value);
+                            setDeliveryZone(null); setDetectedKm(null); setGeoResult(null);
+                            searchSuggestions(e.target.value);
+                          }}
+                          onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                          placeholder="Ex: Hôpital Bellepierre, 12 rue des Fleurs…"
+                          autoComplete="off"/>
+                        {showSuggestions && suggestions.length > 0 && (
+                          <div style={{
+                            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 500,
+                            background: 'white', border: '1.5px solid var(--gray-200)',
+                            borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,.12)',
+                            overflow: 'hidden', marginTop: 4,
+                          }}>
+                            {suggestions.map((s, i) => (
+                              <button key={i} onMouseDown={() => selectSuggestion(s)}
+                                style={{
+                                  display: 'flex', alignItems: 'flex-start', gap: 10,
+                                  width: '100%', padding: '11px 14px', textAlign: 'left',
+                                  borderBottom: i < suggestions.length - 1 ? '1px solid var(--gray-100)' : 'none',
+                                  background: 'white', transition: 'background .15s',
+                                }}
+                                onMouseOver={e => e.currentTarget.style.background = 'rgba(255,51,51,.05)'}
+                                onMouseOut={e => e.currentTarget.style.background = 'white'}>
+                                <MapPin size={14} color="var(--accent)" style={{ flexShrink: 0, marginTop: 2 }}/>
+                                <span style={{ fontSize: 13, color: 'var(--gray-800)', lineHeight: 1.4 }}>{s.label}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div className="form-group">
                         <label className="form-label">Ville</label>
