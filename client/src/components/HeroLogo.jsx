@@ -31,63 +31,66 @@ export default function HeroLogo() {
     };
   };
 
+  // Centre du SVG
+  const cx = 160, cy = 78;
+
   return (
     <div ref={heroRef} style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center', padding: '10px 0 20px' }}>
-      <svg width="320" height="300" viewBox="0 0 320 300" fill="none" xmlns="http://www.w3.org/2000/svg"
-        style={{ filter: 'drop-shadow(0 0 30px rgba(255,51,51,0.35))' }}>
+      <svg width="340" height="280" viewBox="0 0 340 280" fill="none" xmlns="http://www.w3.org/2000/svg"
+        style={{ filter: 'drop-shadow(0 0 28px rgba(255,51,51,0.3))' }}>
 
         {/* ── Cercle pointillé extérieur ── */}
-        <g style={partStyle(0, -70, 360, 0.2)}>
-          <circle cx="160" cy="100" r="78" stroke="#ff3333" strokeWidth="1.5" fill="none" strokeDasharray="6 4" opacity="0.35"/>
+        <g style={partStyle(0, -60, 360, 0.2)}>
+          <circle cx={cx} cy={cy} r="75" stroke="#ff3333" strokeWidth="1.5" fill="none" strokeDasharray="5 4" opacity="0.3"/>
         </g>
 
-        {/* ── Corps engrenage : anneau + centre ── */}
-        <g style={partStyle(0, -80, -180, 0.1)}>
-          <circle cx="160" cy="100" r="46" stroke="#ff3333" strokeWidth="3" fill="rgba(20,2,2,0.95)"/>
-          {/* anneau intérieur décoratif */}
-          <circle cx="160" cy="100" r="30" stroke="rgba(255,51,51,0.25)" strokeWidth="1" fill="none"/>
-          {/* centre rouge */}
-          <circle cx="160" cy="100" r="14" fill="#ff3333" opacity="0.95"/>
-          <circle cx="160" cy="100" r="7" fill="#1a0202"/>
+        {/* ── Corps engrenage ── */}
+        <g style={partStyle(-20, -80, -180, 0.1)}>
+          <circle cx={cx} cy={cy} r="42" stroke="#ff3333" strokeWidth="3" fill="rgba(20,2,2,0.95)"/>
+          <circle cx={cx} cy={cy} r="14" fill="#ff3333" opacity="0.95"/>
+          <circle cx={cx} cy={cy} r="7" fill="#1a0202"/>
         </g>
 
-        {/* ── Dents engrenage ── */}
+        {/* ── Dents engrenage (même angles que navbar) ── */}
         <g style={partStyle(0, -100, -90, 0.2, 0.05)}>
-          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg, i) => {
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => {
             const rad = (deg * Math.PI) / 180;
-            const x1 = 160 + 46 * Math.cos(rad), y1 = 100 + 46 * Math.sin(rad);
-            const x2 = 160 + 63 * Math.cos(rad), y2 = 100 + 63 * Math.sin(rad);
-            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#ff3333" strokeWidth={i % 3 === 0 ? 6 : 4} strokeLinecap="round"/>;
+            const x1 = cx + 42 * Math.cos(rad), y1 = cy + 42 * Math.sin(rad);
+            const x2 = cx + 58 * Math.cos(rad), y2 = cy + 58 * Math.sin(rad);
+            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#ff3333" strokeWidth="6" strokeLinecap="round"/>;
           })}
         </g>
 
+        {/* ── Clé à molette (coin bas-gauche, loin du texte) ── */}
+        <g style={partStyle(-80, 40, -45, 0.2, 0.08)}>
+          <path d="M127 145 L109 163 M109 163 C104 168 96 167 96 161 C96 155 104 154 109 154 L127 136"
+            stroke="rgba(255,255,255,0.65)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+        </g>
+
         {/* ── Texte LV ── */}
-        <g style={partStyle(-80, 60, -10, 0.3, 0.1)}>
-          <text x="118" y="188" fontFamily="Inter,Arial,sans-serif" fontWeight="900" fontSize="42"
+        <g style={partStyle(-90, 60, -10, 0.3, 0.12)}>
+          <text x="116" y="188" fontFamily="Inter,Arial,sans-serif" fontWeight="900" fontSize="44"
             fill="white" letterSpacing="2" textAnchor="middle">LV</text>
         </g>
 
         {/* ── Texte Tools ── */}
-        <g style={partStyle(80, 70, 10, 0.3, 0.15)}>
-          <text x="212" y="188" fontFamily="Inter,Arial,sans-serif" fontWeight="900" fontSize="42"
+        <g style={partStyle(90, 70, 10, 0.3, 0.18)}>
+          <text x="218" y="188" fontFamily="Inter,Arial,sans-serif" fontWeight="900" fontSize="44"
             fill="#ff3333" letterSpacing="2" textAnchor="middle">Tools</text>
         </g>
 
-        {/* ── Séparateur ── */}
-        <g style={partStyle(0, 80, 0, 0.1, 0.25)}>
-          <line x1="80" y1="192" x2="240" y2="192" stroke="#ff3333" strokeWidth="1.5" opacity="0.4"/>
+        {/* ── Ligne séparatrice ── */}
+        <g style={partStyle(0, 80, 0, 0.1, 0.24)}>
+          <line x1="75" y1="202" x2="265" y2="202" stroke="#ff3333" strokeWidth="1.5" opacity="0.4"/>
         </g>
 
         {/* ── By AutoPresto ── */}
         <g style={partStyle(0, 90, 0, 0.5, 0.3)}>
-          <image href="/autopresto-logo.jpeg" x="130" y="198" width="24" height="24"
-            clipPath="url(#apCircle2)"/>
+          <image href="/autopresto-logo.jpeg" x="133" y="208" width="24" height="24" clipPath="url(#apHero)"/>
           <defs>
-            <clipPath id="apCircle2">
-              <circle cx="142" cy="210" r="12"/>
-            </clipPath>
+            <clipPath id="apHero"><circle cx="145" cy="220" r="12"/></clipPath>
           </defs>
-          <text x="162" y="214" fontFamily="Inter,Arial,sans-serif" fontWeight="600" fontSize="13"
+          <text x="165" y="224" fontFamily="Inter,Arial,sans-serif" fontWeight="600" fontSize="13"
             fill="rgba(255,255,255,0.5)" letterSpacing="0.5">by AutoPresto</text>
         </g>
 
