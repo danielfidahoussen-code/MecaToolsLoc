@@ -109,7 +109,6 @@ export default function Home() {
         background: 'linear-gradient(160deg, #220404 0%, #380808 50%, #1a0202 100%)',
         color: 'white',
         position: 'relative',
-        overflow: 'hidden',
         paddingTop: 28,
       }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 50% 40%, rgba(255,40,40,.1) 0%, transparent 60%)', pointerEvents: 'none' }}/>

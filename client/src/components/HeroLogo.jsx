@@ -35,7 +35,7 @@ export default function HeroLogo() {
   const cx = 160, cy = 78;
 
   return (
-    <div ref={heroRef} style={{ position: 'relative', zIndex: 5, marginTop: -70, pointerEvents: 'none', width: '100%', display: 'flex', justifyContent: 'center', padding: '10px 0 20px' }}>
+    <div ref={heroRef} style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center', padding: '10px 0 20px' }}>
       <svg width="340" height="280" viewBox="0 0 340 280" fill="none" xmlns="http://www.w3.org/2000/svg"
         style={{ filter: 'drop-shadow(0 0 28px rgba(255,51,51,0.3))' }}>
 
