@@ -1,52 +1,95 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { ShoppingBag, CreditCard, Lock, CheckCircle, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { ShoppingBag, CreditCard, Lock, CheckCircle, ArrowLeft, AlertTriangle, MapPin, Loader } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
 const ZONES = [
-  { id: '0-10',  label: '0 – 10 km  (Saint-Denis et alentours)', fee: 0 },
+  { id: '0-10',  label: '0 – 10 km', fee: 0 },
   { id: '10-15', label: '10 – 15 km', fee: 14.99 },
   { id: '16-25', label: '16 – 25 km', fee: 19.99 },
   { id: '26-35', label: '26 – 35 km', fee: 29.99 },
   { id: '36+',   label: '36 km et plus', fee: 39 },
 ];
 
+// Coordonnées de l'adresse du magasin (Auto Presto, Moufia)
+const SHOP_LAT = -20.9048811;
+const SHOP_LNG = 55.4930903;
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function kmToZone(km) {
+  if (km <= 10) return '0-10';
+  if (km <= 15) return '10-15';
+  if (km <= 25) return '16-25';
+  if (km <= 35) return '26-35';
+  return '36+';
+}
+
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
-  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [paying, setPaying] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [deliveryMode, setDeliveryMode] = useState('delivery'); // 'delivery' | 'pickup'
-  const [deliveryZone, setDeliveryZone] = useState('0-10');
+  const [deliveryMode, setDeliveryMode] = useState('delivery');
+  const [deliveryZone, setDeliveryZone] = useState(null); // null = pas encore calculé
+  const [detectedKm, setDetectedKm] = useState(null);
+  const [geoLoading, setGeoLoading] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', city: '', cardNumber: '', cardExpiry: '', cardCVC: '' });
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const hasRentals = items.some(i => i.type === 'rent');
   const isPickup = deliveryMode === 'pickup';
-
-  // Livraison gratuite si achat uniquement ET total > 150€
   const allSales = items.every(i => i.type === 'sale');
   const freeShipping = allSales && total > 150;
 
-  const deliveryFee = (() => {
-    if (isPickup) return 0;
-    if (freeShipping) return 0;
-    return ZONES.find(z => z.id === deliveryZone)?.fee ?? 0;
-  })();
-
-  // -10% si retrait sur place
+  const currentZone = ZONES.find(z => z.id === deliveryZone);
+  const deliveryFee = isPickup ? 0 : freeShipping ? 0 : (currentZone?.fee ?? 0);
   const discount = isPickup ? total * 0.1 : 0;
   const finalTotal = total - discount + deliveryFee;
+  const rentalZoneError = !isPickup && hasRentals && deliveryZone && deliveryZone !== '0-10';
 
-  // Location bloquée au-delà de 10 km
-  const rentalZoneError = !isPickup && hasRentals && deliveryZone !== '0-10';
+  // Géocodage de l'adresse + calcul distance
+  const calculateDistance = async () => {
+    if (!form.address || !form.city) {
+      toast.error('Entrez votre adresse et votre ville');
+      return;
+    }
+    setGeoLoading(true);
+    try {
+      const q = encodeURIComponent(`${form.address}, ${form.city}, La Réunion`);
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
+        { headers: { 'Accept-Language': 'fr', 'User-Agent': 'MecaToolsLoc/1.0' } }
+      );
+      const data = await res.json();
+      if (data.length === 0) {
+        toast.error('Adresse introuvable — vérifiez votre saisie');
+        setGeoLoading(false);
+        return;
+      }
+      const km = haversineKm(SHOP_LAT, SHOP_LNG, parseFloat(data[0].lat), parseFloat(data[0].lon));
+      const zone = kmToZone(km);
+      setDetectedKm(km);
+      setDeliveryZone(zone);
+      toast.success(`Distance estimée : ${km.toFixed(1)} km`);
+    } catch {
+      toast.error('Impossible de calculer la distance, vérifiez votre connexion');
+    }
+    setGeoLoading(false);
+  };
 
   const validateStep1 = () => {
     if (!form.name || !form.email || !form.phone) { toast.error('Remplissez tous les champs obligatoires'); return; }
+    if (!isPickup && !deliveryZone) { toast.error('Calculez d\'abord votre zone de livraison'); return; }
     if (rentalZoneError) { toast.error('La livraison des locations est limitée à 10 km'); return; }
     setStep(2);
   };
@@ -62,7 +105,7 @@ export default function Checkout() {
         customer_address: isPickup ? 'Retrait sur place' : `${form.address}, ${form.city}`,
         delivery_mode: isPickup ? 'pickup' : `delivery-${deliveryZone}`,
         delivery_fee: deliveryFee,
-        discount: discount,
+        discount,
         items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price, type: i.type, rentDates: i.rentDates || null })),
         total_price: finalTotal,
         type: 'mixed',
@@ -88,28 +131,20 @@ export default function Checkout() {
         <CheckCircle size={40} color="var(--success)"/>
       </div>
       <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 28, marginBottom: 12 }}>Commande confirmée !</h2>
-      <p style={{ color: 'var(--gray-600)', lineHeight: 1.7, marginBottom: 8 }}>
-        Merci {form.name} ! Votre commande a été enregistrée.
-      </p>
-      <p style={{ color: 'var(--gray-600)', fontSize: 14, marginBottom: 32 }}>
-        Un email de confirmation a été envoyé à <strong>{form.email}</strong>
-      </p>
+      <p style={{ color: 'var(--gray-600)', lineHeight: 1.7, marginBottom: 8 }}>Merci {form.name} ! Votre commande a été enregistrée.</p>
+      <p style={{ color: 'var(--gray-600)', fontSize: 14, marginBottom: 32 }}>Un email de confirmation a été envoyé à <strong>{form.email}</strong></p>
       <Link to="/" className="btn btn-primary btn-lg">Retour à l'accueil</Link>
     </div>
   );
 
   return (
     <div>
-      <div className="page-header">
-        <div className="container">
-          <h1>Finaliser ma commande</h1>
-        </div>
-      </div>
+      <div className="page-header"><div className="container"><h1>Finaliser ma commande</h1></div></div>
       <div className="page" style={{ paddingTop: 40 }}>
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 40, alignItems: 'start' }}>
 
-            {/* Left: Form */}
+            {/* Left */}
             <div>
               {/* Steps */}
               <div style={{ display: 'flex', gap: 0, marginBottom: 36 }}>
@@ -140,6 +175,7 @@ export default function Checkout() {
                         boxShadow: !isPickup ? '0 2px 8px rgba(0,0,0,.1)' : 'none',
                         color: !isPickup ? 'var(--primary)' : 'var(--gray-500)',
                       }}>🚚 Livraison</button>
+
                       <button onClick={() => setDeliveryMode('pickup')} style={{
                         flex: 1, padding: '11px 16px', borderRadius: 10, fontWeight: 700, fontSize: 14, transition: 'all 0.2s',
                         background: isPickup ? '#16a34a' : 'transparent',
@@ -148,7 +184,13 @@ export default function Checkout() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                       }}>
                         🏪 Retrait sur place
-                        {isPickup && <span style={{ background: 'rgba(255,255,255,.25)', borderRadius: 6, padding: '2px 7px', fontSize: 12, fontWeight: 800 }}>-10%</span>}
+                        {/* Badge -10% toujours visible */}
+                        <span style={{
+                          background: isPickup ? 'rgba(255,255,255,.28)' : 'rgba(220,38,38,.12)',
+                          color: isPickup ? 'white' : 'var(--danger)',
+                          border: isPickup ? 'none' : '1px solid rgba(220,38,38,.3)',
+                          borderRadius: 6, padding: '2px 7px', fontSize: 12, fontWeight: 800,
+                        }}>-10%</span>
                       </button>
                     </div>
                     {isPickup && (
@@ -158,53 +200,7 @@ export default function Checkout() {
                     )}
                   </div>
 
-                  {/* Zone de livraison */}
-                  {!isPickup && (
-                    <div className="form-group">
-                      <label className="form-label">Zone de livraison</label>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        {ZONES.map(z => {
-                          const blocked = hasRentals && z.id !== '0-10';
-                          return (
-                            <label key={z.id} style={{
-                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                              padding: '12px 16px', borderRadius: 10, cursor: blocked ? 'not-allowed' : 'pointer',
-                              border: `2px solid ${deliveryZone === z.id ? 'var(--accent)' : 'var(--gray-200)'}`,
-                              background: deliveryZone === z.id ? 'rgba(255,51,51,.05)' : blocked ? 'var(--gray-100)' : 'white',
-                              opacity: blocked ? 0.45 : 1,
-                              transition: 'all 0.18s',
-                            }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <input type="radio" name="zone" value={z.id} checked={deliveryZone === z.id}
-                                  disabled={blocked}
-                                  onChange={() => !blocked && setDeliveryZone(z.id)}
-                                  style={{ accentColor: 'var(--accent)', width: 16, height: 16 }}/>
-                                <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--gray-800)' }}>{z.label}</span>
-                                {blocked && <span style={{ fontSize: 11, color: 'var(--danger)', fontWeight: 700 }}>Location : retrait uniquement</span>}
-                              </div>
-                              <span style={{ fontWeight: 800, color: freeShipping || z.fee === 0 ? 'var(--success)' : 'var(--primary)', fontSize: 14 }}>
-                                {freeShipping || z.fee === 0 ? 'Gratuit' : `+${z.fee.toFixed(2)} €`}
-                              </span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                      {rentalZoneError && (
-                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 8, padding: '10px 14px', marginTop: 8 }}>
-                          <AlertTriangle size={16} color="var(--danger)"/>
-                          <p style={{ fontSize: 13, color: 'var(--danger)', fontWeight: 600 }}>
-                            La livraison des locations est limitée à 10 km autour de Saint-Denis. Choisissez le retrait sur place ou une zone 0-10 km.
-                          </p>
-                        </div>
-                      )}
-                      {freeShipping && (
-                        <p style={{ fontSize: 13, color: 'var(--success)', fontWeight: 600, marginTop: 8 }}>
-                          ✓ Livraison gratuite — achat supérieur à 150 €
-                        </p>
-                      )}
-                    </div>
-                  )}
-
+                  {/* Coordonnées */}
                   <div className="grid-2">
                     <div className="form-group">
                       <label className="form-label">Nom complet *</label>
@@ -219,18 +215,62 @@ export default function Checkout() {
                     <label className="form-label">Email *</label>
                     <input className="form-control" type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="vous@exemple.fr"/>
                   </div>
+
+                  {/* Adresse + calcul distance automatique */}
                   {!isPickup && (
                     <>
                       <div className="form-group">
-                        <label className="form-label">Adresse</label>
-                        <input className="form-control" value={form.address} onChange={e => set('address', e.target.value)} placeholder="34 Rue Exemple"/>
+                        <label className="form-label">Adresse de livraison</label>
+                        <input className="form-control" value={form.address}
+                          onChange={e => { set('address', e.target.value); setDeliveryZone(null); setDetectedKm(null); }}
+                          placeholder="34 Rue Exemple"/>
                       </div>
                       <div className="form-group">
                         <label className="form-label">Ville</label>
-                        <input className="form-control" value={form.city} onChange={e => set('city', e.target.value)} placeholder="Saint-Denis"/>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <input className="form-control" value={form.city}
+                            onChange={e => { set('city', e.target.value); setDeliveryZone(null); setDetectedKm(null); }}
+                            placeholder="Saint-Denis" style={{ flex: 1 }}/>
+                          <button className="btn btn-outline btn-sm" onClick={calculateDistance} disabled={geoLoading}
+                            style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
+                            {geoLoading ? <><Loader size={14} style={{ animation: 'spin .8s linear infinite' }}/> Calcul...</> : <><MapPin size={14}/> Calculer</>}
+                          </button>
+                        </div>
                       </div>
+
+                      {/* Résultat du calcul */}
+                      {deliveryZone && detectedKm !== null && (
+                        <div style={{
+                          background: rentalZoneError ? 'rgba(239,68,68,.06)' : 'rgba(16,185,129,.06)',
+                          border: `1px solid ${rentalZoneError ? 'rgba(239,68,68,.3)' : 'rgba(16,185,129,.3)'}`,
+                          borderRadius: 10, padding: '14px 16px', marginBottom: 16,
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: rentalZoneError ? 8 : 0 }}>
+                            <MapPin size={15} color={rentalZoneError ? 'var(--danger)' : 'var(--success)'}/>
+                            <p style={{ fontWeight: 700, fontSize: 14, color: rentalZoneError ? 'var(--danger)' : 'var(--success)' }}>
+                              Distance estimée : {detectedKm.toFixed(1)} km
+                              &nbsp;→&nbsp;{freeShipping ? 'Livraison gratuite' : currentZone?.fee === 0 ? 'Livraison gratuite' : `Frais : ${currentZone?.fee.toFixed(2)} €`}
+                            </p>
+                          </div>
+                          {rentalZoneError && (
+                            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                              <AlertTriangle size={15} color="var(--danger)" style={{ flexShrink: 0, marginTop: 1 }}/>
+                              <p style={{ fontSize: 13, color: 'var(--danger)', fontWeight: 600 }}>
+                                La livraison des locations est limitée à 10 km. Optez pour le retrait sur place (−10% !) ou ne commandez que des achats.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {!deliveryZone && (
+                        <p style={{ fontSize: 13, color: 'var(--gray-500)', marginBottom: 16 }}>
+                          ↑ Entrez votre adresse et cliquez sur <strong>Calculer</strong> — les frais de livraison seront calculés automatiquement.
+                        </p>
+                      )}
                     </>
                   )}
+
                   <button className="btn btn-primary btn-lg" onClick={validateStep1} style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>
                     Continuer vers le paiement →
                   </button>
@@ -281,7 +321,7 @@ export default function Checkout() {
               )}
             </div>
 
-            {/* Right: Order summary */}
+            {/* Right: Récapitulatif */}
             <div className="card" style={{ padding: 24, position: 'sticky', top: 100 }}>
               <h3 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 20 }}>Récapitulatif</h3>
               {items.map(item => (
@@ -289,9 +329,7 @@ export default function Checkout() {
                   <img src={item.image} alt={item.name} style={{ width: 56, height: 48, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}/>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--primary)', lineHeight: 1.3 }}>{item.name}</p>
-                    <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>
-                      {item.type === 'sale' ? '🛒 Achat' : '📅 Location'} × {item.quantity}
-                    </p>
+                    <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{item.type === 'sale' ? '🛒 Achat' : '📅 Location'} × {item.quantity}</p>
                     {item.rentDates && <p style={{ fontSize: 11, color: 'var(--gray-400)' }}>{new Date(item.rentDates.startDate).toLocaleDateString('fr-FR')} → {new Date(item.rentDates.endDate).toLocaleDateString('fr-FR')}</p>}
                   </div>
                   <p style={{ fontWeight: 800, fontSize: 14, color: 'var(--primary)', whiteSpace: 'nowrap' }}>{(item.price * item.quantity).toFixed(2)} €</p>
@@ -309,9 +347,9 @@ export default function Checkout() {
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
-                  <span style={{ color: 'var(--gray-600)' }}>Livraison</span>
+                  <span style={{ color: 'var(--gray-600)' }}>Livraison {detectedKm && !isPickup ? `(${detectedKm.toFixed(1)} km)` : ''}</span>
                   <span style={{ color: deliveryFee === 0 ? 'var(--success)' : 'var(--primary)', fontWeight: 600 }}>
-                    {deliveryFee === 0 ? (isPickup ? '—' : 'Gratuite') : `${deliveryFee.toFixed(2)} €`}
+                    {isPickup ? '—' : deliveryFee === 0 ? 'Gratuite' : `${deliveryFee.toFixed(2)} €`}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 18, color: 'var(--primary)', borderTop: '2px solid var(--gray-200)', paddingTop: 12, marginTop: 8 }}>
@@ -328,6 +366,7 @@ export default function Checkout() {
         @media (max-width: 900px) {
           .container > div[style*="grid-template-columns: 1fr 380px"] { grid-template-columns: 1fr !important; }
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
