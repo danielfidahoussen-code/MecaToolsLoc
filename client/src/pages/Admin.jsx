@@ -59,7 +59,7 @@ function LoginForm({ onLogin }) {
 function ProductForm({ product, categories, token, onSave, onClose }) {
   const [form, setForm] = useState(product || {
     name: '', description: '', category_id: '', price_sale: '', price_day: '', price_week: '',
-    stock: 0, available_for_sale: true, available_for_rent: true, image: ''
+    stock: 0, available_for_sale: true, available_for_rent: true, image: '', has_qr_notice: false
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -145,12 +145,28 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
             </label>
             <input className="form-control" value={form.image} onChange={e => set('image', e.target.value)} placeholder="Ou coller une URL..."/>
           </div>
-          <div className="form-group" style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
-              <input type="checkbox" checked={!!form.available_for_sale} onChange={e => set('available_for_sale', e.target.checked)} style={{ width: 16, height: 16 }}/> Vente
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
-              <input type="checkbox" checked={!!form.available_for_rent} onChange={e => set('available_for_rent', e.target.checked)} style={{ width: 16, height: 16 }}/> Location
+          <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 20 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
+                <input type="checkbox" checked={!!form.available_for_sale} onChange={e => set('available_for_sale', e.target.checked)} style={{ width: 16, height: 16 }}/> Vente
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
+                <input type="checkbox" checked={!!form.available_for_rent} onChange={e => set('available_for_rent', e.target.checked)} style={{ width: 16, height: 16 }}/> Location
+              </label>
+            </div>
+            <label style={{
+              display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
+              padding: '10px 14px', borderRadius: 10, border: '1.5px solid',
+              borderColor: form.has_qr_notice ? 'var(--accent)' : 'var(--gray-200)',
+              background: form.has_qr_notice ? 'rgba(255,51,51,.06)' : 'var(--gray-100)',
+              transition: 'all .2s',
+            }}>
+              <input type="checkbox" checked={!!form.has_qr_notice} onChange={e => set('has_qr_notice', e.target.checked)} style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}/>
+              <span style={{ fontSize: 18 }}>📱</span>
+              <div>
+                <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)' }}>QR code notice d'utilisation disponible</p>
+                <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Un badge QR code s'affichera sur la fiche produit et dans le récapitulatif de commande</p>
+              </div>
             </label>
           </div>
         </div>

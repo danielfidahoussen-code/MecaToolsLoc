@@ -21,7 +21,7 @@ export function CartProvider({ children }) {
       }
       const price = type === 'sale' ? product.price_sale :
         rentDates ? calcRentPrice(product, rentDates) : product.price_day;
-      return [...prev, { key, id: product.id, name: product.name, image: product.image, type, quantity, price, rentDates }];
+      return [...prev, { key, id: product.id, name: product.name, image: product.image, type, quantity, price, rentDates, has_qr_notice: !!product.has_qr_notice }];
     });
     setIsOpen(true);
   };
