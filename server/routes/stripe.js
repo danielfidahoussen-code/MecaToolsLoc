@@ -63,6 +63,7 @@ router.post('/create-checkout-session', async (req, res) => {
         delivery_fee: String(delivery_fee || 0),
         discount: String(discount || 0),
         total_price: String(total_price),
+        caution_total: String(items.reduce((s, i) => s + (i.caution || 0) * (i.quantity || 1), 0)),
         items: itemsMeta.slice(0, 490),
       },
       payment_intent_data: {

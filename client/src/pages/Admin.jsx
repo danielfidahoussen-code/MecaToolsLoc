@@ -65,7 +65,7 @@ function LoginForm({ onLogin }) {
 /* ─── PRODUCT FORM MODAL ─────────────────────────────────────────────────── */
 function ProductForm({ product, categories, token, onSave, onClose }) {
   const [form, setForm] = useState(product || {
-    name: '', description: '', category_id: '', price_sale: '', price_day: '', price_week: '',
+    name: '', description: '', category_id: '', price_sale: '', price_day: '', price_week: '', caution: '',
     stock: 0, available_for_sale: true, available_for_rent: true, image: '', has_qr_notice: false
   });
   const [saving, setSaving] = useState(false);
@@ -143,6 +143,10 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
             <label className="form-label">Prix location/semaine (€)</label>
             <input className="form-control" type="number" step="0.01" value={form.price_week} onChange={e => set('price_week', parseFloat(e.target.value) || '')} placeholder="0.00"/>
           </div>
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <label className="form-label">🔒 Caution location (€) <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--gray-500)' }}>— collectée à la remise, non débitée en ligne</span></label>
+            <input className="form-control" type="number" step="0.01" value={form.caution} onChange={e => set('caution', parseFloat(e.target.value) || '')} placeholder="Ex: 150.00 (laisser vide si pas de caution)"/>
+          </div>
           <div className="form-group">
             <label className="form-label">Image</label>
             {form.image && <img src={form.image} alt="aperçu" style={{ width: '100%', height: 90, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}/>}
@@ -201,6 +205,7 @@ function ProductCard({ p, onEdit, onDelete }) {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 12, marginBottom: 6 }}>
           {p.price_sale ? <span style={{ background: 'var(--gray-100)', padding: '2px 8px', borderRadius: 4 }}>Achat : <b>{p.price_sale} €</b></span> : null}
           {p.price_day  ? <span style={{ background: 'var(--gray-100)', padding: '2px 8px', borderRadius: 4 }}>Loc/j : <b>{p.price_day} €</b></span> : null}
+          {p.caution    ? <span style={{ background: 'rgba(59,130,246,.1)', padding: '2px 8px', borderRadius: 4, color: '#1e40af' }}>🔒 <b>{p.caution} €</b></span> : null}
           <span style={{ padding: '2px 8px', borderRadius: 4, fontWeight: 700, background: p.stock === 0 ? '#fee2e2' : p.stock < 3 ? '#fef3c7' : '#d1fae5', color: p.stock === 0 ? '#991b1b' : p.stock < 3 ? '#92400e' : '#065f46' }}>
             Stock : {p.stock}
           </span>
@@ -372,7 +377,7 @@ export default function Admin() {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <thead>
                       <tr style={{ background: 'var(--primary)', color: 'white' }}>
-                        {['Produit', 'Catégorie', 'Stock', 'Achat', 'Loc/j', 'Loc/sem', 'Type', 'Actions'].map(h => (
+                        {['Produit', 'Catégorie', 'Stock', 'Achat', 'Loc/j', 'Loc/sem', 'Caution', 'Type', 'Actions'].map(h => (
                           <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
                         ))}
                       </tr>
@@ -393,6 +398,7 @@ export default function Admin() {
                           <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>{p.price_sale ? `${p.price_sale} €` : '—'}</td>
                           <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>{p.price_day ? `${p.price_day} €` : '—'}</td>
                           <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>{p.price_week ? `${p.price_week} €` : '—'}</td>
+                          <td style={{ padding: '11px 14px', whiteSpace: 'nowrap', color: p.caution ? '#1e40af' : 'var(--gray-400)', fontWeight: p.caution ? 700 : 400 }}>{p.caution ? `🔒 ${p.caution} €` : '—'}</td>
                           <td style={{ padding: '11px 14px' }}>
                             <div style={{ display: 'flex', gap: 4 }}>
                               {p.available_for_sale ? <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#d1fae5', color: '#065f46', fontWeight: 700, whiteSpace: 'nowrap' }}>Vente</span> : null}

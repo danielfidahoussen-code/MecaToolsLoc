@@ -105,6 +105,7 @@ export default function Checkout() {
   const deliveryFee = isPickup ? 0 : (currentZone?.fee ?? 0) * tripCount;
   const discount = isPickup ? total * 0.1 : 0;
   const finalTotal = total - discount + deliveryFee;
+  const totalCaution = items.filter(i => i.type === 'rent').reduce((s, i) => s + (i.caution || 0) * i.quantity, 0);
   const rentalZoneError = !isPickup && hasRentals && deliveryZone && deliveryZone !== '0-15';
 
   const [geoResult, setGeoResult] = useState(null); // { km, label, precise }
@@ -194,7 +195,7 @@ export default function Checkout() {
         delivery_mode: isPickup ? 'pickup' : `delivery-${deliveryZone}-${[deliveryTrips.aller && 'aller', deliveryTrips.retour && 'retour'].filter(Boolean).join('+')}`,
         delivery_fee: deliveryFee,
         discount,
-        items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price, type: i.type, rentDates: i.rentDates || null })),
+        items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price, type: i.type, rentDates: i.rentDates || null, caution: i.caution || 0 })),
         total_price: finalTotal,
       });
       // Redirige vers la page de paiement Stripe
@@ -458,6 +459,12 @@ export default function Checkout() {
                       <span>Total à payer</span>
                       <span>{finalTotal.toFixed(2)} €</span>
                     </div>
+                    {totalCaution > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '8px 10px', background: 'rgba(59,130,246,.07)', border: '1.5px solid rgba(59,130,246,.2)', borderRadius: 8 }}>
+                        <span>🔒</span>
+                        <span style={{ fontSize: 12, color: '#1e40af', fontWeight: 600 }}>Caution : {totalCaution.toFixed(2)} € — collectée à la remise, non débitée</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Info Stripe */}
@@ -521,6 +528,15 @@ export default function Checkout() {
                   <span>Total TTC</span>
                   <span>{finalTotal.toFixed(2)} €</span>
                 </div>
+                {totalCaution > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, padding: '10px 12px', background: 'rgba(59,130,246,.07)', border: '1.5px solid rgba(59,130,246,.2)', borderRadius: 10, fontSize: 13 }}>
+                    <span style={{ fontSize: 16 }}>🔒</span>
+                    <div>
+                      <p style={{ fontWeight: 700, color: '#1e40af' }}>Caution : {totalCaution.toFixed(2)} €</p>
+                      <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Non débitée — collectée à la remise du matériel</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

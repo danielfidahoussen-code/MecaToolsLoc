@@ -191,7 +191,7 @@ export default function ProductDetail() {
               {/* Rent panel */}
               {activeTab === 'rent' && product.available_for_rent && (
                 <div>
-                  <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 12, marginBottom: product.caution ? 12 : 20, flexWrap: 'wrap' }}>
                     <div style={{ background: 'rgba(245,197,24,.1)', padding: '10px 16px', borderRadius: 10 }}>
                       <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-600)', textTransform: 'uppercase' }}>Par jour</p>
                       <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--primary)' }}>{product.price_day?.toFixed(2)} €</p>
@@ -203,6 +203,15 @@ export default function ProductDetail() {
                       </div>
                     )}
                   </div>
+                  {product.caution > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(59,130,246,.07)', border: '1.5px solid rgba(59,130,246,.2)', borderRadius: 10, padding: '10px 14px', marginBottom: 20 }}>
+                      <span style={{ fontSize: 20 }}>🔒</span>
+                      <div>
+                        <p style={{ fontWeight: 700, fontSize: 13, color: '#1e40af' }}>Caution : {product.caution.toFixed(2)} €</p>
+                        <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Collectée à la remise du matériel — restituée en fin de location</p>
+                      </div>
+                    </div>
+                  )}
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
