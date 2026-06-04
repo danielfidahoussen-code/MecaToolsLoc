@@ -199,7 +199,12 @@ export default function Checkout() {
       });
       // Redirige vers la page de paiement Stripe
       window.location.href = data.url;
-    } catch { toast.error('Erreur lors de la création du paiement. Réessayez.'); setPaying(false); }
+    } catch (err) {
+      const msg = err?.response?.data?.error || err.message || 'Erreur inconnue';
+      console.error('Stripe checkout error:', msg);
+      toast.error(`Erreur paiement : ${msg}`);
+      setPaying(false);
+    }
   };
 
   if (items.length === 0 && !success) return (
