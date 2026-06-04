@@ -1,11 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
+// Webhook Stripe doit recevoir le body RAW avant express.json()
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
@@ -32,6 +35,7 @@ app.use('/api/reservations', require('./routes/reservations'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/faqs', require('./routes/faqs'));
 app.use('/api/upload', require('./routes/upload'));
+app.use('/api/stripe', require('./routes/stripe'));
 
 // Serve React build in production
 const distPath = path.join(__dirname, '../client/dist');

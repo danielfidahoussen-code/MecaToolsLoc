@@ -17,6 +17,7 @@ import MentionsLegales from './pages/MentionsLegales';
 import CGV from './pages/CGV';
 import Confidentialite from './pages/Confidentialite';
 import LogoPreview from './pages/LogoPreview';
+import CheckoutSuccess from './pages/CheckoutSuccess';
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
                   <Route path="/catalogue" element={<Catalogue/>}/>
                   <Route path="/produit/:id" element={<ProductDetail/>}/>
                   <Route path="/checkout" element={<Checkout/>}/>
+                  <Route path="/checkout/success" element={<CheckoutSuccess/>}/>
                   <Route path="/a-propos" element={<About/>}/>
                   <Route path="/faq" element={<FAQ/>}/>
                   <Route path="/contact" element={<Contact/>}/>

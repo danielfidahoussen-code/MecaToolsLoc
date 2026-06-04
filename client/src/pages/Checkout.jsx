@@ -184,10 +184,9 @@ export default function Checkout() {
   };
 
   const handlePay = async () => {
-    if (!form.cardNumber || !form.cardExpiry || !form.cardCVC) { toast.error('Remplissez les informations de carte'); return; }
     setPaying(true);
     try {
-      await axios.post('/api/orders', {
+      const { data } = await axios.post('/api/stripe/create-checkout-session', {
         customer_name: form.name,
         customer_email: form.email,
         customer_phone: form.phone,
@@ -197,12 +196,10 @@ export default function Checkout() {
         discount,
         items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price, type: i.type, rentDates: i.rentDates || null })),
         total_price: finalTotal,
-        type: 'mixed',
       });
-      clearCart();
-      setSuccess(true);
-    } catch { toast.error('Erreur lors du paiement. Réessayez.'); }
-    finally { setPaying(false); }
+      // Redirige vers la page de paiement Stripe
+      window.location.href = data.url;
+    } catch { toast.error('Erreur lors de la création du paiement. Réessayez.'); setPaying(false); }
   };
 
   if (items.length === 0 && !success) return (
@@ -430,42 +427,49 @@ export default function Checkout() {
 
               {step === 2 && (
                 <div className="card" style={{ padding: 28 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                     <h3 style={{ fontWeight: 800, color: 'var(--primary)' }}>Paiement sécurisé</h3>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--success)' }}>
-                      <Lock size={14}/> SSL sécurisé
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--success)', fontWeight: 600 }}>
+                      <Lock size={14}/> SSL Stripe
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-                    {['VISA', 'MC', 'CB'].map(c => (
-                      <div key={c} style={{ padding: '6px 14px', border: '1.5px solid var(--gray-200)', borderRadius: 8, fontSize: 12, fontWeight: 800, color: 'var(--gray-600)' }}>{c}</div>
-                    ))}
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Numéro de carte</label>
-                    <input className="form-control" value={form.cardNumber}
-                      onChange={e => set('cardNumber', e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim().slice(0, 19))}
-                      placeholder="1234 5678 9012 3456" maxLength={19}/>
-                  </div>
-                  <div className="grid-2">
-                    <div className="form-group">
-                      <label className="form-label">Date d'expiration</label>
-                      <input className="form-control" value={form.cardExpiry}
-                        onChange={e => { let v = e.target.value.replace(/\D/g, ''); if (v.length >= 2) v = v.slice(0, 2) + '/' + v.slice(2); set('cardExpiry', v.slice(0, 5)); }}
-                        placeholder="MM/AA" maxLength={5}/>
+
+                  {/* Récap commande */}
+                  <div style={{ background: 'var(--light)', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+                    <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)', marginBottom: 10 }}>Résumé de votre commande</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
+                      <span style={{ color: 'var(--gray-600)' }}>Client</span>
+                      <span style={{ fontWeight: 600 }}>{form.name}</span>
                     </div>
-                    <div className="form-group">
-                      <label className="form-label">CVC</label>
-                      <input className="form-control" value={form.cardCVC} onChange={e => set('cardCVC', e.target.value.replace(/\D/g, '').slice(0, 3))} placeholder="123" maxLength={3}/>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
+                      <span style={{ color: 'var(--gray-600)' }}>Email</span>
+                      <span style={{ fontWeight: 600 }}>{form.email}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
+                      <span style={{ color: 'var(--gray-600)' }}>Livraison</span>
+                      <span style={{ fontWeight: 600 }}>{isPickup ? 'Retrait sur place' : `Livraison — ${deliveryFee.toFixed(2)} €`}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 800, color: 'var(--primary)', borderTop: '1.5px solid var(--gray-200)', paddingTop: 10, marginTop: 8 }}>
+                      <span>Total à payer</span>
+                      <span>{finalTotal.toFixed(2)} €</span>
                     </div>
                   </div>
-                  <div style={{ background: 'var(--light)', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: 'var(--gray-600)', display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <Lock size={14}/> Vos données sont chiffrées et sécurisées. Nous ne stockons pas vos informations bancaires.
+
+                  {/* Info Stripe */}
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: 'rgba(99,102,241,.06)', border: '1px solid rgba(99,102,241,.2)', borderRadius: 10, padding: '12px 14px', marginBottom: 20 }}>
+                    <Lock size={16} color="#6366f1" style={{ flexShrink: 0, marginTop: 1 }}/>
+                    <p style={{ fontSize: 13, color: 'var(--gray-600)', lineHeight: 1.5 }}>
+                      Vous allez être redirigé vers la page de paiement sécurisée <strong>Stripe</strong>. Carte bancaire, Apple Pay et Google Pay acceptés. Vos données ne transitent jamais par nos serveurs.
+                    </p>
                   </div>
-                  <button className="btn btn-primary btn-lg" onClick={handlePay} disabled={paying} style={{ width: '100%', justifyContent: 'center' }}>
-                    <CreditCard size={18}/> {paying ? 'Traitement...' : `Payer ${finalTotal.toFixed(2)} €`}
+
+                  <button className="btn btn-primary btn-lg" onClick={handlePay} disabled={paying}
+                    style={{ width: '100%', justifyContent: 'center', fontSize: 16 }}>
+                    <CreditCard size={18}/>
+                    {paying ? 'Redirection vers Stripe...' : `Payer ${finalTotal.toFixed(2)} € →`}
                   </button>
-                  <button className="btn" style={{ width: '100%', justifyContent: 'center', marginTop: 10, background: 'var(--gray-100)', color: 'var(--gray-700)' }} onClick={() => setStep(1)}>
+                  <button className="btn" onClick={() => setStep(1)}
+                    style={{ width: '100%', justifyContent: 'center', marginTop: 10, background: 'var(--gray-100)', color: 'var(--gray-700)' }}>
                     <ArrowLeft size={14}/> Retour
                   </button>
                 </div>
