@@ -4,7 +4,7 @@ const { orders, products, reservations } = require('../database');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Crée une session Stripe Checkout et retourne l'URL de paiement
+// Crée une session Stripe Checkout
 router.post('/create-checkout-session', async (req, res) => {
   try {
     const {
@@ -12,15 +12,17 @@ router.post('/create-checkout-session', async (req, res) => {
       delivery_mode, delivery_fee, discount, items, total_price,
     } = req.body;
 
-    const origin = req.headers.origin || `https://${req.headers.host}`;
+    const host = req.headers.host || '';
+    const proto = host.includes('localhost') ? 'http' : 'https';
+    const origin = req.headers.origin || `${proto}://${host}`;
 
     const lineItems = items.map(item => ({
       price_data: {
         currency: 'eur',
         product_data: {
           name: item.type === 'rent'
-            ? `📅 Location — ${item.name} (${item.rentDates?.startDate} → ${item.rentDates?.endDate})`
-            : `🛒 Achat — ${item.name}`,
+            ? `Location - ${item.name.slice(0, 80)} (${item.rentDates?.startDate} -> ${item.rentDates?.endDate})`
+            : `Achat - ${item.name.slice(0, 100)}`,
         },
         unit_amount: Math.round(item.price * 100),
       },
@@ -31,12 +33,20 @@ router.post('/create-checkout-session', async (req, res) => {
       lineItems.push({
         price_data: {
           currency: 'eur',
-          product_data: { name: `🚚 Frais de livraison` },
+          product_data: { name: 'Frais de livraison' },
           unit_amount: Math.round(delivery_fee * 100),
         },
         quantity: 1,
       });
     }
+
+    // Stripe metadata : max 500 chars par valeur, on compresse les items
+    const itemsCompact = items.map(i => ({
+      id: i.id, qty: i.quantity, price: i.price,
+      type: i.type,
+      ...(i.rentDates ? { start: i.rentDates.startDate, end: i.rentDates.endDate } : {}),
+    }));
+    const itemsMeta = JSON.stringify(itemsCompact);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -46,17 +56,17 @@ router.post('/create-checkout-session', async (req, res) => {
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout`,
       metadata: {
-        customer_name,
-        customer_phone: customer_phone || '',
-        customer_address: customer_address || '',
-        delivery_mode: delivery_mode || '',
+        customer_name: (customer_name || '').slice(0, 200),
+        customer_phone: (customer_phone || '').slice(0, 50),
+        customer_address: (customer_address || '').slice(0, 200),
+        delivery_mode: (delivery_mode || '').slice(0, 100),
         delivery_fee: String(delivery_fee || 0),
         discount: String(discount || 0),
         total_price: String(total_price),
-        items: JSON.stringify(items),
+        items: itemsMeta.slice(0, 490),
       },
       payment_intent_data: {
-        description: `LVTools — commande de ${customer_name}`,
+        description: `LVTools - commande de ${(customer_name || '').slice(0, 100)}`,
       },
     });
 
@@ -67,14 +77,21 @@ router.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-// Webhook Stripe — confirmation paiement (body raw configuré dans index.js)
+// Webhook Stripe — body raw configuré dans index.js
 router.post('/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'];
-  let event;
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
 
+  if (!secret) {
+    console.warn('STRIPE_WEBHOOK_SECRET non configuré — webhook ignoré');
+    return res.json({ received: true });
+  }
+
+  let event;
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET || '');
+    event = stripe.webhooks.constructEvent(req.body, sig, secret);
   } catch (err) {
+    console.error('Webhook signature error:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
@@ -82,37 +99,49 @@ router.post('/webhook', async (req, res) => {
     const session = event.data.object;
     if (session.payment_status === 'paid') {
       const existing = orders.all().find(o => o.stripe_session_id === session.id);
-      if (!existing) await createOrderFromSession(session);
+      if (!existing) {
+        await createOrderFromSession(session);
+        console.log(`Commande créée via webhook : session ${session.id}`);
+      }
     }
   }
 
   res.json({ received: true });
 });
 
-// Vérifie une session après retour sur /checkout/success (fallback sans webhook)
+// Vérifie une session après retour sur /checkout/success
 router.get('/session/:sessionId', async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
     if (session.payment_status === 'paid') {
       const existing = orders.all().find(o => o.stripe_session_id === session.id);
-      if (!existing) await createOrderFromSession(session);
-      res.json({ paid: true, customer_email: session.customer_email, customer_name: session.metadata?.customer_name });
+      if (!existing) {
+        await createOrderFromSession(session);
+        console.log(`Commande créée via session check : ${session.id}`);
+      }
+      res.json({
+        paid: true,
+        customer_email: session.customer_email,
+        customer_name: session.metadata?.customer_name,
+      });
     } else {
       res.json({ paid: false });
     }
   } catch (err) {
+    console.error('Session check error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Retourne la clé publique Stripe pour le front
+// Clé publique pour le front (optionnel)
 router.get('/config', (req, res) => {
-  res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
+  res.json({ publishableKey: process.env.STRIPE_PUBLIC_KEY || process.env.STRIPE_PUBLISHABLE_KEY || '' });
 });
 
 async function createOrderFromSession(session) {
   const meta = session.metadata || {};
-  const items = JSON.parse(meta.items || '[]');
+  let items = [];
+  try { items = JSON.parse(meta.items || '[]'); } catch {}
 
   orders.insert({
     customer_name: meta.customer_name || '',
@@ -129,17 +158,17 @@ async function createOrderFromSession(session) {
   items.forEach(item => {
     if (item.type === 'sale') {
       const p = products.getById(item.id);
-      if (p) products.update(item.id, { stock: Math.max(0, p.stock - item.quantity) });
-    } else if (item.type === 'rent' && item.rentDates) {
+      if (p) products.update(item.id, { stock: Math.max(0, p.stock - (item.qty || item.quantity || 1)) });
+    } else if (item.type === 'rent' && (item.start || item.rentDates?.startDate)) {
       reservations.insert({
         product_id: item.id,
         customer_name: meta.customer_name || '',
         customer_email: session.customer_email || '',
         customer_phone: meta.customer_phone || '',
-        start_date: item.rentDates.startDate,
-        end_date: item.rentDates.endDate,
-        quantity: item.quantity,
-        total_price: item.price * item.quantity,
+        start_date: item.start || item.rentDates?.startDate,
+        end_date: item.end || item.rentDates?.endDate,
+        quantity: item.qty || item.quantity || 1,
+        total_price: item.price * (item.qty || item.quantity || 1),
         status: 'confirmed',
       });
     }
