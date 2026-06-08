@@ -159,7 +159,7 @@ export default function Navbar() {
 
             {/* Contact rapide dans le menu */}
             <div style={{ padding: '14px 20px', display: 'flex', gap: 12 }}>
-              <a href="tel:+262693839654" className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>📞 Appeler</a>
+              <a href="tel:+262693839654" className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>Appeler</a>
               <Link to="/contact" className="btn btn-outline btn-sm" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setMenuOpen(false)}>Nous écrire</Link>
             </div>
           </div>

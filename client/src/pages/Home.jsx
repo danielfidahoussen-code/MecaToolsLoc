@@ -27,8 +27,8 @@ export default function Home() {
 
   const types = [
     { id: '', label: 'Tout' },
-    { id: 'rent', label: '📅 Location' },
-    { id: 'sale', label: '🛒 Achat' },
+    { id: 'rent', label: 'Location' },
+    { id: 'sale', label: 'Achat' },
   ];
 
   return (
@@ -51,7 +51,7 @@ export default function Home() {
             background: activeCategory === c.slug ? 'var(--accent)' : 'var(--gray-100)',
             color: activeCategory === c.slug ? 'white' : 'var(--gray-700)',
             border: 'none',
-          }}>{c.icon} {c.name}</button>
+          }}>{c.name}</button>
         ))}
       </div>
 

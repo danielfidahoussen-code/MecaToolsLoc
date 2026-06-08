@@ -29,8 +29,8 @@ export default function ProductCard({ product }) {
             onMouseOver={e => e.currentTarget.style.transform = 'scale(1.06)'}
             onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}/>
           <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 5 }}>
-            {product.available_for_rent && <span className="badge badge-rent">📅 Location</span>}
-            {product.available_for_sale && <span className="badge badge-sale">🛒 Achat</span>}
+            {product.available_for_rent && <span className="badge badge-rent">Location</span>}
+            {product.available_for_sale && <span className="badge badge-sale">Achat</span>}
           </div>
           <div style={{ position: 'absolute', top: 10, right: 10 }}>
             <span style={{ background: 'white', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, color: stockColor, boxShadow: 'var(--shadow-sm)' }}>
@@ -42,7 +42,7 @@ export default function ProductCard({ product }) {
         {/* Content */}
         <div style={{ padding: '16px 18px' }}>
           <p style={{ fontSize: 11, color: 'var(--gray-400)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 5 }}>
-            {product.category_icon} {product.category_name}
+            {product.category_name}
           </p>
           <h3 style={{ fontWeight: 700, fontSize: 15, color: 'var(--primary)', marginBottom: 10, lineHeight: 1.3 }}>
             {product.name}

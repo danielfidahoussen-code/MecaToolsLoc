@@ -40,7 +40,7 @@ export default function Catalogue() {
     axios.get('/api/products/categories').then(r => setCategories(r.data));
   }, []);
 
-  const typeLabels = { '': 'Tout', 'rent': '📅 Location', 'sale': '🛒 Achat' };
+  const typeLabels = { '': 'Tout', 'rent': 'Location', 'sale': 'Achat' };
 
   return (
     <div>
@@ -74,7 +74,7 @@ export default function Catalogue() {
             {/* Category */}
             <select className="form-control" value={category} onChange={e => setParam('category', e.target.value)} style={{ flex: '0 0 200px' }}>
               <option value="">Toutes catégories</option>
-              {categories.map(c => <option key={c.id} value={c.slug}>{c.icon} {c.name}</option>)}
+              {categories.map(c => <option key={c.id} value={c.slug}>{c.name}</option>)}
             </select>
 
             {/* Clear */}

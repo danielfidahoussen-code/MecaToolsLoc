@@ -143,7 +143,7 @@ export default function ProductDetail() {
             {/* Right: Info + action */}
             <div>
               <p style={{ fontSize: 12, color: 'var(--gray-400)', fontWeight: 600, textTransform: 'uppercase', marginBottom: 8 }}>
-                {product.category_icon} {product.category_name}
+                {product.category_name}
               </p>
               <h1 style={{ fontSize: 'clamp(22px,3vw,30px)', fontWeight: 800, color: 'var(--primary)', marginBottom: 12 }}>{product.name}</h1>
 
@@ -152,20 +152,20 @@ export default function ProductDetail() {
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 700, color: stockColor }}>
                   ● {product.stock > 0 ? `${product.stock} en stock` : 'Rupture de stock'}
                 </span>
-                {product.available_for_rent && <span className="badge badge-rent">📅 Location</span>}
-                {product.available_for_sale && <span className="badge badge-sale">🛒 Achat</span>}
+                {product.available_for_rent && <span className="badge badge-rent">Location</span>}
+                {product.available_for_sale && <span className="badge badge-sale">Achat</span>}
               </div>
 
               {/* Tabs */}
               <div style={{ display: 'flex', gap: 0, marginBottom: 24, borderRadius: 12, background: 'var(--gray-100)', padding: 4 }}>
                 {product.available_for_sale && (
                   <button style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: 14, transition: 'var(--transition)', background: activeTab === 'buy' ? 'white' : 'transparent', color: activeTab === 'buy' ? 'var(--primary)' : 'var(--gray-500)', boxShadow: activeTab === 'buy' ? 'var(--shadow-sm)' : 'none' }} onClick={() => setActiveTab('buy')}>
-                    🛒 Acheter
+                    Acheter
                   </button>
                 )}
                 {product.available_for_rent && (
                   <button style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: 14, transition: 'var(--transition)', background: activeTab === 'rent' ? 'white' : 'transparent', color: activeTab === 'rent' ? 'var(--primary)' : 'var(--gray-500)', boxShadow: activeTab === 'rent' ? 'var(--shadow-sm)' : 'none' }} onClick={() => setActiveTab('rent')}>
-                    📅 Louer
+                    Louer
                   </button>
                 )}
               </div>
@@ -208,7 +208,7 @@ export default function ProductDetail() {
                   </div>
                   {product.caution > 0 && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(59,130,246,.07)', border: '1.5px solid rgba(59,130,246,.2)', borderRadius: 10, padding: '10px 14px', marginBottom: 20 }}>
-                      <span style={{ fontSize: 20 }}>🔒</span>
+                      <span style={{ fontSize: 16, fontWeight: 800, color: '#1e40af' }}>C</span>
                       <div>
                         <p style={{ fontWeight: 700, fontSize: 13, color: '#1e40af' }}>Caution : {product.caution.toFixed(2)} €</p>
                         <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Collectée à la remise du matériel — restituée en fin de location</p>
@@ -218,7 +218,7 @@ export default function ProductDetail() {
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">📅 Date de début</label>
+                      <label className="form-label">Date de début</label>
                       <DatePicker selected={startDate}
                         onChange={d => { setStartDate(d); if (endDate && d > endDate) setEndDate(null); }}
                         minDate={new Date()}
@@ -227,7 +227,7 @@ export default function ProductDetail() {
                         placeholderText="Choisir..." dateFormat="dd/MM/yyyy" className="form-control"/>
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">📅 Date de fin</label>
+                      <label className="form-label">Date de fin</label>
                       <DatePicker selected={endDate}
                         onChange={setEndDate}
                         minDate={startDate || new Date()}
