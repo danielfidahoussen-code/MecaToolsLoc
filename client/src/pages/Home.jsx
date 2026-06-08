@@ -35,19 +35,19 @@ export default function Home() {
     <div className="container" style={{ paddingTop: 24, paddingBottom: 48 }}>
 
       {/* Filtres */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 20, paddingBottom: 4 }}>
         {types.map(t => (
           <button key={t.id} onClick={() => setActiveType(t.id)} style={{
-            padding: '7px 16px', borderRadius: 20, fontWeight: 700, fontSize: 13, cursor: 'pointer',
+            padding: '7px 16px', borderRadius: 20, fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
             background: activeType === t.id ? 'var(--primary)' : 'var(--gray-100)',
             color: activeType === t.id ? 'white' : 'var(--gray-700)',
             border: 'none',
           }}>{t.label}</button>
         ))}
-        <div style={{ width: 1, background: 'var(--gray-200)', margin: '0 4px' }}/>
+        <div style={{ width: 1, background: 'var(--gray-200)', margin: '0 4px', flexShrink: 0 }}/>
         {categories.map(c => (
           <button key={c.id} onClick={() => setActiveCategory(activeCategory === c.slug ? '' : c.slug)} style={{
-            padding: '7px 16px', borderRadius: 20, fontWeight: 700, fontSize: 13, cursor: 'pointer',
+            padding: '7px 16px', borderRadius: 20, fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
             background: activeCategory === c.slug ? 'var(--accent)' : 'var(--gray-100)',
             color: activeCategory === c.slug ? 'white' : 'var(--gray-700)',
             border: 'none',
