@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+import { PriceProvider } from './context/PriceContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
@@ -22,6 +23,7 @@ import CheckoutSuccess from './pages/CheckoutSuccess';
 export default function App() {
   return (
     <AuthProvider>
+      <PriceProvider>
       <CartProvider>
         <BrowserRouter>
           <ScrollToTop/>
@@ -51,6 +53,7 @@ export default function App() {
           </Routes>
         </BrowserRouter>
       </CartProvider>
+      </PriceProvider>
     </AuthProvider>
   );
 }

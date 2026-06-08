@@ -5,12 +5,14 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { ShoppingCart, Calendar, ChevronLeft, Package, Info, CheckCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { usePrice } from '../context/PriceContext';
 import toast from 'react-hot-toast';
 import { addDays, differenceInDays } from 'date-fns';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { addItem } = useCart();
+  const { fmt, display, isPro } = usePrice();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('buy');
@@ -70,9 +72,10 @@ export default function ProductDetail() {
   const rangeAvailable = isRangeAvailable();
 
   const days = startDate && endDate ? Math.max(1, differenceInDays(endDate, startDate)) : 0;
-  const rentPrice = days >= 7
-    ? (Math.ceil(days / 7) * (product.price_week || product.price_day * 5)).toFixed(2)
-    : (days * (product.price_day || 0)).toFixed(2);
+  const rentPriceTTC = days >= 7
+    ? Math.ceil(days / 7) * (product.price_week || product.price_day * 5)
+    : days * (product.price_day || 0);
+  const rentPrice = rentPriceTTC.toFixed(2);
 
   const handleAddToCart = () => {
     addItem(product, 'sale', qty);
@@ -171,7 +174,7 @@ export default function ProductDetail() {
               {activeTab === 'buy' && product.available_for_sale && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-                    <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--primary)' }}>{product.price_sale?.toFixed(2)} €</span>
+                    <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--primary)' }}>{fmt(product.price_sale)}</span>
                     <span style={{ fontSize: 14, color: 'var(--gray-500)' }}>TTC</span>
                   </div>
                   <div className="form-group">
@@ -183,7 +186,7 @@ export default function ProductDetail() {
                     </div>
                   </div>
                   <button className="btn btn-primary btn-lg" onClick={handleAddToCart} disabled={product.stock === 0} style={{ width: '100%', justifyContent: 'center' }}>
-                    <ShoppingCart size={18}/> Ajouter au panier — {(product.price_sale * qty).toFixed(2)} €
+                    <ShoppingCart size={18}/> Ajouter au panier — {fmt(product.price_sale * qty)}
                   </button>
                 </div>
               )}
@@ -193,13 +196,13 @@ export default function ProductDetail() {
                 <div>
                   <div style={{ display: 'flex', gap: 12, marginBottom: product.caution ? 12 : 20, flexWrap: 'wrap' }}>
                     <div style={{ background: 'rgba(245,197,24,.1)', padding: '10px 16px', borderRadius: 10 }}>
-                      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-600)', textTransform: 'uppercase' }}>Par jour</p>
-                      <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--primary)' }}>{product.price_day?.toFixed(2)} €</p>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-600)', textTransform: 'uppercase' }}>Par jour {isPro ? 'HT' : 'TTC'}</p>
+                      <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--primary)' }}>{fmt(product.price_day)}</p>
                     </div>
                     {product.price_week && (
                       <div style={{ background: 'rgba(245,197,24,.15)', padding: '10px 16px', borderRadius: 10 }}>
-                        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-600)', textTransform: 'uppercase' }}>Par semaine</p>
-                        <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--primary)' }}>{product.price_week?.toFixed(2)} €</p>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-600)', textTransform: 'uppercase' }}>Par semaine {isPro ? 'HT' : 'TTC'}</p>
+                        <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--primary)' }}>{fmt(product.price_week)}</p>
                       </div>
                     )}
                   </div>
@@ -238,7 +241,7 @@ export default function ProductDetail() {
                     <div style={{ background: 'rgba(245,197,24,.1)', border: '1.5px solid rgba(245,197,24,.3)', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ fontWeight: 600, color: 'var(--gray-700)' }}>{days} jour{days > 1 ? 's' : ''}</span>
-                        <span style={{ fontWeight: 800, fontSize: 20, color: 'var(--primary)' }}>{rentPrice} €</span>
+                        <span style={{ fontWeight: 800, fontSize: 20, color: 'var(--primary)' }}>{fmt(rentPriceTTC)}</span>
                       </div>
                     </div>
                   )}
@@ -281,7 +284,7 @@ export default function ProductDetail() {
                     </button>
                   ) : (
                     <button className="btn btn-primary btn-lg" onClick={handleReserve} disabled={reserving || !startDate || !endDate} style={{ width: '100%', justifyContent: 'center' }}>
-                      <Calendar size={18}/> {reserving ? 'En cours...' : `Réserver — ${rentPrice || '?'} €`}
+                      <Calendar size={18}/> {reserving ? 'En cours...' : `Réserver — ${rentPriceTTC ? fmt(rentPriceTTC) : '?'}`}
                     </button>
                   )}
                 </div>

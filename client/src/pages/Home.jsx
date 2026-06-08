@@ -4,6 +4,7 @@ import axios from 'axios';
 import { ChevronRight, ArrowRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import HeroLogo from '../components/HeroLogo';
+import { usePrice } from '../context/PriceContext';
 
 const BASE = 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets';
 const CAT_ICONS = {
@@ -19,6 +20,7 @@ const CAT_ICONS = {
 const CARD_W = 234;
 
 function ProductCarousel({ products }) {
+  const { fmt } = usePrice();
   const [paused, setPaused] = useState(false);
   const offsetRef = useRef(0);
   const animRef = useRef(null);
@@ -81,8 +83,8 @@ function ProductCarousel({ products }) {
               <div style={{ padding: '12px 14px' }}>
                 <p style={{ color: 'white', fontWeight: 700, fontSize: 13, lineHeight: 1.3, marginBottom: 6 }}>{p.name}</p>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {p.price_day && <span style={{ color: '#ff4444', fontWeight: 800, fontSize: 13 }}>{p.price_day} €/j</span>}
-                  {p.price_sale && <span style={{ color: 'rgba(255,255,255,.5)', fontWeight: 600, fontSize: 12 }}>{p.price_sale} € achat</span>}
+                  {p.price_day && <span style={{ color: '#ff4444', fontWeight: 800, fontSize: 13 }}>{fmt(p.price_day)}/j</span>}
+                  {p.price_sale && <span style={{ color: 'rgba(255,255,255,.5)', fontWeight: 600, fontSize: 12 }}>{fmt(p.price_sale)} achat</span>}
                 </div>
               </div>
             </div>

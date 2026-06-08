@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Calendar, Eye } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { usePrice } from '../context/PriceContext';
 import toast from 'react-hot-toast';
 
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
+  const { fmt, isPro } = usePrice();
 
   const handleBuy = (e) => {
     e.preventDefault();
@@ -50,14 +52,14 @@ export default function ProductCard({ product }) {
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
             {product.available_for_sale && product.price_sale && (
               <div style={{ background: 'rgba(16,185,129,.08)', padding: '5px 10px', borderRadius: 8 }}>
-                <p style={{ fontSize: 10, color: 'var(--gray-600)', fontWeight: 600 }}>ACHAT</p>
-                <p style={{ fontWeight: 800, fontSize: 17, color: 'var(--primary)' }}>{product.price_sale.toFixed(2)} €</p>
+                <p style={{ fontSize: 10, color: 'var(--gray-600)', fontWeight: 600 }}>ACHAT {isPro ? 'HT' : 'TTC'}</p>
+                <p style={{ fontWeight: 800, fontSize: 17, color: 'var(--primary)' }}>{fmt(product.price_sale)}</p>
               </div>
             )}
             {product.available_for_rent && product.price_day && (
               <div style={{ background: 'rgba(245,197,24,.1)', padding: '5px 10px', borderRadius: 8 }}>
-                <p style={{ fontSize: 10, color: 'var(--gray-600)', fontWeight: 600 }}>LOCATION</p>
-                <p style={{ fontWeight: 800, fontSize: 17, color: 'var(--primary)' }}>{product.price_day.toFixed(2)} €<span style={{ fontSize: 11, fontWeight: 500 }}>/j</span></p>
+                <p style={{ fontSize: 10, color: 'var(--gray-600)', fontWeight: 600 }}>LOCATION {isPro ? 'HT' : 'TTC'}</p>
+                <p style={{ fontWeight: 800, fontSize: 17, color: 'var(--primary)' }}>{fmt(product.price_day)}<span style={{ fontSize: 11, fontWeight: 500 }}>/j</span></p>
               </div>
             )}
           </div>
