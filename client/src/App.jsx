@@ -19,6 +19,7 @@ import CGV from './pages/CGV';
 import Confidentialite from './pages/Confidentialite';
 import LogoPreview from './pages/LogoPreview';
 import CheckoutSuccess from './pages/CheckoutSuccess';
+import AutresServices from './pages/AutresServices';
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
                   <Route path="/cgv" element={<CGV/>}/>
                   <Route path="/confidentialite" element={<Confidentialite/>}/>
                   <Route path="/logo-preview" element={<LogoPreview/>}/>
+                  <Route path="/autres-services" element={<AutresServices/>}/>
                 </Routes>
                 <Footer/>
               </>
