@@ -8,6 +8,54 @@ import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 import { addDays, differenceInDays } from 'date-fns';
 
+function ProductGallery({ product }) {
+  const allImages = [product.image, ...(product.images || [])].filter(Boolean);
+  const [active, setActive] = useState(0);
+
+  return (
+    <div>
+      {/* Image principale avec zoom */}
+      <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid var(--gray-200)', marginBottom: 10, cursor: 'zoom-in', background: 'var(--light)' }}>
+        <img
+          key={active}
+          src={allImages[active]}
+          alt={product.name}
+          style={{ width: '100%', height: 380, objectFit: 'contain', transition: 'transform 0.3s ease' }}
+          onMouseMove={e => {
+            if (window.matchMedia('(hover: none)').matches) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
+            e.currentTarget.style.transform = 'scale(2.5)';
+          }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+        />
+      </div>
+      {/* Miniatures */}
+      {allImages.length > 1 && (
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          {allImages.map((url, i) => (
+            <button key={i} onClick={() => setActive(i)} style={{
+              width: 72, height: 60, borderRadius: 10, overflow: 'hidden', padding: 0,
+              border: `2px solid ${active === i ? 'var(--accent)' : 'var(--gray-200)'}`,
+              cursor: 'pointer', background: 'var(--light)', flexShrink: 0,
+              transition: 'border-color .2s',
+            }}>
+              <img src={url} alt={`vue ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
+            </button>
+          ))}
+        </div>
+      )}
+      {/* Description */}
+      <div style={{ background: 'var(--light)', borderRadius: 14, padding: '16px 20px' }}>
+        <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)', marginBottom: 10 }}>Détails</p>
+        <p style={{ fontSize: 14, color: 'var(--gray-600)', lineHeight: 1.8, whiteSpace: 'pre-line' }}>{product.description}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function ProductDetail() {
   const { id } = useParams();
   const { addItem } = useCart();
@@ -115,29 +163,8 @@ export default function ProductDetail() {
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'start' }}>
 
-            {/* Left: Image */}
-            <div>
-              <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid var(--gray-200)', marginBottom: 16, cursor: 'zoom-in' }}>
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  style={{ width: '100%', height: 380, objectFit: 'cover', transition: 'transform 0.4s ease' }}
-                  onMouseMove={e => {
-                    if (window.matchMedia('(hover: none)').matches) return;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = ((e.clientX - rect.left) / rect.width) * 100;
-                    const y = ((e.clientY - rect.top) / rect.height) * 100;
-                    e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
-                    e.currentTarget.style.transform = 'scale(2)';
-                  }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-                />
-              </div>
-              <div style={{ background: 'var(--light)', borderRadius: 14, padding: '16px 20px' }}>
-                <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--primary)', marginBottom: 10 }}>📋 Détails</p>
-                <p style={{ fontSize: 14, color: 'var(--gray-600)', lineHeight: 1.8 }}>{product.description}</p>
-              </div>
-            </div>
+            {/* Left: Galerie + description */}
+            <ProductGallery product={product}/>
 
             {/* Right: Info + action */}
             <div>

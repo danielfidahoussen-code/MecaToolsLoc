@@ -66,7 +66,7 @@ function LoginForm({ onLogin }) {
 function ProductForm({ product, categories, token, onSave, onClose }) {
   const [form, setForm] = useState(product || {
     name: '', description: '', category_id: '', price_sale: '', price_day: '', price_week: '', caution: '',
-    stock: 0, available_for_sale: true, available_for_rent: true, image: '', has_qr_notice: false
+    stock: 0, available_for_sale: true, available_for_rent: true, image: '', images: [], has_qr_notice: false
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -81,7 +81,12 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
       const fd = new FormData();
       fd.append('image', file);
       const { data } = await axios.post('/api/upload', fd);
-      set('image', data.url);
+      // Première image = image principale, les suivantes dans images[]
+      if (!form.image) {
+        set('image', data.url);
+      } else {
+        setForm(f => ({ ...f, images: [...(f.images || []), data.url] }));
+      }
       toast.success('Image importée !');
     } catch { toast.error("Erreur lors de l'import"); }
     finally { setUploading(false); }
@@ -147,16 +152,32 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
             <label className="form-label">🔒 Caution location (€) <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--gray-500)' }}>— collectée à la remise, non débitée en ligne</span></label>
             <input className="form-control" type="number" step="0.01" value={form.caution} onChange={e => set('caution', parseFloat(e.target.value) || '')} placeholder="Ex: 150.00 (laisser vide si pas de caution)"/>
           </div>
-          <div className="form-group">
-            <label className="form-label">Image</label>
-            {form.image && <img src={form.image} alt="aperçu" style={{ width: '100%', height: 90, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}/>}
-            <label style={{ display: 'block', cursor: uploading ? 'wait' : 'pointer', marginBottom: 6 }}>
-              <div className="btn btn-outline btn-sm" style={{ width: '100%', justifyContent: 'center', pointerEvents: 'none' }}>
-                {uploading ? '⏳ Import...' : '📁 Importer une image'}
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <label className="form-label">Images (max 3) <span style={{ fontWeight: 400, color: 'var(--gray-500)', fontSize: 12 }}>— 1ère = principale</span></label>
+            {/* Aperçu galerie */}
+            {(form.image || (form.images || []).length > 0) && (
+              <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                {form.image && (
+                  <div style={{ position: 'relative' }}>
+                    <img src={form.image} alt="principale" style={{ width: 90, height: 70, objectFit: 'cover', borderRadius: 8, border: '2px solid var(--accent)' }}/>
+                    <button onClick={() => set('image', (form.images || [])[0] ? form.images[0] : '')} style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: 'var(--danger)', color: 'white', fontSize: 11, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                  </div>
+                )}
+                {(form.images || []).map((url, i) => (
+                  <div key={i} style={{ position: 'relative' }}>
+                    <img src={url} alt={`img ${i+1}`} style={{ width: 90, height: 70, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--gray-200)' }}/>
+                    <button onClick={() => setForm(f => ({ ...f, images: f.images.filter((_, j) => j !== i) }))} style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: 'var(--danger)', color: 'white', fontSize: 11, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                  </div>
+                ))}
               </div>
-              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} disabled={uploading}/>
+            )}
+            <label style={{ display: 'block', cursor: uploading ? 'wait' : 'pointer', marginBottom: 8 }}>
+              <div className="btn btn-outline btn-sm" style={{ justifyContent: 'center', pointerEvents: 'none' }}>
+                {uploading ? 'Import en cours...' : `Importer une image${[form.image, ...(form.images||[])].filter(Boolean).length > 0 ? ' supplémentaire' : ''}`}
+              </div>
+              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} disabled={uploading || [form.image, ...(form.images||[])].filter(Boolean).length >= 3}/>
             </label>
-            <input className="form-control" value={form.image} onChange={e => set('image', e.target.value)} placeholder="Ou coller une URL..."/>
+            <input className="form-control" value={form.image} onChange={e => set('image', e.target.value)} placeholder="Ou coller l'URL de l'image principale..."/>
           </div>
           <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ display: 'flex', gap: 20 }}>
