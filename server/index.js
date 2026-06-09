@@ -36,6 +36,7 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/faqs', require('./routes/faqs'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/stripe', require('./routes/stripe'));
+app.use('/api/car-reservations', require('./routes/car-reservations'));
 
 // Serve React build in production
 const distPath = path.join(__dirname, '../client/dist');

@@ -20,6 +20,7 @@ import Confidentialite from './pages/Confidentialite';
 import LogoPreview from './pages/LogoPreview';
 import CheckoutSuccess from './pages/CheckoutSuccess';
 import AutresServices from './pages/AutresServices';
+import CarReservationSuccess from './pages/CarReservationSuccess';
 
 export default function App() {
   return (
@@ -48,6 +49,7 @@ export default function App() {
                   <Route path="/confidentialite" element={<Confidentialite/>}/>
                   <Route path="/logo-preview" element={<LogoPreview/>}/>
                   <Route path="/autres-services" element={<AutresServices/>}/>
+                  <Route path="/autres-services/success" element={<CarReservationSuccess/>}/>
                 </Routes>
                 <Footer/>
               </>

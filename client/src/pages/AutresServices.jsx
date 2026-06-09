@@ -4,6 +4,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { differenceInDays } from 'date-fns';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 const CARS = [
   {
@@ -109,10 +110,10 @@ const CARS = [
       ['Climatisation', 'Oui'],
       ['Kilométrage', 'Illimité'],
     ],
-    price_day: null,
-    price_5days: null,
-    price_2weeks: 35,
-    min_days: 14,
+    price_day: 39,
+    price_5days: 35,
+    price_2weeks: Math.round(35 * 0.85),
+    min_days: null,
     image: null,
   },
 ];
@@ -140,17 +141,35 @@ function CarCard({ car }) {
   const [endDate, setEndDate] = useState(null);
   const [form, setForm] = useState({ name: '', phone: '', email: '' });
   const [open, setOpen] = useState(false);
+  const [paying, setPaying] = useState(false);
 
   const days = startDate && endDate ? Math.max(1, differenceInDays(endDate, startDate)) : 0;
   const total = calcPrice(car, days);
   const rateInfo = getRateInfo(car, days);
 
-  const handleReserve = () => {
+  const handlePay = async () => {
     if (!startDate || !endDate) { toast.error('Choisissez vos dates'); return; }
     if (car.min_days && days < car.min_days) { toast.error(`Ce véhicule est disponible à partir de ${car.min_days} jours`); return; }
-    if (!form.name || !form.phone) { toast.error('Nom et téléphone requis'); return; }
-    const msg = `Bonjour PrestoLocation,\n\nJe souhaite réserver : ${car.name} (${car.category})\nDu : ${startDate.toLocaleDateString('fr-FR')}\nAu : ${endDate.toLocaleDateString('fr-FR')}\nDurée : ${days} jour${days > 1 ? 's' : ''}\nTotal estimé : ${total} €\n\nNom : ${form.name}\nTél : ${form.phone}${form.email ? `\nEmail : ${form.email}` : ''}`;
-    window.open(`https://wa.me/262693839654?text=${encodeURIComponent(msg)}`, '_blank');
+    if (!form.name || !form.email) { toast.error('Nom et email requis'); return; }
+    if (rateInfo?.invalid) { toast.error(rateInfo.label); return; }
+    setPaying(true);
+    try {
+      const { data } = await axios.post('/api/car-reservations/checkout', {
+        car_id: car.id,
+        car_name: car.name,
+        start_date: startDate.toLocaleDateString('fr-FR'),
+        end_date: endDate.toLocaleDateString('fr-FR'),
+        days,
+        total,
+        customer_name: form.name,
+        customer_email: form.email,
+        customer_phone: form.phone,
+      });
+      window.location.href = data.url;
+    } catch (err) {
+      toast.error(err?.response?.data?.error || 'Erreur paiement');
+      setPaying(false);
+    }
   };
 
   const startPrice = car.price_2weeks || car.price_5days || car.price_day;
@@ -261,10 +280,10 @@ function CarCard({ car }) {
               <input className="form-control" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="vous@exemple.fr"/>
             </div>
 
-            <button className="btn" style={{ width: '100%', justifyContent: 'center', background: '#25D366', color: 'white', fontWeight: 700 }} onClick={handleReserve}>
-              Envoyer sur WhatsApp
+            <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 15 }} onClick={handlePay} disabled={paying}>
+              {paying ? 'Redirection...' : `Payer ${total > 0 ? total + ' €' : ''} →`}
             </button>
-            <p style={{ fontSize: 11, color: 'var(--gray-400)', textAlign: 'center', marginTop: 6 }}>Confirmation sous 24h</p>
+            <p style={{ fontSize: 11, color: 'var(--gray-400)', textAlign: 'center', marginTop: 6 }}>Paiement sécurisé Stripe — confirmation immédiate</p>
           </div>
         )}
       </div>

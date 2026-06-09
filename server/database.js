@@ -57,4 +57,6 @@ if (faqs.count() === 0) {
   ].forEach(f => faqs.insert(f));
 }
 
-module.exports = { categories, products, reservations, orders, users, faqs };
+const car_reservations = db.table('car_reservations');
+
+module.exports = { categories, products, reservations, orders, users, faqs, car_reservations };

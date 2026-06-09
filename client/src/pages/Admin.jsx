@@ -248,6 +248,7 @@ export default function Admin() {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const [carReservations, setCarReservations] = useState([]);
   const [categories, setCategories] = useState([]);
   const [editProduct, setEditProduct] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -260,16 +261,18 @@ export default function Admin() {
     if (!loggedIn || !token) return;
     setLoading(true);
     try {
-      const [p, o, r, c] = await Promise.all([
+      const [p, o, r, c, cr] = await Promise.all([
         axios.get('/api/products?limit=100'),
         axios.get('/api/orders', API(token)),
         axios.get('/api/reservations', API(token)),
         axios.get('/api/products/categories'),
+        axios.get('/api/car-reservations', API(token)),
       ]);
       setProducts(p.data.products);
       setOrders(o.data);
       setReservations(r.data);
       setCategories(c.data);
+      setCarReservations(cr.data);
     } catch {}
     setLoading(false);
   };
@@ -291,11 +294,17 @@ export default function Admin() {
 
   if (!loggedIn) return <LoginForm onLogin={() => setLoggedIn(true)}/>;
 
+  const updateCarReservationStatus = async (id, status) => {
+    await axios.put(`/api/car-reservations/${id}`, { status }, API(token));
+    loadData();
+  };
+
   const tabs = [
-    { id: 'products',     label: 'Produits',       icon: <Package size={15}/> },
-    { id: 'orders',       label: 'Commandes',       icon: <ShoppingBag size={15}/> },
-    { id: 'reservations', label: 'Réservations',    icon: <Calendar size={15}/> },
-    { id: 'stats',        label: 'Tableau de bord', icon: <BarChart3 size={15}/> },
+    { id: 'products',        label: 'Produits',        icon: <Package size={15}/> },
+    { id: 'orders',          label: 'Commandes',        icon: <ShoppingBag size={15}/> },
+    { id: 'reservations',    label: 'Réservations',     icon: <Calendar size={15}/> },
+    { id: 'car_reservations',label: 'Location voitures',icon: <Calendar size={15}/> },
+    { id: 'stats',           label: 'Tableau de bord',  icon: <BarChart3 size={15}/> },
   ];
 
   const revenue = orders.filter(o => o.status === 'paid').reduce((s, o) => s + o.total_price, 0);
@@ -560,6 +569,71 @@ export default function Admin() {
                             </select>
                           </td>
                           <td style={{ padding: '11px 14px', fontSize: 12, color: 'var(--gray-400)' }}>{new Date(r.created_at).toLocaleDateString('fr-FR')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'car_reservations' && (
+            <div>
+              <h2 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 20, fontSize: isMobile ? 17 : 22 }}>Location voitures ({carReservations.length})</h2>
+              {carReservations.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucune réservation pour le moment</p> : isMobile ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {carReservations.map(r => (
+                    <div key={r.id} className="card" style={{ padding: 16 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <p style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 15 }}>{r.car_name}</p>
+                        <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{r.total} €</span>
+                      </div>
+                      <p style={{ fontSize: 13, fontWeight: 600 }}>{r.customer_name}</p>
+                      <p style={{ fontSize: 12, color: 'var(--gray-500)', marginBottom: 4 }}>{r.customer_email} · {r.customer_phone}</p>
+                      <p style={{ fontSize: 12, color: 'var(--gray-600)', marginBottom: 8 }}>{r.start_date} → {r.end_date} ({r.days} j)</p>
+                      <select style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1.5px solid var(--gray-200)', fontSize: 13, fontWeight: 700 }}
+                        value={r.status} onChange={e => updateCarReservationStatus(r.id, e.target.value)}>
+                        <option value="confirmed">Confirmée</option>
+                        <option value="pending">En attente</option>
+                        <option value="completed">Terminée</option>
+                        <option value="cancelled">Annulée</option>
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+                    <thead>
+                      <tr style={{ background: 'var(--light)', borderBottom: '2px solid var(--gray-200)' }}>
+                        {['#', 'Véhicule', 'Client', 'Téléphone', 'Dates', 'Durée', 'Total', 'Statut'].map(h => (
+                          <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {carReservations.map((r, i) => (
+                        <tr key={r.id} style={{ background: i % 2 ? 'var(--light)' : 'white' }}>
+                          <td style={{ padding: '11px 14px', fontWeight: 700 }}>#{r.id}</td>
+                          <td style={{ padding: '11px 14px', fontWeight: 700, color: 'var(--primary)' }}>{r.car_name}</td>
+                          <td style={{ padding: '11px 14px' }}>
+                            <p style={{ fontWeight: 600 }}>{r.customer_name}</p>
+                            <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{r.customer_email}</p>
+                          </td>
+                          <td style={{ padding: '11px 14px', fontSize: 13, fontWeight: 600 }}>{r.customer_phone || '—'}</td>
+                          <td style={{ padding: '11px 14px', fontSize: 12, color: 'var(--gray-600)', whiteSpace: 'nowrap' }}>{r.start_date} → {r.end_date}</td>
+                          <td style={{ padding: '11px 14px', fontWeight: 600 }}>{r.days} j</td>
+                          <td style={{ padding: '11px 14px', fontWeight: 800, color: 'var(--primary)' }}>{r.total} €</td>
+                          <td style={{ padding: '11px 14px' }}>
+                            <select style={{ padding: '4px 8px', borderRadius: 6, border: '1.5px solid var(--gray-200)', fontSize: 12, fontWeight: 700 }}
+                              value={r.status} onChange={e => updateCarReservationStatus(r.id, e.target.value)}>
+                              <option value="confirmed">Confirmée</option>
+                              <option value="pending">En attente</option>
+                              <option value="completed">Terminée</option>
+                              <option value="cancelled">Annulée</option>
+                            </select>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
