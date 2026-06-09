@@ -43,5 +43,45 @@ if (faqs.count() === 0) {
 const car_reservations = db.table('car_reservations');
 
 const cars = db.table('cars');
+if (cars.count() === 0) {
+  [
+    {
+      name: 'Toyota Yaris', category: 'Citadine',
+      description: "Citadine compacte idéale pour se déplacer sur l'île. Économique, facile à garer et agréable à conduire au quotidien.",
+      specs: JSON.stringify([['Carburant','Essence'],['Boîte','Manuelle'],['Places','5'],['Portes','5'],['Climatisation','Oui'],['Kilométrage','Illimité']]),
+      price_day: 30, price_5days: 27, price_2weeks: 25, caution: 0, min_days: null, image: '', active: 1,
+    },
+    {
+      name: 'Kia Picanto 3', category: 'Citadine — Phase 1',
+      description: 'Petite citadine maniable et économique. Parfaite pour la ville et les routes de montagne de La Réunion.',
+      specs: JSON.stringify([['Carburant','Essence'],['Boîte','Manuelle'],['Places','5'],['Portes','5'],['Climatisation','Oui'],['Kilométrage','Illimité']]),
+      price_day: 30, price_5days: 28, price_2weeks: 27, caution: 0, min_days: null, image: '', active: 1,
+    },
+    {
+      name: 'Citroën C3', category: 'Compacte',
+      description: 'Conçue pour La Réunion. Confortable, moderne et polyvalente. Un bon équilibre entre espace, confort et consommation.',
+      specs: JSON.stringify([['Carburant','Essence'],['Boîte','Manuelle'],['Places','5'],['Portes','5'],['Climatisation','Oui'],['Kilométrage','Illimité']]),
+      price_day: 43, price_5days: 41, price_2weeks: 39, caution: 0, min_days: null, image: '', active: 1,
+    },
+    {
+      name: 'Toyota Auris', category: 'Hybride',
+      description: "Compacte hybride polyvalente. Faible consommation, conduite agréable et coffre spacieux pour explorer l'île sans contrainte.",
+      specs: JSON.stringify([['Carburant','Hybride'],['Boîte','Automatique'],['Places','5'],['Portes','5'],['Climatisation','Oui'],['Kilométrage','Illimité']]),
+      price_day: 39, price_5days: 37, price_2weeks: 35, caution: 0, min_days: null, image: '', active: 1,
+    },
+    {
+      name: 'Lexus CT200h', category: 'Hybride — Premium',
+      description: 'Berline hybride haut de gamme. Silencieuse, économique et raffinée. Pour ceux qui veulent le meilleur confort sur La Réunion.',
+      specs: JSON.stringify([['Carburant','Hybride'],['Boîte','Automatique'],['Places','5'],['Portes','5'],['Climatisation','Oui'],['GPS','Intégré']]),
+      price_day: 45, price_5days: 43, price_2weeks: 39, caution: 0, min_days: null, image: '', active: 1,
+    },
+    {
+      name: 'Mitsubishi Outlander', category: 'SUV — Longue durée',
+      description: "Grand SUV familial, idéal pour les groupes ou les longues distances. Disponible en location longue durée (2 semaines minimum).",
+      specs: JSON.stringify([['Carburant','Essence'],['Boîte','Automatique'],['Places','7'],['Portes','5'],['Climatisation','Oui'],['Kilométrage','Illimité']]),
+      price_day: 39, price_5days: 35, price_2weeks: 30, caution: 0, min_days: null, image: '', active: 1,
+    },
+  ].forEach(c => cars.insert(c));
+}
 
 module.exports = { categories, products, reservations, orders, users, faqs, car_reservations, cars };
