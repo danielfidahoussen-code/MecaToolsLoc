@@ -279,6 +279,7 @@ router.get('/:id/contract/print', authMiddleware, (req, res) => {
     <div><div class="label">N° de permis</div><div class="field">${driver.permis || ''}</div></div>
     <div><div class="label">Date d'obtention</div><div class="field">${driver.permis_date || ''}</div></div>
     <div><div class="label">Téléphone</div><div class="field">${r.customer_phone || ''}</div></div>
+    ${driver.permis_photo ? `<div style="grid-column:1/-1;margin-top:6px;"><div class="label">Photo permis</div><img src="${driver.permis_photo}" style="max-height:80px;border-radius:4px;margin-top:3px;" alt="Permis"/></div>` : ''}
     ${driver.conducteur2_nom ? `
     <div><div class="label">2ème conducteur — Prénom</div><div class="field">${driver.conducteur2_prenom || ''}</div></div>
     <div><div class="label">2ème conducteur — Nom</div><div class="field">${driver.conducteur2_nom}</div></div>
