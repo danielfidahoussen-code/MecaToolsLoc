@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -249,9 +249,13 @@ export default function Admin() {
   const [orders, setOrders] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [carReservations, setCarReservations] = useState([]);
+  const [carsDb, setCarsDb] = useState([]);
   const [categories, setCategories] = useState([]);
   const [editProduct, setEditProduct] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [showCarForm, setShowCarForm] = useState(false);
+  const [editCar, setEditCar] = useState(null);
+  const [carSubTab, setCarSubTab] = useState('reservations');
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
 
@@ -261,18 +265,20 @@ export default function Admin() {
     if (!loggedIn || !token) return;
     setLoading(true);
     try {
-      const [p, o, r, c, cr] = await Promise.all([
+      const [p, o, r, c, cr, cars] = await Promise.all([
         axios.get('/api/products?limit=100'),
         axios.get('/api/orders', API(token)),
         axios.get('/api/reservations', API(token)),
         axios.get('/api/products/categories'),
         axios.get('/api/car-reservations', API(token)),
+        axios.get('/api/cars/all', API(token)),
       ]);
       setProducts(p.data.products);
       setOrders(o.data);
       setReservations(r.data);
       setCategories(c.data);
       setCarReservations(cr.data);
+      setCarsDb(cars.data);
     } catch {}
     setLoading(false);
   };
@@ -296,6 +302,13 @@ export default function Admin() {
 
   const updateCarReservationStatus = async (id, status) => {
     await axios.put(`/api/car-reservations/${id}`, { status }, API(token));
+    loadData();
+  };
+
+  const handleDeleteCar = async (id) => {
+    if (!confirm('Supprimer ce véhicule ?')) return;
+    await axios.delete(`/api/cars/${id}`, API(token));
+    toast.success('Véhicule supprimé');
     loadData();
   };
 
@@ -622,8 +635,30 @@ export default function Admin() {
 
           {tab === 'car_reservations' && (
             <div>
-              <h2 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 20, fontSize: isMobile ? 17 : 22 }}>Location voitures ({carReservations.length})</h2>
-              {carReservations.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucune réservation pour le moment</p> : isMobile ? (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: isMobile ? 17 : 22 }}>Location voitures</h2>
+                {carSubTab === 'vehicles' && (
+                  <button className="btn btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                    onClick={() => { setEditCar(null); setShowCarForm(true); }}>
+                    <Plus size={14}/> Ajouter un véhicule
+                  </button>
+                )}
+              </div>
+
+              {/* Sous-onglets */}
+              <div style={{ display: 'flex', gap: 4, marginBottom: 20, borderBottom: '2px solid var(--gray-200)', paddingBottom: 0 }}>
+                {[{id:'reservations',label:`Réservations (${carReservations.length})`},{id:'vehicles',label:`Véhicules (${carsDb.length})`}].map(st => (
+                  <button key={st.id} onClick={() => setCarSubTab(st.id)} style={{
+                    padding: '8px 16px', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer',
+                    borderBottom: carSubTab === st.id ? '3px solid var(--accent)' : '3px solid transparent',
+                    color: carSubTab === st.id ? 'var(--accent)' : 'var(--gray-600)',
+                    background: 'transparent', marginBottom: -2,
+                  }}>{st.label}</button>
+                ))}
+              </div>
+
+              {/* Sous-onglet Réservations */}
+              {carSubTab === 'reservations' && (carReservations.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucune réservation pour le moment</p> : isMobile ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {carReservations.map(r => (
                     <div key={r.id} className="card" style={{ padding: 16 }}>
@@ -694,6 +729,39 @@ export default function Admin() {
                     </tbody>
                   </table>
                 </div>
+              ))}
+
+              {/* Sous-onglet Véhicules */}
+              {carSubTab === 'vehicles' && (
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
+                  {carsDb.map(car => (
+                    <div key={car.id} className="card" style={{ padding: 16, opacity: car.active === 0 ? 0.5 : 1 }}>
+                      {car.image && <img src={car.image} alt={car.name} style={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 8, marginBottom: 10 }}/>}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+                        <div>
+                          <p style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 15 }}>{car.name}</p>
+                          <p style={{ fontSize: 12, color: 'var(--gray-500)', fontWeight: 600 }}>{car.category}</p>
+                        </div>
+                        {car.active === 0 && <span style={{ fontSize: 10, fontWeight: 800, background: 'var(--gray-200)', color: 'var(--gray-500)', padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase' }}>Masqué</span>}
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--gray-600)', marginBottom: 12 }}>
+                        <span>{car.price_day} €/j</span>
+                        {car.price_5days > 0 && <span>· 5j: {car.price_5days} €</span>}
+                        {car.price_2weeks > 0 && <span>· 2sem: {car.price_2weeks} €</span>}
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button className="btn btn-sm btn-outline" style={{ flex: 1, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 4 }}
+                          onClick={() => { setEditCar(car); setShowCarForm(true); }}>
+                          <Edit2 size={13}/> Modifier
+                        </button>
+                        <button className="btn btn-sm" style={{ background: '#fee2e2', color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 8, fontWeight: 700 }}
+                          onClick={() => handleDeleteCar(car.id)}>
+                          <Trash2 size={13}/>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           )}
@@ -706,6 +774,124 @@ export default function Admin() {
           onSave={() => { loadData(); setShowForm(false); }}
           onClose={() => setShowForm(false)}/>
       )}
+
+      {showCarForm && (
+        <CarForm car={editCar} token={token}
+          onSave={() => { loadData(); setShowCarForm(false); }}
+          onClose={() => setShowCarForm(false)}/>
+      )}
+    </div>
+  );
+}
+
+/* ─── CAR FORM MODAL ─────────────────────────────────────────────────────── */
+function CarForm({ car, token, onSave, onClose }) {
+  const isMobile = useIsMobile();
+  const empty = { name: '', category: '', description: '', price_day: '', price_5days: '', price_2weeks: '', min_days: '', image: '', active: true,
+    specs: [['Carburant',''],['Boîte',''],['Places',''],['Portes',''],['Climatisation',''],['Kilométrage','']] };
+  const [form, setForm] = useState(car ? { ...car, active: car.active !== 0 } : empty);
+  const [saving, setSaving] = useState(false);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const setSpec = (i, col, val) => {
+    const specs = [...(form.specs || [])];
+    specs[i] = col === 0 ? [val, specs[i]?.[1] || ''] : [specs[i]?.[0] || '', val];
+    set('specs', specs);
+  };
+  const addSpec = () => set('specs', [...(form.specs || []), ['', '']]);
+  const removeSpec = (i) => set('specs', (form.specs || []).filter((_, idx) => idx !== i));
+
+  const handleSave = async () => {
+    if (!form.name) { toast.error('Nom requis'); return; }
+    setSaving(true);
+    try {
+      const payload = { ...form, specs: form.specs || [] };
+      if (car?.id) {
+        await axios.put(`/api/cars/${car.id}`, payload, API(token));
+        toast.success('Véhicule modifié !');
+      } else {
+        await axios.post('/api/cars', payload, API(token));
+        toast.success('Véhicule ajouté !');
+      }
+      onSave();
+    } catch { toast.error('Erreur lors de la sauvegarde'); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 2000, display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center', padding: isMobile ? 0 : 16 }}>
+      <div className="card" style={{ width: '100%', maxWidth: 640, maxHeight: isMobile ? '92vh' : '90vh', overflow: 'auto', padding: isMobile ? '20px 16px' : 28, borderRadius: isMobile ? '16px 16px 0 0' : 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: isMobile ? 17 : 20 }}>{car ? 'Modifier' : 'Ajouter'} un véhicule</h3>
+          <button onClick={onClose} style={{ padding: 6, borderRadius: 8, background: 'var(--gray-100)' }}><X size={18}/></button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
+          <div className="form-group">
+            <label className="form-label">Nom *</label>
+            <input className="form-control" value={form.name} onChange={e => set('name', e.target.value)} placeholder="Ex: Toyota Yaris"/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Catégorie</label>
+            <input className="form-control" value={form.category} onChange={e => set('category', e.target.value)} placeholder="Ex: Citadine, SUV..."/>
+          </div>
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <label className="form-label">Description</label>
+            <textarea className="form-control" rows={3} value={form.description} onChange={e => set('description', e.target.value)}/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Prix journalier (€)</label>
+            <input className="form-control" type="number" value={form.price_day} onChange={e => set('price_day', e.target.value)}/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Prix 5 jours+ (€/j)</label>
+            <input className="form-control" type="number" value={form.price_5days} onChange={e => set('price_5days', e.target.value)}/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Prix 2 semaines (€/j)</label>
+            <input className="form-control" type="number" value={form.price_2weeks} onChange={e => set('price_2weeks', e.target.value)}/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Durée minimum (jours)</label>
+            <input className="form-control" type="number" value={form.min_days || ''} onChange={e => set('min_days', e.target.value)} placeholder="Aucune"/>
+          </div>
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <label className="form-label">URL photo</label>
+            <input className="form-control" value={form.image} onChange={e => set('image', e.target.value)} placeholder="https://..."/>
+          </div>
+        </div>
+
+        {/* Caractéristiques */}
+        <div style={{ marginTop: 8, marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <label className="form-label" style={{ marginBottom: 0 }}>Caractéristiques</label>
+            <button type="button" className="btn btn-sm btn-outline" onClick={addSpec} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Plus size={12}/> Ajouter
+            </button>
+          </div>
+          {(form.specs || []).map((spec, i) => (
+            <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+              <input className="form-control" value={spec[0]} onChange={e => setSpec(i, 0, e.target.value)} placeholder="Label (ex: Boîte)" style={{ fontSize: 13 }}/>
+              <input className="form-control" value={spec[1]} onChange={e => setSpec(i, 1, e.target.value)} placeholder="Valeur (ex: Manuelle)" style={{ fontSize: 13 }}/>
+              <button type="button" onClick={() => removeSpec(i)} style={{ padding: '0 8px', borderRadius: 6, background: '#fee2e2', color: 'var(--danger)', flexShrink: 0 }}>
+                <X size={14}/>
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+          <input type="checkbox" id="car-active" checked={form.active} onChange={e => set('active', e.target.checked)} style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}/>
+          <label htmlFor="car-active" style={{ fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>Visible sur le site</label>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 6 }} onClick={handleSave} disabled={saving}>
+            <Save size={15}/> {saving ? 'Sauvegarde...' : 'Enregistrer'}
+          </button>
+          <button className="btn btn-outline" onClick={onClose}>Annuler</button>
+        </div>
+      </div>
     </div>
   );
 }

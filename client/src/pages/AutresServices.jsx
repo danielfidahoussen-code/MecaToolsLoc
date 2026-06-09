@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { differenceInDays } from 'date-fns';
@@ -6,117 +6,7 @@ import { Phone, Mail, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
-const CARS = [
-  {
-    id: 'yaris',
-    name: 'Toyota Yaris',
-    category: 'Citadine',
-    description: 'Citadine compacte idéale pour se déplacer sur l\'île. Économique, facile à garer et agréable à conduire au quotidien.',
-    specs: [
-      ['Carburant', 'Essence'],
-      ['Boîte', 'Manuelle'],
-      ['Places', '5'],
-      ['Portes', '5'],
-      ['Climatisation', 'Oui'],
-      ['Kilométrage', 'Illimité'],
-    ],
-    price_day: 30,
-    price_5days: 27,
-    price_2weeks: 25,
-    image: null,
-  },
-  {
-    id: 'picanto',
-    name: 'Kia Picanto 3',
-    category: 'Citadine — Phase 1',
-    description: 'Petite citadine maniable et économique. Parfaite pour la ville et les routes de montagne de La Réunion.',
-    specs: [
-      ['Carburant', 'Essence'],
-      ['Boîte', 'Manuelle'],
-      ['Places', '5'],
-      ['Portes', '5'],
-      ['Climatisation', 'Oui'],
-      ['Kilométrage', 'Illimité'],
-    ],
-    price_day: 30,
-    price_5days: 28,
-    price_2weeks: 27,
-    image: null,
-  },
-  {
-    id: 'c3',
-    name: 'Citroën C3',
-    category: 'Compacte',
-    description: 'Conçue pour La Réunion. Confortable, moderne et polyvalente. Un bon équilibre entre espace, confort et consommation.',
-    specs: [
-      ['Carburant', 'Essence'],
-      ['Boîte', 'Manuelle'],
-      ['Places', '5'],
-      ['Portes', '5'],
-      ['Climatisation', 'Oui'],
-      ['Kilométrage', 'Illimité'],
-    ],
-    price_day: 43,
-    price_5days: 41,
-    price_2weeks: 39,
-    image: null,
-  },
-  {
-    id: 'auris',
-    name: 'Toyota Auris',
-    category: 'Hybride',
-    description: 'Compacte hybride polyvalente. Faible consommation, conduite agréable et coffre spacieux pour explorer l\'île sans contrainte.',
-    specs: [
-      ['Carburant', 'Hybride'],
-      ['Boîte', 'Automatique'],
-      ['Places', '5'],
-      ['Portes', '5'],
-      ['Climatisation', 'Oui'],
-      ['Kilométrage', 'Illimité'],
-    ],
-    price_day: 39,
-    price_5days: 37,
-    price_2weeks: 35,
-    image: null,
-  },
-  {
-    id: 'lexus',
-    name: 'Lexus CT200h',
-    category: 'Hybride — Premium',
-    description: 'Berline hybride haut de gamme. Silencieuse, économique et raffinée. Pour ceux qui veulent le meilleur confort sur La Réunion.',
-    specs: [
-      ['Carburant', 'Hybride'],
-      ['Boîte', 'Automatique'],
-      ['Places', '5'],
-      ['Portes', '5'],
-      ['Climatisation', 'Oui'],
-      ['GPS', 'Intégré'],
-    ],
-    price_day: 45,
-    price_5days: 43,
-    price_2weeks: 39,
-    image: null,
-  },
-  {
-    id: 'outlander',
-    name: 'Mitsubishi Outlander',
-    category: 'SUV — Longue durée',
-    description: 'Grand SUV familial, idéal pour les groupes ou les longues distances. Disponible en location longue durée (2 semaines minimum).',
-    specs: [
-      ['Carburant', 'Essence'],
-      ['Boîte', 'Automatique'],
-      ['Places', '7'],
-      ['Portes', '5'],
-      ['Climatisation', 'Oui'],
-      ['Kilométrage', 'Illimité'],
-    ],
-    price_day: 39,
-    price_5days: 35,
-    price_2weeks: Math.round(35 * 0.85),
-    min_days: null,
-    image: null,
-  },
-];
+const DELIVERY_FEE = 20;
 
 function calcPrice(car, days) {
   if (!days || days <= 0) return 0;
@@ -135,8 +25,6 @@ function getRateInfo(car, days) {
   if (car.price_day) return { label: `Tarif journalier — ${car.price_day} €/j`, color: 'var(--gray-500)' };
   return null;
 }
-
-const DELIVERY_FEE = 20;
 
 function CarCard({ car }) {
   const [startDate, setStartDate] = useState(null);
@@ -192,7 +80,7 @@ function CarCard({ car }) {
           : <p style={{ color: 'rgba(255,255,255,.25)', fontSize: 13 }}>Photo à venir</p>
         }
         <div style={{ position: 'absolute', top: 12, left: 12, background: 'var(--accent)', padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 800, color: 'white', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-          {car.category.split('—')[0].trim()}
+          {(car.category || '').split('—')[0].trim()}
         </div>
         <div style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(6px)', padding: '6px 12px', borderRadius: 10, textAlign: 'right' }}>
           <p style={{ fontSize: 10, color: 'rgba(255,255,255,.5)', fontWeight: 600 }}>À PARTIR DE</p>
@@ -208,33 +96,37 @@ function CarCard({ car }) {
         </div>
 
         {/* Specs grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--gray-100)' }}>
-          {car.specs.map(([k, v]) => (
-            <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-              <span style={{ color: 'var(--gray-500)', fontWeight: 500 }}>{k}</span>
-              <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{v}</span>
-            </div>
-          ))}
-        </div>
+        {car.specs && car.specs.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--gray-100)' }}>
+            {car.specs.map(([k, v]) => (
+              <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ color: 'var(--gray-500)', fontWeight: 500 }}>{k}</span>
+                <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{v}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Tarifs */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-          {car.price_day && (
+          {car.price_day > 0 && (
             <div style={{ flex: 1, background: 'var(--gray-100)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
               <p style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: 2 }}>Journalier</p>
               <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--primary)' }}>{car.price_day} €</p>
             </div>
           )}
-          {car.price_5days && (
+          {car.price_5days > 0 && (
             <div style={{ flex: 1, background: 'rgba(245,197,24,.12)', border: '1px solid rgba(245,197,24,.3)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
               <p style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: 2 }}>5 jours+</p>
               <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--primary)' }}>{car.price_5days} €</p>
             </div>
           )}
-          <div style={{ flex: 1, background: 'var(--primary)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
-            <p style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'rgba(255,255,255,.6)', marginBottom: 2 }}>2 semaines</p>
-            <p style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{car.price_2weeks} €</p>
-          </div>
+          {car.price_2weeks > 0 && (
+            <div style={{ flex: 1, background: 'var(--primary)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
+              <p style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'rgba(255,255,255,.6)', marginBottom: 2 }}>2 semaines</p>
+              <p style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{car.price_2weeks} €</p>
+            </div>
+          )}
         </div>
 
         {car.min_days && (
@@ -268,7 +160,7 @@ function CarCard({ car }) {
               <div style={{ background: rateInfo?.invalid ? '#fee2e2' : 'var(--light)', borderRadius: 8, padding: '10px 12px', marginBottom: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 13, color: 'var(--gray-600)' }}>{days} jour{days > 1 ? 's' : ''}</span>
-                  {!rateInfo?.invalid && <span style={{ fontWeight: 900, fontSize: 18, color: 'var(--primary)' }}>{total} €</span>}
+                  {!rateInfo?.invalid && <span style={{ fontWeight: 900, fontSize: 18, color: 'var(--primary)' }}>{carTotal} €</span>}
                 </div>
                 {rateInfo && <p style={{ fontSize: 12, color: rateInfo.color, fontWeight: 600, marginTop: 3 }}>{rateInfo.label}</p>}
               </div>
@@ -342,6 +234,13 @@ function CarCard({ car }) {
 }
 
 export default function AutresServices() {
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios.get('/api/cars').then(({ data }) => setCars(data)).finally(() => setLoading(false));
+  }, []);
+
   return (
     <div>
       {/* Header */}
@@ -380,9 +279,15 @@ export default function AutresServices() {
 
       {/* Grille véhicules */}
       <div className="container" style={{ paddingTop: 36, paddingBottom: 60 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24, marginBottom: 48 }}>
-          {CARS.map(car => <CarCard key={car.id} car={car}/>)}
-        </div>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--gray-400)' }}>Chargement...</div>
+        ) : cars.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--gray-400)' }}>Aucun véhicule disponible pour le moment.</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24, marginBottom: 48 }}>
+            {cars.map(car => <CarCard key={car.id} car={car}/>)}
+          </div>
+        )}
 
         {/* Pied de page contact */}
         <div style={{ background: 'var(--primary)', borderRadius: 20, padding: '28px 32px', color: 'white', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 24 }}>
