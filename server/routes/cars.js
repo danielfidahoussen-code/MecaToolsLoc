@@ -22,7 +22,7 @@ router.get('/all', authMiddleware, (req, res) => {
 router.post('/', authMiddleware, (req, res) => {
   const { name, category, description, specs, price_day, price_5days, price_2weeks, min_days, image, active } = req.body;
   if (!name) return res.status(400).json({ error: 'Nom requis' });
-  const id = cars.insert({
+  const { lastInsertRowid: id } = cars.insert({
     name,
     category: category || '',
     description: description || '',
@@ -34,7 +34,7 @@ router.post('/', authMiddleware, (req, res) => {
     image: image || '',
     active: active !== false ? 1 : 0,
   });
-  res.json(parseCar(cars.find(id)));
+  res.json(parseCar(cars.getById(id)));
 });
 
 // Admin — modifier
@@ -52,7 +52,7 @@ router.put('/:id', authMiddleware, (req, res) => {
     image: image || '',
     active: active !== false ? 1 : 0,
   });
-  res.json(parseCar(cars.find(Number(req.params.id))));
+  res.json(parseCar(cars.getById(Number(req.params.id))));
 });
 
 // Admin — supprimer

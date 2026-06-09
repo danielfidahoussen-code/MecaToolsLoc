@@ -10,7 +10,7 @@ router.post('/create', (req, res) => {
   try {
     const { car_id, car_name, start_date, end_date, days, car_total, total, delivery, delivery_address, customer_name, customer_email, customer_phone } = req.body;
     if (!car_name || !customer_name || !customer_email) return res.status(400).json({ error: 'Champs requis manquants' });
-    const id = car_reservations.insert({
+    const { lastInsertRowid: id } = car_reservations.insert({
       car_id, car_name, start_date, end_date,
       days: parseInt(days), car_total: parseFloat(car_total || total),
       total: parseFloat(total), delivery: !!delivery,
@@ -27,7 +27,7 @@ router.post('/create', (req, res) => {
 // Crée une session Stripe pour une réservation existante (après signature du contrat)
 router.post('/:id/checkout', async (req, res) => {
   try {
-    const r = car_reservations.find(Number(req.params.id));
+    const r = car_reservations.getById(Number(req.params.id));
     if (!r) return res.status(404).json({ error: 'Réservation introuvable' });
     if (!r.contract_signed_at) return res.status(400).json({ error: 'Le contrat doit être signé avant le paiement' });
 
@@ -151,7 +151,7 @@ router.get('/session/:sessionId', async (req, res) => {
         if (meta.reservation_id) {
           const rid = Number(meta.reservation_id);
           car_reservations.update(rid, { status: 'confirmed', stripe_session_id: session.id });
-          existing = car_reservations.find(rid);
+          existing = car_reservations.getById(rid);
         } else {
           // Ancien flux (rétrocompat)
           car_reservations.insert({
@@ -181,7 +181,7 @@ router.get('/', authMiddleware, (req, res) => {
 
 // Public — récupère une réservation pour le contrat (champs limités)
 router.get('/public/:id', (req, res) => {
-  const r = car_reservations.find(Number(req.params.id));
+  const r = car_reservations.getById(Number(req.params.id));
   if (!r) return res.status(404).json({ error: 'Réservation introuvable' });
   res.json({
     id: r.id, car_name: r.car_name, car_id: r.car_id,
@@ -195,7 +195,7 @@ router.get('/public/:id', (req, res) => {
 // Soumet le contrat signé
 router.post('/:id/contract', (req, res) => {
   const id = Number(req.params.id);
-  const r = car_reservations.find(id);
+  const r = car_reservations.getById(id);
   if (!r) return res.status(404).json({ error: 'Réservation introuvable' });
   const { driver, vehicle_state, signature } = req.body;
   if (!signature) return res.status(400).json({ error: 'Signature requise' });
@@ -210,7 +210,7 @@ router.post('/:id/contract', (req, res) => {
 
 // Admin — voir le contrat en HTML imprimable
 router.get('/:id/contract/print', authMiddleware, (req, res) => {
-  const r = car_reservations.find(Number(req.params.id));
+  const r = car_reservations.getById(Number(req.params.id));
   if (!r) return res.status(404).json({ error: 'Introuvable' });
   let driver = {}; try { driver = JSON.parse(r.contract_driver || '{}'); } catch {}
   let vehicle = {}; try { vehicle = JSON.parse(r.contract_vehicle || '{}'); } catch {}
