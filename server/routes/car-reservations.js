@@ -208,8 +208,15 @@ router.post('/:id/contract', (req, res) => {
   res.json({ success: true });
 });
 
-// Admin — voir le contrat en HTML imprimable
-router.get('/:id/contract/print', authMiddleware, (req, res) => {
+// Admin — voir le contrat en HTML imprimable (token accepté en query param pour ouverture navigateur)
+router.get('/:id/contract/print', (req, res, next) => {
+  const { JWT_SECRET } = require('../middleware/auth');
+  const jwt = require('jsonwebtoken');
+  const token = req.headers.authorization?.split(' ')[1] || req.query.token;
+  if (!token) return res.status(401).json({ error: 'Token manquant' });
+  try { req.user = jwt.verify(token, JWT_SECRET); next(); }
+  catch { return res.status(401).json({ error: 'Token invalide' }); }
+}, (req, res) => {
   const r = car_reservations.getById(Number(req.params.id));
   if (!r) return res.status(404).json({ error: 'Introuvable' });
   let driver = {}; try { driver = JSON.parse(r.contract_driver || '{}'); } catch {}

@@ -680,7 +680,7 @@ export default function Admin() {
                           : <span style={{ fontSize: 11, fontWeight: 700, background: '#fee2e2', color: '#991b1b', padding: '2px 8px', borderRadius: 20 }}>Contrat non signé</span>
                         }
                         {r.contract_signed_at && (
-                          <a href={`/api/car-reservations/${r.id}/contract/print`} target="_blank" rel="noreferrer"
+                          <a href={`/api/car-reservations/${r.id}/contract/print?token=${token}`} target="_blank" rel="noreferrer"
                             style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
                             <FileText size={12}/> Voir
                           </a>
@@ -729,7 +729,7 @@ export default function Admin() {
                           </td>
                           <td style={{ padding: '11px 14px' }}>
                             {r.contract_signed_at ? (
-                              <a href={`/api/car-reservations/${r.id}/contract/print`} target="_blank" rel="noreferrer"
+                              <a href={`/api/car-reservations/${r.id}/contract/print?token=${token}`} target="_blank" rel="noreferrer"
                                 style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#065f46', background: '#d1fae5', padding: '3px 8px', borderRadius: 6, textDecoration: 'none' }}>
                                 <FileText size={12}/> Voir
                               </a>
