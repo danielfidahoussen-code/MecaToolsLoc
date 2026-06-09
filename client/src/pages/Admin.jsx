@@ -344,12 +344,14 @@ export default function Admin() {
           {/* ── Stats ── */}
           {tab === 'stats' && (
             <div>
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4,1fr)', gap: 14, marginBottom: 28 }}>
+              {/* Chiffres clés */}
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(5,1fr)', gap: 14, marginBottom: 28 }}>
                 {[
-                  { label: 'Produits',     value: products.length,         icon: '📦', color: 'var(--primary)' },
-                  { label: 'Commandes',    value: orders.length,            icon: '🛒', color: '#7c3aed' },
-                  { label: 'Réservations', value: reservations.length,      icon: '📅', color: '#0891b2' },
-                  { label: 'CA Total',     value: `${revenue.toFixed(0)} €`,icon: '💰', color: 'var(--success)' },
+                  { label: 'Produits',          value: products.length,                                       icon: '📦', color: 'var(--primary)' },
+                  { label: 'Commandes',          value: orders.length,                                         icon: '🛒', color: '#7c3aed' },
+                  { label: 'Résa. outils',       value: reservations.length,                                   icon: '📅', color: '#0891b2' },
+                  { label: 'Résa. voitures',     value: carReservations.length,                                icon: '🚗', color: '#d97706' },
+                  { label: 'CA Total',           value: `${revenue.toFixed(0)} €`,                            icon: '💰', color: 'var(--success)' },
                 ].map(({ label, value, icon, color }) => (
                   <div key={label} className="card" style={{ padding: isMobile ? 16 : 22, textAlign: 'center' }}>
                     <div style={{ fontSize: isMobile ? 26 : 32, marginBottom: 8 }}>{icon}</div>
@@ -358,7 +360,9 @@ export default function Admin() {
                   </div>
                 ))}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                {/* Ruptures de stock */}
                 <div className="card" style={{ padding: isMobile ? 16 : 22 }}>
                   <h3 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: 14, fontSize: 15 }}>Produits en rupture</h3>
                   {products.filter(p => p.stock === 0).map(p => (
@@ -367,17 +371,55 @@ export default function Admin() {
                       <span style={{ color: 'var(--danger)', fontWeight: 700, flexShrink: 0 }}>Rupture</span>
                     </div>
                   ))}
-                  {products.filter(p => p.stock === 0).length === 0 && <p style={{ color: 'var(--success)', fontSize: 13 }}>✅ Tous les produits sont en stock</p>}
+                  {products.filter(p => p.stock === 0).length === 0 && <p style={{ color: 'var(--success)', fontSize: 13 }}>Tous les produits sont en stock</p>}
                 </div>
+
+                {/* Réservations outils en attente */}
                 <div className="card" style={{ padding: isMobile ? 16 : 22 }}>
-                  <h3 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: 14, fontSize: 15 }}>Réservations en attente</h3>
+                  <h3 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: 14, fontSize: 15 }}>Réservations outils en attente</h3>
                   {reservations.filter(r => r.status === 'pending').slice(0, 5).map(r => (
                     <div key={r.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--gray-100)', fontSize: 13 }}>
                       <p style={{ fontWeight: 600 }}>{r.customer_name}</p>
                       <p style={{ color: 'var(--gray-500)', fontSize: 12, marginTop: 2 }}>{r.product_name} — {r.start_date} → {r.end_date}</p>
                     </div>
                   ))}
-                  {reservations.filter(r => r.status === 'pending').length === 0 && <p style={{ color: 'var(--success)', fontSize: 13 }}>✅ Aucune réservation en attente</p>}
+                  {reservations.filter(r => r.status === 'pending').length === 0 && <p style={{ color: 'var(--success)', fontSize: 13 }}>Aucune réservation en attente</p>}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+                {/* Réservations voitures récentes */}
+                <div className="card" style={{ padding: isMobile ? 16 : 22 }}>
+                  <h3 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: 14, fontSize: 15 }}>Réservations voitures récentes</h3>
+                  {carReservations.slice(0, 5).map(r => (
+                    <div key={r.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--gray-100)', fontSize: 13 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <p style={{ fontWeight: 600 }}>{r.car_name}</p>
+                        <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{r.total} €</span>
+                      </div>
+                      <p style={{ color: 'var(--gray-500)', fontSize: 12, marginTop: 2 }}>{r.customer_name} — {r.start_date} → {r.end_date} ({r.days} j)</p>
+                      <span style={{ display: 'inline-block', marginTop: 3, fontSize: 11, fontWeight: 700, padding: '1px 8px', borderRadius: 10,
+                        background: r.status === 'confirmed' ? '#d1fae5' : r.status === 'completed' ? '#e0e7ff' : r.status === 'cancelled' ? '#fee2e2' : '#fef3c7',
+                        color: r.status === 'confirmed' ? '#065f46' : r.status === 'completed' ? '#3730a3' : r.status === 'cancelled' ? '#991b1b' : '#92400e',
+                      }}>{r.status}</span>
+                    </div>
+                  ))}
+                  {carReservations.length === 0 && <p style={{ color: 'var(--gray-500)', fontSize: 13 }}>Aucune réservation voiture</p>}
+                </div>
+
+                {/* Dernières commandes */}
+                <div className="card" style={{ padding: isMobile ? 16 : 22 }}>
+                  <h3 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: 14, fontSize: 15 }}>Dernières commandes</h3>
+                  {orders.slice(0, 5).map(o => (
+                    <div key={o.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--gray-100)', fontSize: 13 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <p style={{ fontWeight: 600 }}>{o.customer_name}</p>
+                        <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{o.total_price?.toFixed(2)} €</span>
+                      </div>
+                      <p style={{ color: 'var(--gray-500)', fontSize: 12, marginTop: 2 }}>{o.customer_email}</p>
+                    </div>
+                  ))}
+                  {orders.length === 0 && <p style={{ color: 'var(--gray-500)', fontSize: 13 }}>Aucune commande</p>}
                 </div>
               </div>
             </div>
