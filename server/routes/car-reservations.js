@@ -5,7 +5,80 @@ const { authMiddleware } = require('../middleware/auth');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Crée une session Stripe pour une location de voiture
+// Crée une réservation en attente (avant contrat + paiement)
+router.post('/create', (req, res) => {
+  try {
+    const { car_id, car_name, start_date, end_date, days, car_total, total, delivery, delivery_address, customer_name, customer_email, customer_phone } = req.body;
+    if (!car_name || !customer_name || !customer_email) return res.status(400).json({ error: 'Champs requis manquants' });
+    const id = car_reservations.insert({
+      car_id, car_name, start_date, end_date,
+      days: parseInt(days), car_total: parseFloat(car_total || total),
+      total: parseFloat(total), delivery: !!delivery,
+      delivery_address: delivery_address || '',
+      customer_name, customer_email, customer_phone: customer_phone || '',
+      status: 'pending',
+    });
+    res.json({ id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Crée une session Stripe pour une réservation existante (après signature du contrat)
+router.post('/:id/checkout', async (req, res) => {
+  try {
+    const r = car_reservations.find(Number(req.params.id));
+    if (!r) return res.status(404).json({ error: 'Réservation introuvable' });
+    if (!r.contract_signed_at) return res.status(400).json({ error: 'Le contrat doit être signé avant le paiement' });
+
+    const host = req.headers.host || '';
+    const proto = host.includes('localhost') ? 'http' : 'https';
+    const origin = req.headers.origin || `${proto}://${host}`;
+
+    const days = r.days;
+    const carTotal = r.car_total || r.total;
+
+    const lineItems = [{
+      price_data: {
+        currency: 'eur',
+        product_data: { name: `Location ${r.car_name} — ${r.start_date} au ${r.end_date} (${days} jour${days > 1 ? 's' : ''})` },
+        unit_amount: Math.round(carTotal * 100),
+      },
+      quantity: 1,
+    }];
+
+    if (r.delivery) {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: { name: `Livraison / récupération${r.delivery_address ? ` — ${r.delivery_address.slice(0, 80)}` : ''}` },
+          unit_amount: 2000,
+        },
+        quantity: 1,
+      });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: lineItems,
+      mode: 'payment',
+      customer_email: r.customer_email,
+      success_url: `${origin}/autres-services/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/autres-services/contrat/${r.id}`,
+      metadata: { reservation_id: String(r.id) },
+      payment_intent_data: {
+        description: `PrestoLocation — ${r.car_name} du ${r.start_date} au ${r.end_date}`,
+      },
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('Car checkout error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Ancien endpoint checkout (conservé pour rétrocompatibilité)
 router.post('/checkout', async (req, res) => {
   try {
     const { car_id, car_name, start_date, end_date, days, car_total, total, delivery, delivery_address, customer_name, customer_email, customer_phone } = req.body;
@@ -71,27 +144,28 @@ router.get('/session/:sessionId', async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
     if (session.payment_status === 'paid') {
-      const existing = car_reservations.all().find(r => r.stripe_session_id === session.id);
+      let existing = car_reservations.all().find(r => r.stripe_session_id === session.id);
       if (!existing) {
         const meta = session.metadata || {};
-        car_reservations.insert({
-          car_id: meta.car_id,
-          car_name: meta.car_name,
-          start_date: meta.start_date,
-          end_date: meta.end_date,
-          days: parseInt(meta.days || 1),
-          total: parseFloat(meta.total || 0),
-          delivery: meta.delivery === 'true',
-          delivery_address: meta.delivery_address || '',
-          customer_name: meta.customer_name,
-          customer_email: session.customer_email,
-          customer_phone: meta.customer_phone,
-          status: 'confirmed',
-          stripe_session_id: session.id,
-        });
+        // Nouveau flux : mise à jour de la réservation existante
+        if (meta.reservation_id) {
+          const rid = Number(meta.reservation_id);
+          car_reservations.update(rid, { status: 'confirmed', stripe_session_id: session.id });
+          existing = car_reservations.find(rid);
+        } else {
+          // Ancien flux (rétrocompat)
+          car_reservations.insert({
+            car_id: meta.car_id, car_name: meta.car_name,
+            start_date: meta.start_date, end_date: meta.end_date,
+            days: parseInt(meta.days || 1), total: parseFloat(meta.total || 0),
+            delivery: meta.delivery === 'true', delivery_address: meta.delivery_address || '',
+            customer_name: meta.customer_name, customer_email: session.customer_email,
+            customer_phone: meta.customer_phone, status: 'confirmed', stripe_session_id: session.id,
+          });
+          existing = car_reservations.all().find(r => r.stripe_session_id === session.id);
+        }
       }
-      const saved = existing || car_reservations.all().find(r => r.stripe_session_id === session.id);
-      res.json({ paid: true, reservation_id: saved?.id, customer_name: session.metadata?.customer_name, customer_email: session.customer_email });
+      res.json({ paid: true, reservation_id: existing?.id, customer_name: existing?.customer_name, customer_email: existing?.customer_email });
     } else {
       res.json({ paid: false });
     }

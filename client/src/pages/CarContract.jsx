@@ -119,14 +119,15 @@ export default function CarContract() {
   const [signature, setSignature] = useState(null);
   const [cgcRead, setCgcRead] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
+  const [signed, setSigned] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [secondDriver, setSecondDriver] = useState(false);
 
   useEffect(() => {
     axios.get(`/api/car-reservations/public/${id}`)
       .then(({ data }) => {
         setReservation(data);
-        if (data.contract_signed) { setDone(true); setPageStatus('ready'); return; }
+        if (data.contract_signed) { setSigned(true); setPageStatus('ready'); return; }
         const parts = (data.customer_name || '').split(' ');
         setDriver(d => ({ ...d, prenom: parts[0] || '', nom: parts.slice(1).join(' ') || '' }));
         setPageStatus('ready');
@@ -146,10 +147,21 @@ export default function CarContract() {
     setSubmitting(true);
     try {
       await axios.post(`/api/car-reservations/${id}/contract`, { driver, vehicle_state: vehicle, signature });
-      setDone(true);
-      toast.success('Contrat signé avec succès !');
+      toast.success('Contrat signé !');
+      setSigned(true);
     } catch { toast.error('Erreur lors de la signature'); }
     finally { setSubmitting(false); }
+  };
+
+  const handlePay = async () => {
+    setPaying(true);
+    try {
+      const { data } = await axios.post(`/api/car-reservations/${id}/checkout`);
+      window.location.href = data.url;
+    } catch (err) {
+      toast.error(err?.response?.data?.error || 'Erreur paiement');
+      setPaying(false);
+    }
   };
 
   if (pageStatus === 'loading') return (
@@ -166,14 +178,45 @@ export default function CarContract() {
     </div>
   );
 
-  if (done) return (
-    <div style={{ textAlign: 'center', padding: '100px 20px', maxWidth: 500, margin: '0 auto' }}>
-      <div style={{ width: 88, height: 88, borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px' }}>
-        <CheckCircle size={46} color="#059669"/>
+  if (signed && reservation) return (
+    <div style={{ maxWidth: 540, margin: '60px auto', padding: '0 16px' }}>
+      <div className="card" style={{ padding: '32px 28px', textAlign: 'center' }}>
+        <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+          <CheckCircle size={38} color="#059669"/>
+        </div>
+        <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 22, marginBottom: 8 }}>Contrat signé !</h2>
+        <p style={{ color: 'var(--gray-600)', marginBottom: 20, lineHeight: 1.6 }}>
+          Votre contrat pour <strong>{reservation.car_name}</strong> est signé.<br/>
+          Il ne reste plus qu'à procéder au paiement de la location.
+        </p>
+
+        {/* Récap */}
+        <div style={{ background: 'var(--light)', borderRadius: 12, padding: '14px 18px', marginBottom: 20, textAlign: 'left', fontSize: 13 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+            <span style={{ color: 'var(--gray-600)' }}>Location {reservation.days} jour{reservation.days > 1 ? 's' : ''}</span>
+            <span style={{ fontWeight: 700 }}>{reservation.car_total || reservation.total} €</span>
+          </div>
+          {reservation.delivery && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ color: 'var(--gray-600)' }}>Livraison / récupération</span>
+              <span style={{ fontWeight: 700 }}>20 €</span>
+            </div>
+          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--gray-200)', paddingTop: 8, marginTop: 4, fontWeight: 900, fontSize: 15 }}>
+            <span>Total à payer</span>
+            <span style={{ color: 'var(--primary)' }}>{reservation.total} €</span>
+          </div>
+          <div style={{ marginTop: 10, padding: '8px 10px', background: '#f0f9ff', borderRadius: 8, fontSize: 12, color: '#0c4a6e', lineHeight: 1.5 }}>
+            <strong>Caution :</strong> demandée à la remise des clés par <strong>chèque ou carte bancaire</strong>. Restituée au retour du véhicule en bon état.
+          </div>
+        </div>
+
+        <button className="btn btn-primary btn-lg" style={{ width: '100%', justifyContent: 'center', fontSize: 16 }}
+          onClick={handlePay} disabled={paying}>
+          {paying ? 'Redirection vers le paiement...' : `Payer ${reservation.total} € →`}
+        </button>
+        <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 8 }}>Paiement sécurisé par Stripe</p>
       </div>
-      <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 26, marginBottom: 12 }}>Contrat signé !</h2>
-      <p style={{ color: 'var(--gray-600)', marginBottom: 32 }}>Votre contrat de location pour <strong>{reservation?.car_name}</strong> a bien été enregistré.</p>
-      <Link to="/" className="btn btn-primary btn-lg">Retour à l'accueil</Link>
     </div>
   );
 

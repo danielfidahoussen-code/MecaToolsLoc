@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { differenceInDays } from 'date-fns';
@@ -27,28 +28,29 @@ function getRateInfo(car, days) {
 }
 
 function CarCard({ car }) {
+  const navigate = useNavigate();
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [form, setForm] = useState({ name: '', phone: '', email: '' });
   const [delivery, setDelivery] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [open, setOpen] = useState(false);
-  const [paying, setPaying] = useState(false);
+  const [reserving, setReserving] = useState(false);
 
   const days = startDate && endDate ? Math.max(1, differenceInDays(endDate, startDate)) : 0;
   const carTotal = calcPrice(car, days);
   const total = carTotal + (delivery ? DELIVERY_FEE : 0);
   const rateInfo = getRateInfo(car, days);
 
-  const handlePay = async () => {
+  const handleReserve = async () => {
     if (!startDate || !endDate) { toast.error('Choisissez vos dates'); return; }
     if (car.min_days && days < car.min_days) { toast.error(`Ce véhicule est disponible à partir de ${car.min_days} jours`); return; }
-    if (!form.name || !form.email) { toast.error('Nom et email requis'); return; }
+    if (!form.name || !form.phone || !form.email) { toast.error('Nom, téléphone et email requis'); return; }
     if (delivery && !deliveryAddress.trim()) { toast.error('Adresse de livraison requise'); return; }
     if (rateInfo?.invalid) { toast.error(rateInfo.label); return; }
-    setPaying(true);
+    setReserving(true);
     try {
-      const { data } = await axios.post('/api/car-reservations/checkout', {
+      const { data } = await axios.post('/api/car-reservations/create', {
         car_id: car.id,
         car_name: car.name,
         start_date: startDate.toLocaleDateString('fr-FR'),
@@ -62,10 +64,10 @@ function CarCard({ car }) {
         customer_email: form.email,
         customer_phone: form.phone,
       });
-      window.location.href = data.url;
+      navigate(`/autres-services/contrat/${data.id}`);
     } catch (err) {
-      toast.error(err?.response?.data?.error || 'Erreur paiement');
-      setPaying(false);
+      toast.error(err?.response?.data?.error || 'Erreur lors de la réservation');
+      setReserving(false);
     }
   };
 
@@ -222,10 +224,16 @@ function CarCard({ car }) {
               </div>
             )}
 
-            <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 15 }} onClick={handlePay} disabled={paying}>
-              {paying ? 'Redirection...' : `Payer ${total > 0 ? total + ' €' : ''} →`}
+            {/* Info caution */}
+            <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 10, padding: '10px 14px', marginBottom: 12, fontSize: 12, color: '#0c4a6e', lineHeight: 1.6 }}>
+              <p style={{ fontWeight: 800, marginBottom: 2 }}>Caution (dépôt de garantie)</p>
+              <p>La caution est demandée lors de la remise des clés, par <strong>chèque ou carte bancaire</strong>. Elle vous sera restituée au retour du véhicule en bon état.</p>
+            </div>
+
+            <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 15 }} onClick={handleReserve} disabled={reserving}>
+              {reserving ? 'Création de la réservation...' : `Réserver et signer le contrat →`}
             </button>
-            <p style={{ fontSize: 11, color: 'var(--gray-400)', textAlign: 'center', marginTop: 6 }}>Paiement sécurisé Stripe — confirmation immédiate</p>
+            <p style={{ fontSize: 11, color: 'var(--gray-400)', textAlign: 'center', marginTop: 6 }}>Vous signerez le contrat avant le paiement en ligne</p>
           </div>
         )}
       </div>

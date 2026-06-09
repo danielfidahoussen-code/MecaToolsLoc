@@ -53,28 +53,12 @@ export default function CarReservationSuccess() {
       <p style={{ color: 'var(--gray-500)', fontSize: 14, marginBottom: 32 }}>
         Un reçu a été envoyé à <strong>{info.customer_email}</strong>
       </p>
-      {info.reservation_id && (
-        <div style={{ background: '#fffbeb', border: '2px solid #fcd34d', borderRadius: 14, padding: '18px 20px', marginBottom: 24, textAlign: 'left' }}>
-          <p style={{ fontWeight: 800, color: '#92400e', marginBottom: 6, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <FileText size={18}/> Signez votre contrat de location
-          </p>
-          <p style={{ color: '#78350f', fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>
-            Avant la remise des clés, merci de remplir et signer votre contrat de location en ligne. Cela ne prend que 2 minutes.
-          </p>
-          <Link to={`/autres-services/contrat/${info.reservation_id}`}
-            className="btn btn-primary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#d97706', fontSize: 14 }}>
-            <FileText size={15}/> Remplir et signer le contrat
-          </Link>
-        </div>
-      )}
-
       <div style={{ background: 'var(--light)', borderRadius: 12, padding: '16px 20px', marginBottom: 32, fontSize: 14, color: 'var(--gray-600)', textAlign: 'left' }}>
         <p style={{ fontWeight: 700, marginBottom: 8, color: 'var(--primary)' }}>Prochaines étapes</p>
         <p>Nous vous contacterons sous 24h pour confirmer les détails</p>
-        <p style={{ marginTop: 6 }}>Remise des clés au point de retrait choisi</p>
+        <p style={{ marginTop: 6 }}>Remise des clés au point de retrait choisi — caution demandée sur place</p>
       </div>
-      <Link to="/" className="btn btn-outline btn-lg">Retour à l'accueil</Link>
+      <Link to="/" className="btn btn-primary btn-lg">Retour à l'accueil</Link>
     </div>
   );
 }

@@ -811,7 +811,22 @@ function CarForm({ car, token, onSave, onClose }) {
     specs: [['Carburant',''],['Boîte',''],['Places',''],['Portes',''],['Climatisation',''],['Kilométrage','']] };
   const [form, setForm] = useState(car ? { ...car, active: car.active !== 0 } : empty);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const { data } = await axios.post('/api/upload', fd);
+      set('image', data.url);
+      toast.success('Image importée !');
+    } catch { toast.error("Erreur lors de l'import"); }
+    finally { setUploading(false); }
+  };
 
   const setSpec = (i, col, val) => {
     const specs = [...(form.specs || [])];
@@ -876,8 +891,20 @@ function CarForm({ car, token, onSave, onClose }) {
             <input className="form-control" type="number" value={form.min_days || ''} onChange={e => set('min_days', e.target.value)} placeholder="Aucune"/>
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="form-label">URL photo</label>
-            <input className="form-control" value={form.image} onChange={e => set('image', e.target.value)} placeholder="https://..."/>
+            <label className="form-label">Photo du véhicule</label>
+            {form.image && (
+              <div style={{ marginBottom: 8, position: 'relative', display: 'inline-block' }}>
+                <img src={form.image} alt="Preview" style={{ height: 100, borderRadius: 8, objectFit: 'cover' }}/>
+                <button type="button" onClick={() => set('image', '')}
+                  style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,.6)', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <X size={12} color="white"/>
+                </button>
+              </div>
+            )}
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', border: '2px dashed var(--gray-200)', borderRadius: 10, cursor: 'pointer', background: 'var(--gray-50)', fontWeight: 600, fontSize: 13, color: 'var(--gray-600)' }}>
+              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }}/>
+              {uploading ? 'Import en cours...' : form.image ? 'Remplacer la photo' : 'Choisir une photo'}
+            </label>
           </div>
         </div>
 
