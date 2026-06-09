@@ -528,6 +528,10 @@ export default function Checkout() {
                   <span>Total TTC</span>
                   <span>{finalTotal.toFixed(2)} €</span>
                 </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--gray-400)', marginTop: 4 }}>
+                  <span>dont TVA (8,5%)</span>
+                  <span>{(finalTotal - finalTotal / 1.085).toFixed(2)} € — HT : {(finalTotal / 1.085).toFixed(2)} €</span>
+                </div>
                 {totalCaution > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, padding: '10px 12px', background: 'rgba(59,130,246,.07)', border: '1.5px solid rgba(59,130,246,.2)', borderRadius: 10, fontSize: 13 }}>
                     <span style={{ fontSize: 16 }}>🔒</span>

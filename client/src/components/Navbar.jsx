@@ -3,14 +3,12 @@ import { Link, NavLink } from 'react-router-dom';
 import { ShoppingCart, Menu, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { usePrice } from '../context/PriceContext';
 import Logo from './Logo';
 import CartDrawer from './CartDrawer';
 
 export default function Navbar() {
   const { count, setIsOpen } = useCart();
   const { isAdmin, logout } = useAuth();
-  const { isPro, toggle } = usePrice();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -83,16 +81,6 @@ export default function Navbar() {
               <button className="btn btn-sm btn-outline desktop-nav" onClick={logout}>Déconnexion</button>
             )}
 
-            {/* Toggle HT / TTC */}
-            <button onClick={toggle} title={isPro ? 'Passer en mode Particulier (TTC)' : 'Passer en mode Pro (HT)'} style={{
-              display: 'flex', alignItems: 'center', gap: 0,
-              borderRadius: 20, overflow: 'hidden', border: '1.5px solid var(--gray-200)',
-              background: 'white', cursor: 'pointer', fontSize: 12, fontWeight: 700, height: 36,
-            }}>
-              <span style={{ padding: '0 10px', background: !isPro ? 'var(--primary)' : 'transparent', color: !isPro ? 'white' : 'var(--gray-500)', transition: 'var(--transition)', height: '100%', display: 'flex', alignItems: 'center' }}>TTC</span>
-              <span style={{ padding: '0 10px', background: isPro ? 'var(--accent)' : 'transparent', color: isPro ? 'white' : 'var(--gray-500)', transition: 'var(--transition)', height: '100%', display: 'flex', alignItems: 'center' }}>HT Pro</span>
-            </button>
-
             {/* Panier */}
             <button onClick={() => setIsOpen(true)} style={{
               position: 'relative', padding: '10px 14px', borderRadius: 10,
@@ -148,15 +136,6 @@ export default function Navbar() {
                 </button>
               </>
             )}
-            {/* Toggle HT/TTC mobile */}
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--gray-100)' }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-500)', textTransform: 'uppercase', marginBottom: 8 }}>Affichage des prix</p>
-              <button onClick={toggle} style={{ display: 'flex', borderRadius: 20, overflow: 'hidden', border: '1.5px solid var(--gray-200)', background: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 700, height: 38 }}>
-                <span style={{ padding: '0 16px', background: !isPro ? 'var(--primary)' : 'transparent', color: !isPro ? 'white' : 'var(--gray-500)', height: '100%', display: 'flex', alignItems: 'center' }}>Particulier (TTC)</span>
-                <span style={{ padding: '0 16px', background: isPro ? 'var(--accent)' : 'transparent', color: isPro ? 'white' : 'var(--gray-500)', height: '100%', display: 'flex', alignItems: 'center' }}>Pro (HT)</span>
-              </button>
-            </div>
-
             {/* Contact rapide dans le menu */}
             <div style={{ padding: '14px 20px', display: 'flex', gap: 12 }}>
               <a href="tel:+262693839654" className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>Appeler</a>
