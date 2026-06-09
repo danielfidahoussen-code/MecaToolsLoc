@@ -136,21 +136,27 @@ function getRateInfo(car, days) {
   return null;
 }
 
+const DELIVERY_FEE = 20;
+
 function CarCard({ car }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [form, setForm] = useState({ name: '', phone: '', email: '' });
+  const [delivery, setDelivery] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [open, setOpen] = useState(false);
   const [paying, setPaying] = useState(false);
 
   const days = startDate && endDate ? Math.max(1, differenceInDays(endDate, startDate)) : 0;
-  const total = calcPrice(car, days);
+  const carTotal = calcPrice(car, days);
+  const total = carTotal + (delivery ? DELIVERY_FEE : 0);
   const rateInfo = getRateInfo(car, days);
 
   const handlePay = async () => {
     if (!startDate || !endDate) { toast.error('Choisissez vos dates'); return; }
     if (car.min_days && days < car.min_days) { toast.error(`Ce véhicule est disponible à partir de ${car.min_days} jours`); return; }
     if (!form.name || !form.email) { toast.error('Nom et email requis'); return; }
+    if (delivery && !deliveryAddress.trim()) { toast.error('Adresse de livraison requise'); return; }
     if (rateInfo?.invalid) { toast.error(rateInfo.label); return; }
     setPaying(true);
     try {
@@ -160,7 +166,10 @@ function CarCard({ car }) {
         start_date: startDate.toLocaleDateString('fr-FR'),
         end_date: endDate.toLocaleDateString('fr-FR'),
         days,
+        car_total: carTotal,
         total,
+        delivery,
+        delivery_address: delivery ? deliveryAddress.trim() : '',
         customer_name: form.name,
         customer_email: form.email,
         customer_phone: form.phone,
@@ -280,6 +289,47 @@ function CarCard({ car }) {
               <input className="form-control" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="vous@exemple.fr"/>
             </div>
 
+            {/* Option livraison */}
+            <div style={{ border: '1.5px solid var(--gray-200)', borderRadius: 10, padding: '12px 14px', marginBottom: 12, background: delivery ? 'rgba(34,197,94,.06)' : 'var(--gray-50)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontWeight: 700, fontSize: 14, color: 'var(--primary)' }}>
+                <input type="checkbox" checked={delivery} onChange={e => setDelivery(e.target.checked)}
+                  style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer' }}/>
+                <span>Livraison / récupération à domicile</span>
+                <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>+{DELIVERY_FEE} €</span>
+              </label>
+              {delivery && (
+                <div style={{ marginTop: 10 }}>
+                  <input className="form-control" value={deliveryAddress}
+                    onChange={e => setDeliveryAddress(e.target.value)}
+                    placeholder="Adresse complète de livraison / récupération"
+                    style={{ fontSize: 13 }}/>
+                  <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>Nous vous contacterons pour confirmer l'heure</p>
+                </div>
+              )}
+            </div>
+
+            {/* Récap total */}
+            {days > 0 && !rateInfo?.invalid && (
+              <div style={{ background: 'var(--light)', borderRadius: 8, padding: '10px 12px', marginBottom: 12, fontSize: 13 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)', marginBottom: delivery ? 4 : 0 }}>
+                  <span>Location ({days}j)</span>
+                  <span>{carTotal} €</span>
+                </div>
+                {delivery && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)', marginBottom: 4 }}>
+                    <span>Livraison / récupération</span>
+                    <span>{DELIVERY_FEE} €</span>
+                  </div>
+                )}
+                {delivery && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, color: 'var(--primary)', borderTop: '1px solid var(--gray-200)', paddingTop: 6, marginTop: 4 }}>
+                    <span>Total</span>
+                    <span>{total} €</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 15 }} onClick={handlePay} disabled={paying}>
               {paying ? 'Redirection...' : `Payer ${total > 0 ? total + ' €' : ''} →`}
             </button>
@@ -321,6 +371,8 @@ export default function AutresServices() {
           <span>Kilométrage illimité</span>
           <span style={{ color: 'var(--gray-300)' }}>|</span>
           <span>Saint-Denis &amp; Saint-Pierre</span>
+          <span style={{ color: 'var(--gray-300)' }}>|</span>
+          <span style={{ color: '#059669', fontWeight: 700 }}>Livraison / récupération +20 €</span>
           <span style={{ color: 'var(--gray-300)' }}>|</span>
           <span style={{ color: '#d97706', fontWeight: 700 }}>-10% dès 5 jours</span>
         </div>

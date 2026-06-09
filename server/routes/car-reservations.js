@@ -8,22 +8,35 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 // Crée une session Stripe pour une location de voiture
 router.post('/checkout', async (req, res) => {
   try {
-    const { car_id, car_name, start_date, end_date, days, total, customer_name, customer_email, customer_phone } = req.body;
+    const { car_id, car_name, start_date, end_date, days, car_total, total, delivery, delivery_address, customer_name, customer_email, customer_phone } = req.body;
 
     const host = req.headers.host || '';
     const proto = host.includes('localhost') ? 'http' : 'https';
     const origin = req.headers.origin || `${proto}://${host}`;
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
+    const lineItems = [{
+      price_data: {
+        currency: 'eur',
+        product_data: { name: `Location ${car_name} — ${start_date} au ${end_date} (${days} jour${days > 1 ? 's' : ''})` },
+        unit_amount: Math.round((car_total || total) * 100),
+      },
+      quantity: 1,
+    }];
+
+    if (delivery) {
+      lineItems.push({
         price_data: {
           currency: 'eur',
-          product_data: { name: `Location ${car_name} — ${start_date} au ${end_date} (${days} jour${days > 1 ? 's' : ''})` },
-          unit_amount: Math.round(total * 100),
+          product_data: { name: `Livraison / récupération à domicile${delivery_address ? ` — ${delivery_address.slice(0, 100)}` : ''}` },
+          unit_amount: 2000,
         },
         quantity: 1,
-      }],
+      });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: lineItems,
       mode: 'payment',
       customer_email,
       success_url: `${origin}/autres-services/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -36,6 +49,8 @@ router.post('/checkout', async (req, res) => {
         end_date,
         days: String(days),
         total: String(total),
+        delivery: delivery ? 'true' : 'false',
+        delivery_address: (delivery_address || '').slice(0, 200),
         customer_name: (customer_name || '').slice(0, 200),
         customer_phone: (customer_phone || '').slice(0, 50),
       },
@@ -66,6 +81,8 @@ router.get('/session/:sessionId', async (req, res) => {
           end_date: meta.end_date,
           days: parseInt(meta.days || 1),
           total: parseFloat(meta.total || 0),
+          delivery: meta.delivery === 'true',
+          delivery_address: meta.delivery_address || '',
           customer_name: meta.customer_name,
           customer_email: session.customer_email,
           customer_phone: meta.customer_phone,
