@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Calendar, Eye } from 'lucide-react';
+import { ShoppingCart, Eye } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
+  const [imgError, setImgError] = useState(false);
 
   const handleBuy = (e) => {
     e.preventDefault();
@@ -22,10 +24,17 @@ export default function ProductCard({ product }) {
         onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}>
 
         {/* Image */}
-        <div style={{ position: 'relative', overflow: 'hidden', height: 200 }}>
-          <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .4s ease' }}
-            onMouseOver={e => e.currentTarget.style.transform = 'scale(1.06)'}
-            onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}/>
+        <div style={{ position: 'relative', overflow: 'hidden', height: 200, background: 'var(--gray-100)' }}>
+          {product.image && !imgError ? (
+            <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .4s ease' }}
+              onMouseOver={e => e.currentTarget.style.transform = 'scale(1.06)'}
+              onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+              onError={() => setImgError(true)}/>
+          ) : (
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <p style={{ color: 'var(--gray-400)', fontSize: 13, fontWeight: 600 }}>Photo à venir</p>
+            </div>
+          )}
           <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 5 }}>
             {product.available_for_rent && <span className="badge badge-rent">Location</span>}
             {product.available_for_sale && <span className="badge badge-sale">Achat</span>}
