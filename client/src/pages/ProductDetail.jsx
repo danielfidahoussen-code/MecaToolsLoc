@@ -123,6 +123,7 @@ export default function ProductDetail() {
                   alt={product.name}
                   style={{ width: '100%', height: 380, objectFit: 'cover', transition: 'transform 0.4s ease' }}
                   onMouseMove={e => {
+                    if (window.matchMedia('(hover: none)').matches) return;
                     const rect = e.currentTarget.getBoundingClientRect();
                     const x = ((e.clientX - rect.left) / rect.width) * 100;
                     const y = ((e.clientY - rect.top) / rect.height) * 100;
