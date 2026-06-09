@@ -20,7 +20,7 @@ router.get('/all', authMiddleware, (req, res) => {
 
 // Admin — ajouter
 router.post('/', authMiddleware, (req, res) => {
-  const { name, category, description, specs, price_day, price_5days, price_2weeks, min_days, image, active } = req.body;
+  const { name, category, description, specs, price_day, price_5days, price_2weeks, min_days, caution, image, active } = req.body;
   if (!name) return res.status(400).json({ error: 'Nom requis' });
   const { lastInsertRowid: id } = cars.insert({
     name,
@@ -31,6 +31,7 @@ router.post('/', authMiddleware, (req, res) => {
     price_5days: Number(price_5days) || 0,
     price_2weeks: Number(price_2weeks) || 0,
     min_days: min_days ? Number(min_days) : null,
+    caution: caution ? Number(caution) : null,
     image: image || '',
     active: active !== false ? 1 : 0,
   });
@@ -39,7 +40,7 @@ router.post('/', authMiddleware, (req, res) => {
 
 // Admin — modifier
 router.put('/:id', authMiddleware, (req, res) => {
-  const { name, category, description, specs, price_day, price_5days, price_2weeks, min_days, image, active } = req.body;
+  const { name, category, description, specs, price_day, price_5days, price_2weeks, min_days, caution, image, active } = req.body;
   cars.update(Number(req.params.id), {
     name,
     category: category || '',
@@ -49,6 +50,7 @@ router.put('/:id', authMiddleware, (req, res) => {
     price_5days: Number(price_5days) || 0,
     price_2weeks: Number(price_2weeks) || 0,
     min_days: min_days ? Number(min_days) : null,
+    caution: caution ? Number(caution) : null,
     image: image || '',
     active: active !== false ? 1 : 0,
   });

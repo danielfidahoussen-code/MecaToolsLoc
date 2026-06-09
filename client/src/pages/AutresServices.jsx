@@ -131,6 +131,12 @@ function CarCard({ car }) {
           )}
         </div>
 
+        {car.caution > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: '#0c4a6e', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '6px 10px', borderRadius: 8, marginBottom: 8, fontWeight: 600 }}>
+            <span>Caution à la remise des clés</span>
+            <span style={{ fontWeight: 900, fontSize: 14 }}>{car.caution} €</span>
+          </div>
+        )}
         {car.min_days && (
           <div style={{ fontSize: 12, color: 'var(--gray-500)', background: 'var(--gray-100)', padding: '6px 10px', borderRadius: 8, marginBottom: 12, fontWeight: 600 }}>
             Durée minimum : {car.min_days} jours
@@ -226,8 +232,13 @@ function CarCard({ car }) {
 
             {/* Info caution */}
             <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 10, padding: '10px 14px', marginBottom: 12, fontSize: 12, color: '#0c4a6e', lineHeight: 1.6 }}>
-              <p style={{ fontWeight: 800, marginBottom: 2 }}>Caution (dépôt de garantie)</p>
-              <p>La caution est demandée lors de la remise des clés, par <strong>chèque ou carte bancaire</strong>. Elle vous sera restituée au retour du véhicule en bon état.</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                <p style={{ fontWeight: 800 }}>Caution (dépôt de garantie)</p>
+                {car.caution > 0 && (
+                  <span style={{ fontWeight: 900, fontSize: 15, color: '#0369a1' }}>{car.caution} €</span>
+                )}
+              </div>
+              <p>Demandée à la remise des clés par <strong>chèque ou carte bancaire</strong>. Restituée au retour du véhicule en bon état.</p>
             </div>
 
             <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 15 }} onClick={handleReserve} disabled={reserving}>

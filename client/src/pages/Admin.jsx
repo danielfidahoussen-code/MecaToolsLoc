@@ -807,7 +807,7 @@ export default function Admin() {
 /* ─── CAR FORM MODAL ─────────────────────────────────────────────────────── */
 function CarForm({ car, token, onSave, onClose }) {
   const isMobile = useIsMobile();
-  const empty = { name: '', category: '', description: '', price_day: '', price_5days: '', price_2weeks: '', min_days: '', image: '', active: true,
+  const empty = { name: '', category: '', description: '', price_day: '', price_5days: '', price_2weeks: '', min_days: '', caution: '', image: '', active: true,
     specs: [['Carburant',''],['Boîte',''],['Places',''],['Portes',''],['Climatisation',''],['Kilométrage','']] };
   const [form, setForm] = useState(car ? { ...car, active: car.active !== 0 } : empty);
   const [saving, setSaving] = useState(false);
@@ -889,6 +889,11 @@ function CarForm({ car, token, onSave, onClose }) {
           <div className="form-group">
             <label className="form-label">Durée minimum (jours)</label>
             <input className="form-control" type="number" value={form.min_days || ''} onChange={e => set('min_days', e.target.value)} placeholder="Aucune"/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Caution (€)</label>
+            <input className="form-control" type="number" value={form.caution || ''} onChange={e => set('caution', e.target.value)} placeholder="Ex: 500"/>
+            <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 3 }}>Demandée à la remise des clés (chèque ou CB)</p>
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
             <label className="form-label">Photo du véhicule</label>

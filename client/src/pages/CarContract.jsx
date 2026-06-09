@@ -222,8 +222,14 @@ export default function CarContract() {
             <span>Total à payer</span>
             <span style={{ color: 'var(--primary)' }}>{reservation.total} €</span>
           </div>
-          <div style={{ marginTop: 10, padding: '8px 10px', background: '#f0f9ff', borderRadius: 8, fontSize: 12, color: '#0c4a6e', lineHeight: 1.5 }}>
-            <strong>Caution :</strong> demandée à la remise des clés par <strong>chèque ou carte bancaire</strong>. Restituée au retour du véhicule en bon état.
+          <div style={{ marginTop: 10, padding: '10px 12px', background: '#f0f9ff', borderRadius: 8, fontSize: 12, color: '#0c4a6e', lineHeight: 1.5 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <strong>Caution (dépôt de garantie)</strong>
+              {reservation.caution_amount > 0 && (
+                <span style={{ fontWeight: 900, fontSize: 15 }}>{reservation.caution_amount} €</span>
+              )}
+            </div>
+            <p>Demandée à la remise des clés par <strong>chèque ou carte bancaire</strong>. Restituée au retour du véhicule en bon état.</p>
           </div>
         </div>
 

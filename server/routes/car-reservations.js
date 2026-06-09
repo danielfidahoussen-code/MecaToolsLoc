@@ -8,14 +8,17 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 // Crée une réservation en attente (avant contrat + paiement)
 router.post('/create', (req, res) => {
   try {
+    const { cars } = require('../database');
     const { car_id, car_name, start_date, end_date, days, car_total, total, delivery, delivery_address, customer_name, customer_email, customer_phone } = req.body;
     if (!car_name || !customer_name || !customer_email) return res.status(400).json({ error: 'Champs requis manquants' });
+    const carRecord = car_id ? cars.getById(Number(car_id)) : null;
     const { lastInsertRowid: id } = car_reservations.insert({
       car_id, car_name, start_date, end_date,
       days: parseInt(days), car_total: parseFloat(car_total || total),
       total: parseFloat(total), delivery: !!delivery,
       delivery_address: delivery_address || '',
       customer_name, customer_email, customer_phone: customer_phone || '',
+      caution_amount: carRecord?.caution || null,
       status: 'pending',
     });
     res.json({ id });
@@ -186,8 +189,9 @@ router.get('/public/:id', (req, res) => {
   res.json({
     id: r.id, car_name: r.car_name, car_id: r.car_id,
     start_date: r.start_date, end_date: r.end_date, days: r.days,
-    total: r.total, customer_name: r.customer_name, customer_email: r.customer_email,
+    total: r.total, car_total: r.car_total, customer_name: r.customer_name, customer_email: r.customer_email,
     customer_phone: r.customer_phone, delivery: r.delivery, delivery_address: r.delivery_address,
+    caution_amount: r.caution_amount || null,
     contract_signed: !!r.contract_signed_at,
   });
 });
@@ -267,7 +271,7 @@ router.get('/:id/contract/print', (req, res, next) => {
   <div class="grid3">
     <div><div class="label">Véhicule</div><div class="field">${r.car_name}</div></div>
     <div><div class="label">Immatriculation</div><div class="field">${vehicle.immatriculation || ''}</div></div>
-    <div><div class="label">Caution</div><div class="field">${vehicle.caution || '—'}</div></div>
+    <div><div class="label">Caution</div><div class="field">${r.caution_amount ? r.caution_amount + ' €' : vehicle.caution || '—'}</div></div>
     <div><div class="label">Date de début</div><div class="field">${r.start_date}</div></div>
     <div><div class="label">Date de fin</div><div class="field">${r.end_date}</div></div>
     <div><div class="label">Durée</div><div class="field">${r.days} jour${r.days > 1 ? 's' : ''}</div></div>
