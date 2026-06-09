@@ -26,12 +26,12 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { to: '/', label: 'Accueil', icon: '🏠' },
-    { to: '/catalogue', label: 'Catalogue', icon: '🔧' },
-    { to: '/autres-services', label: 'Autres services', icon: '🚗' },
-    { to: '/a-propos', label: 'À propos', icon: 'ℹ️' },
-    { to: '/faq', label: 'FAQ', icon: '❓' },
-    { to: '/contact', label: 'Contact', icon: '📞' },
+    { to: '/', label: 'Accueil' },
+    { to: '/catalogue', label: 'Catalogue' },
+    { to: '/autres-services', label: 'Autres services' },
+    { to: '/a-propos', label: 'À propos' },
+    { to: '/faq', label: 'FAQ' },
+    { to: '/contact', label: 'Contact' },
   ];
 
   return (
@@ -113,27 +113,27 @@ export default function Navbar() {
         {/* Mobile menu */}
         {menuOpen && (
           <div style={{ borderTop: '1px solid var(--gray-100)', background: 'white', paddingBottom: 16 }}>
-            {navLinks.map(({ to, label, icon }) => (
+            {navLinks.map(({ to, label }) => (
               <NavLink key={to} to={to} end={to === '/'} onClick={() => setMenuOpen(false)}
                 style={({ isActive }) => ({
-                  display: 'flex', alignItems: 'center', gap: 12,
+                  display: 'flex', alignItems: 'center',
                   padding: '14px 20px', fontWeight: 600, fontSize: 15,
                   borderBottom: '1px solid var(--gray-100)',
                   color: isActive ? 'var(--accent)' : 'var(--gray-800)',
                   background: isActive ? 'rgba(255,51,51,.04)' : 'transparent',
                 })}>
-                <span style={{ fontSize: 18 }}>{icon}</span> {label}
+                {label}
               </NavLink>
             ))}
             {isAdmin && (
               <>
                 <NavLink to="/admin" onClick={() => setMenuOpen(false)}
                   style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px', fontWeight: 700, fontSize: 15, borderBottom: '1px solid var(--gray-100)', color: 'var(--primary)' }}>
-                  ⚙️ Admin
+                  Admin
                 </NavLink>
                 <button onClick={() => { logout(); setMenuOpen(false); }}
                   style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px', fontWeight: 600, fontSize: 15, width: '100%', color: 'var(--danger)', borderBottom: '1px solid var(--gray-100)' }}>
-                  🚪 Déconnexion
+                  Déconnexion
                 </button>
               </>
             )}

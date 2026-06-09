@@ -60,7 +60,7 @@ export default function CartDrawer() {
                   background: item.type === 'sale' ? '#d1fae5' : '#fef3c7',
                   color: item.type === 'sale' ? '#065f46' : '#92400e'
                 }}>
-                  {item.type === 'sale' ? '🛒 Achat' : '📅 Location'}
+                  {item.type === 'sale' ? 'Achat' : 'Location'}
                 </span>
                 {item.rentDates && (
                   <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 3 }}>

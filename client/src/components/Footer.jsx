@@ -131,7 +131,7 @@ export default function Footer() {
               </a>
 
               <div style={{ background: 'rgba(255,51,51,.15)', border: '1px solid rgba(255,51,51,.3)', borderRadius: 10, padding: '10px 14px', marginTop: 8 }}>
-                <p style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 13 }}>🏷️ -10% retrait sur place</p>
+                <p style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 13 }}>-10% retrait sur place</p>
                 <p style={{ color: 'rgba(255,255,255,.6)', fontSize: 12, marginTop: 4 }}>Remise accordée à la récupération chez nous</p>
               </div>
             </div>

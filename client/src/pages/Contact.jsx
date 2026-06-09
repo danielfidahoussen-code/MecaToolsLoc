@@ -64,7 +64,7 @@ export default function Contact() {
               ))}
 
               <div style={{ background: 'var(--primary)', borderRadius: 16, padding: '24px', marginTop: 20 }}>
-                <p style={{ color: 'var(--accent)', fontWeight: 700, marginBottom: 6 }}>⚡ Besoin urgent ?</p>
+                <p style={{ color: 'var(--accent)', fontWeight: 700, marginBottom: 6 }}>Besoin urgent ?</p>
                 <p style={{ color: 'rgba(255,255,255,.85)', fontSize: 14, lineHeight: 1.7 }}>
                   Pour toute demande urgente, appelez-nous directement au <strong style={{ color: 'white' }}>06 93 83 96 54</strong>.
                   Nous ferons notre maximum pour vous aider immédiatement.

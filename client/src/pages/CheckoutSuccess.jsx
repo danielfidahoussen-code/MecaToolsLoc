@@ -53,7 +53,7 @@ export default function CheckoutSuccess() {
       <div style={{ width: 88, height: 88, borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px' }}>
         <CheckCircle size={46} color="#059669"/>
       </div>
-      <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 28, marginBottom: 12 }}>Paiement confirmé ! 🎉</h2>
+      <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 28, marginBottom: 12 }}>Paiement confirmé !</h2>
       <p style={{ color: 'var(--gray-600)', lineHeight: 1.7, marginBottom: 8 }}>
         Merci {info.customer_name} ! Votre commande a bien été enregistrée.
       </p>
@@ -62,8 +62,8 @@ export default function CheckoutSuccess() {
       </p>
       <div style={{ background: 'var(--light)', borderRadius: 12, padding: '16px 20px', marginBottom: 32, fontSize: 14, color: 'var(--gray-600)', textAlign: 'left' }}>
         <p style={{ fontWeight: 700, marginBottom: 8, color: 'var(--primary)' }}>Prochaines étapes</p>
-        <p>📞 Nous vous contacterons sous 24h pour confirmer les détails</p>
-        <p style={{ marginTop: 6 }}>📍 Retrait ou livraison selon votre choix à la commande</p>
+        <p>Nous vous contacterons sous 24h pour confirmer les détails</p>
+        <p style={{ marginTop: 6 }}>Retrait ou livraison selon votre choix à la commande</p>
       </div>
       <Link to="/" className="btn btn-primary btn-lg">Retour à l'accueil</Link>
     </div>

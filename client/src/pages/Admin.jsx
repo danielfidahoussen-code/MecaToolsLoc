@@ -360,14 +360,13 @@ export default function Admin() {
               {/* Chiffres clés */}
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(5,1fr)', gap: 14, marginBottom: 28 }}>
                 {[
-                  { label: 'Produits',          value: products.length,                                       icon: '📦', color: 'var(--primary)' },
-                  { label: 'Commandes',          value: orders.length,                                         icon: '🛒', color: '#7c3aed' },
-                  { label: 'Résa. outils',       value: reservations.length,                                   icon: '📅', color: '#0891b2' },
-                  { label: 'Résa. voitures',     value: carReservations.length,                                icon: '🚗', color: '#d97706' },
-                  { label: 'CA Total',           value: `${revenue.toFixed(0)} €`,                            icon: '💰', color: 'var(--success)' },
-                ].map(({ label, value, icon, color }) => (
+                  { label: 'Produits',          value: products.length,                color: 'var(--primary)' },
+                  { label: 'Commandes',          value: orders.length,                  color: '#7c3aed' },
+                  { label: 'Résa. outils',       value: reservations.length,            color: '#0891b2' },
+                  { label: 'Résa. voitures',     value: carReservations.length,         color: '#d97706' },
+                  { label: 'CA Total',           value: `${revenue.toFixed(0)} €`,      color: 'var(--success)' },
+                ].map(({ label, value, color }) => (
                   <div key={label} className="card" style={{ padding: isMobile ? 16 : 22, textAlign: 'center' }}>
-                    <div style={{ fontSize: isMobile ? 26 : 32, marginBottom: 8 }}>{icon}</div>
                     <p style={{ fontSize: isMobile ? 22 : 28, fontWeight: 900, color }}>{value}</p>
                     <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{label}</p>
                   </div>
@@ -575,8 +574,8 @@ export default function Admin() {
                           <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.product_name}</p>
                           <p style={{ fontSize: 13, fontWeight: 600, marginTop: 2 }}>{r.customer_name}</p>
                           <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{r.customer_email}</p>
-                          {r.customer_phone && <p style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600, marginTop: 2 }}>📞 {r.customer_phone}</p>}
-                          <p style={{ fontSize: 12, color: 'var(--gray-500)', marginTop: 4 }}>📅 {r.start_date} → {r.end_date}</p>
+                          {r.customer_phone && <p style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600, marginTop: 2 }}>{r.customer_phone}</p>}
+                          <p style={{ fontSize: 12, color: 'var(--gray-500)', marginTop: 4 }}>{r.start_date} → {r.end_date}</p>
                         </div>
                         <div style={{ flexShrink: 0, textAlign: 'right', marginLeft: 10 }}>
                           <p style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 15 }}>{r.total_price?.toFixed(2)} €</p>

@@ -36,7 +36,7 @@ export default function FAQ() {
   }, []);
 
   const categories = ['all', ...new Set(faqs.map(f => f.category))];
-  const catLabels = { all: '📋 Toutes', reservation: '📅 Réservation', paiement: '💳 Paiement', livraison: '🚚 Livraison', contact: '📞 Contact', general: '❓ Général' };
+  const catLabels = { all: 'Toutes', reservation: 'Réservation', paiement: 'Paiement', livraison: 'Livraison', contact: 'Contact', general: 'Général' };
   const filtered = activeCategory === 'all' ? faqs : faqs.filter(f => f.category === activeCategory);
 
   return (
