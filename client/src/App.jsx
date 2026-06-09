@@ -21,6 +21,7 @@ import LogoPreview from './pages/LogoPreview';
 import CheckoutSuccess from './pages/CheckoutSuccess';
 import AutresServices from './pages/AutresServices';
 import CarReservationSuccess from './pages/CarReservationSuccess';
+import CarContract from './pages/CarContract';
 
 export default function App() {
   return (
@@ -50,6 +51,7 @@ export default function App() {
                   <Route path="/logo-preview" element={<LogoPreview/>}/>
                   <Route path="/autres-services" element={<AutresServices/>}/>
                   <Route path="/autres-services/success" element={<CarReservationSuccess/>}/>
+                  <Route path="/autres-services/contrat/:id" element={<CarContract/>}/>
                 </Routes>
                 <Footer/>
               </>

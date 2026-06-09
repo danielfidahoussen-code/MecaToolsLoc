@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -670,10 +670,22 @@ export default function Admin() {
                       <p style={{ fontSize: 12, color: 'var(--gray-500)', marginBottom: 4 }}>{r.customer_email} · {r.customer_phone}</p>
                       <p style={{ fontSize: 12, color: 'var(--gray-600)', marginBottom: r.delivery ? 4 : 8 }}>{r.start_date} → {r.end_date} ({r.days} j)</p>
                       {r.delivery && (
-                        <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 700, color: '#92400e', marginBottom: 8 }}>
+                        <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 700, color: '#92400e', marginBottom: 6 }}>
                           Livraison à domicile{r.delivery_address ? ` — ${r.delivery_address}` : ''}
                         </div>
                       )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        {r.contract_signed_at
+                          ? <span style={{ fontSize: 11, fontWeight: 700, background: '#d1fae5', color: '#065f46', padding: '2px 8px', borderRadius: 20 }}>Contrat signé</span>
+                          : <span style={{ fontSize: 11, fontWeight: 700, background: '#fee2e2', color: '#991b1b', padding: '2px 8px', borderRadius: 20 }}>Contrat non signé</span>
+                        }
+                        {r.contract_signed_at && (
+                          <a href={`/api/car-reservations/${r.id}/contract/print`} target="_blank" rel="noreferrer"
+                            style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
+                            <FileText size={12}/> Voir
+                          </a>
+                        )}
+                      </div>
                       <select style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1.5px solid var(--gray-200)', fontSize: 13, fontWeight: 700 }}
                         value={r.status} onChange={e => updateCarReservationStatus(r.id, e.target.value)}>
                         <option value="confirmed">Confirmée</option>
@@ -689,7 +701,7 @@ export default function Admin() {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <thead>
                       <tr style={{ background: 'var(--light)', borderBottom: '2px solid var(--gray-200)' }}>
-                        {['#', 'Véhicule', 'Client', 'Téléphone', 'Dates', 'Durée', 'Total', 'Livraison', 'Statut'].map(h => (
+                        {['#', 'Véhicule', 'Client', 'Téléphone', 'Dates', 'Durée', 'Total', 'Livraison', 'Contrat', 'Statut'].map(h => (
                           <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
                         ))}
                       </tr>
@@ -714,6 +726,14 @@ export default function Admin() {
                                 {r.delivery_address && <p style={{ fontSize: 11, color: 'var(--gray-500)', marginTop: 3, maxWidth: 180 }}>{r.delivery_address}</p>}
                               </div>
                             ) : <span style={{ color: 'var(--gray-400)', fontSize: 12 }}>—</span>}
+                          </td>
+                          <td style={{ padding: '11px 14px' }}>
+                            {r.contract_signed_at ? (
+                              <a href={`/api/car-reservations/${r.id}/contract/print`} target="_blank" rel="noreferrer"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#065f46', background: '#d1fae5', padding: '3px 8px', borderRadius: 6, textDecoration: 'none' }}>
+                                <FileText size={12}/> Voir
+                              </a>
+                            ) : <span style={{ fontSize: 11, fontWeight: 700, color: '#991b1b', background: '#fee2e2', padding: '2px 6px', borderRadius: 4 }}>Non signé</span>}
                           </td>
                           <td style={{ padding: '11px 14px' }}>
                             <select style={{ padding: '4px 8px', borderRadius: 6, border: '1.5px solid var(--gray-200)', fontSize: 12, fontWeight: 700 }}

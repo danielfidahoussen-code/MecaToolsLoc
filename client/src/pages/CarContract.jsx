@@ -1,0 +1,354 @@
+import { useState, useEffect, useRef } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { CheckCircle, Loader, PenLine, Trash2 } from 'lucide-react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+
+const CGC_TEXT = `CONDITIONS GÉNÉRALES DE LOCATION (CGL) – LOCATION DE VÉHICULE SANS CHAUFFEUR
+PRESTOLOC — Date : 22/01/2026
+
+1) Objet – Champ d'application
+Les présentes CGL encadrent toute location de véhicule sans chauffeur entre le Loueur et le Locataire. En signant, le Locataire reconnaît avoir pris connaissance des CGL et les accepter.
+
+2) Conducteurs autorisés
+Seules les personnes indiquées au contrat peuvent conduire. Tout ajout doit être déclaré avant départ.
+
+3) Caution / Dépôt de garantie
+Le Loueur peut encaisser tout ou partie de la caution pour couvrir : dommages, franchise, carburant manquant, nettoyage, retard, amendes, frais de dossier, immobilisation, accessoires manquants.
+
+4) Utilisation du Véhicule
+Ne pas : sous-louer, prêter à un conducteur non autorisé, conduire sous alcool/stupéfiants, participer à des courses, transporter des matières dangereuses.
+
+5) Carburant
+Le niveau doit être rendu identique au départ. Tout carburant manquant est facturé.
+
+6) Sinistre / Accident (procédure obligatoire)
+(a) Sécuriser. (b) Prévenir le Loueur immédiatement. (c) Constat amiable + photos. (d) Ne pas reconnaître de responsabilité.
+
+7) Restitution – Retard
+Retour à la date/heure convenus. Prolongation validée avant l'échéance. Retard non autorisé : jours supplémentaires + pénalités.
+
+8) Nettoyage
+Véhicule rendu anormalement sale : frais de nettoyage facturés selon grille.
+
+9) Infractions
+Le Locataire est responsable des infractions (stationnement, vitesse, péages).
+
+10) Données personnelles (RGPD)
+Données utilisées pour gérer la réservation, le contrat, la facturation. Contact : locationautopresto@gmail.com
+
+11) Loi applicable
+Droit français. Juridictions compétentes en cas de litige après tentative de médiation.`;
+
+function SignaturePad({ onSign }) {
+  const canvasRef = useRef(null);
+  const drawing = useRef(false);
+  const [hasSignature, setHasSignature] = useState(false);
+
+  const getPos = (e, canvas) => {
+    const rect = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - rect.left) * (canvas.width / rect.width), y: (src.clientY - rect.top) * (canvas.height / rect.height) };
+  };
+
+  const start = (e) => {
+    e.preventDefault();
+    drawing.current = true;
+    const ctx = canvasRef.current.getContext('2d');
+    const pos = getPos(e, canvasRef.current);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  };
+
+  const move = (e) => {
+    e.preventDefault();
+    if (!drawing.current) return;
+    const ctx = canvasRef.current.getContext('2d');
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    const pos = getPos(e, canvasRef.current);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    setHasSignature(true);
+  };
+
+  const end = () => {
+    drawing.current = false;
+    if (hasSignature) onSign(canvasRef.current.toDataURL('image/png'));
+  };
+
+  const clear = () => {
+    const canvas = canvasRef.current;
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    setHasSignature(false);
+    onSign(null);
+  };
+
+  return (
+    <div>
+      <div style={{ position: 'relative', border: '2px solid var(--gray-200)', borderRadius: 10, background: '#fafafa', overflow: 'hidden' }}>
+        <canvas ref={canvasRef} width={560} height={150} style={{ width: '100%', height: 150, touchAction: 'none', cursor: 'crosshair', display: 'block' }}
+          onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end}
+          onTouchStart={start} onTouchMove={move} onTouchEnd={end}/>
+        {!hasSignature && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+            <p style={{ color: 'var(--gray-400)', fontSize: 13, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <PenLine size={16}/> Signez ici avec votre doigt ou la souris
+            </p>
+          </div>
+        )}
+      </div>
+      {hasSignature && (
+        <button type="button" onClick={clear} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: 12, color: 'var(--danger)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          <Trash2 size={13}/> Effacer la signature
+        </button>
+      )}
+    </div>
+  );
+}
+
+export default function CarContract() {
+  const { id } = useParams();
+  const [reservation, setReservation] = useState(null);
+  const [pageStatus, setPageStatus] = useState('loading');
+  const [step, setStep] = useState(1);
+  const [driver, setDriver] = useState({ prenom: '', nom: '', naissance: '', permis: '', permis_date: '', conducteur2_prenom: '', conducteur2_nom: '', conducteur2_permis: '' });
+  const [vehicle, setVehicle] = useState({ immatriculation: '', caution: '', km: '', carburant: '', lavage: 'Oui', options: '', observations: '' });
+  const [signature, setSignature] = useState(null);
+  const [cgcRead, setCgcRead] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [secondDriver, setSecondDriver] = useState(false);
+
+  useEffect(() => {
+    axios.get(`/api/car-reservations/public/${id}`)
+      .then(({ data }) => {
+        setReservation(data);
+        if (data.contract_signed) { setDone(true); setPageStatus('ready'); return; }
+        const parts = (data.customer_name || '').split(' ');
+        setDriver(d => ({ ...d, prenom: parts[0] || '', nom: parts.slice(1).join(' ') || '' }));
+        setPageStatus('ready');
+      })
+      .catch(() => setPageStatus('error'));
+  }, [id]);
+
+  const setD = (k, v) => setDriver(d => ({ ...d, [k]: v }));
+  const setV = (k, v) => setVehicle(v2 => ({ ...v2, [k]: v }));
+
+  const handleSubmit = async () => {
+    if (!signature) { toast.error('Veuillez signer le contrat'); return; }
+    if (!cgcRead) { toast.error('Veuillez accepter les conditions générales'); return; }
+    if (!driver.prenom || !driver.nom || !driver.naissance || !driver.permis || !driver.permis_date) {
+      toast.error('Tous les champs conducteur sont requis'); return;
+    }
+    setSubmitting(true);
+    try {
+      await axios.post(`/api/car-reservations/${id}/contract`, { driver, vehicle_state: vehicle, signature });
+      setDone(true);
+      toast.success('Contrat signé avec succès !');
+    } catch { toast.error('Erreur lors de la signature'); }
+    finally { setSubmitting(false); }
+  };
+
+  if (pageStatus === 'loading') return (
+    <div style={{ textAlign: 'center', padding: '100px 20px' }}>
+      <Loader size={40} style={{ color: 'var(--primary)', animation: 'spin 1s linear infinite' }}/>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+
+  if (pageStatus === 'error') return (
+    <div style={{ textAlign: 'center', padding: '100px 20px' }}>
+      <p style={{ color: 'var(--danger)', fontWeight: 700 }}>Réservation introuvable.</p>
+      <Link to="/autres-services" className="btn btn-primary" style={{ marginTop: 16, display: 'inline-flex' }}>Retour</Link>
+    </div>
+  );
+
+  if (done) return (
+    <div style={{ textAlign: 'center', padding: '100px 20px', maxWidth: 500, margin: '0 auto' }}>
+      <div style={{ width: 88, height: 88, borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px' }}>
+        <CheckCircle size={46} color="#059669"/>
+      </div>
+      <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 26, marginBottom: 12 }}>Contrat signé !</h2>
+      <p style={{ color: 'var(--gray-600)', marginBottom: 32 }}>Votre contrat de location pour <strong>{reservation?.car_name}</strong> a bien été enregistré.</p>
+      <Link to="/" className="btn btn-primary btn-lg">Retour à l'accueil</Link>
+    </div>
+  );
+
+  const r = reservation;
+
+  return (
+    <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 16px 60px' }}>
+      <h1 style={{ fontWeight: 900, color: 'var(--primary)', fontSize: 'clamp(20px,4vw,28px)', marginBottom: 4 }}>Contrat de location N°{id}</h1>
+      <p style={{ color: 'var(--gray-500)', fontSize: 13, marginBottom: 28 }}>
+        {r.car_name} — du {r.start_date} au {r.end_date} ({r.days} jour{r.days > 1 ? 's' : ''}) — <strong>{r.total} €</strong>
+      </p>
+
+      {/* Étapes */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 28 }}>
+        {['Conducteur', 'Véhicule', 'CGC & Signature'].map((label, i) => (
+          <div key={i} style={{ flex: 1, textAlign: 'center' }}>
+            <div style={{ height: 4, borderRadius: 2, background: step > i ? 'var(--accent)' : step === i + 1 ? 'var(--primary)' : 'var(--gray-200)', marginBottom: 4 }}/>
+            <span style={{ fontSize: 11, fontWeight: 700, color: step === i + 1 ? 'var(--primary)' : step > i + 1 ? 'var(--accent)' : 'var(--gray-400)' }}>{label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Étape 1 — Conducteur */}
+      {step === 1 && (
+        <div className="card" style={{ padding: 24 }}>
+          <h3 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 20, fontSize: 17 }}>Informations conducteur</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Prénom *</label>
+              <input className="form-control" value={driver.prenom} onChange={e => setD('prenom', e.target.value)}/>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Nom *</label>
+              <input className="form-control" value={driver.nom} onChange={e => setD('nom', e.target.value)}/>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Date de naissance *</label>
+              <input className="form-control" type="date" value={driver.naissance} onChange={e => setD('naissance', e.target.value)}/>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">N° de permis *</label>
+              <input className="form-control" value={driver.permis} onChange={e => setD('permis', e.target.value)} placeholder="Ex: 12AA34567"/>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Date d'obtention du permis *</label>
+              <input className="form-control" type="date" value={driver.permis_date} onChange={e => setD('permis_date', e.target.value)}/>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 20 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
+              <input type="checkbox" checked={secondDriver} onChange={e => setSecondDriver(e.target.checked)}
+                style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}/>
+              Ajouter un 2ème conducteur
+            </label>
+          </div>
+
+          {secondDriver && (
+            <div style={{ marginTop: 14, padding: 14, background: 'var(--light)', borderRadius: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Prénom</label>
+                <input className="form-control" value={driver.conducteur2_prenom} onChange={e => setD('conducteur2_prenom', e.target.value)}/>
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Nom</label>
+                <input className="form-control" value={driver.conducteur2_nom} onChange={e => setD('conducteur2_nom', e.target.value)}/>
+              </div>
+              <div className="form-group" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
+                <label className="form-label">N° de permis</label>
+                <input className="form-control" value={driver.conducteur2_permis} onChange={e => setD('conducteur2_permis', e.target.value)}/>
+              </div>
+            </div>
+          )}
+
+          <button className="btn btn-primary" style={{ marginTop: 24, width: '100%', justifyContent: 'center' }}
+            onClick={() => {
+              if (!driver.prenom || !driver.nom || !driver.naissance || !driver.permis || !driver.permis_date) {
+                toast.error('Remplissez tous les champs obligatoires'); return;
+              }
+              setStep(2);
+            }}>
+            Suivant →
+          </button>
+        </div>
+      )}
+
+      {/* Étape 2 — État du véhicule (optionnel, peut être rempli par admin) */}
+      {step === 2 && (
+        <div className="card" style={{ padding: 24 }}>
+          <h3 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 6, fontSize: 17 }}>État du véhicule au départ</h3>
+          <p style={{ color: 'var(--gray-500)', fontSize: 12, marginBottom: 20 }}>Ces informations seront complétées lors de la remise des clés. Vous pouvez les laisser vides.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Immatriculation</label>
+              <input className="form-control" value={vehicle.immatriculation} onChange={e => setV('immatriculation', e.target.value)} placeholder="Ex: AA-123-BB"/>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Caution versée</label>
+              <input className="form-control" value={vehicle.caution} onChange={e => setV('caution', e.target.value)} placeholder="Ex: 500 €"/>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Km compteur départ</label>
+              <input className="form-control" value={vehicle.km} onChange={e => setV('km', e.target.value)} placeholder="Ex: 45 230"/>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Carburant au départ</label>
+              <select className="form-control" value={vehicle.carburant} onChange={e => setV('carburant', e.target.value)}>
+                <option value="">—</option>
+                <option>Plein</option>
+                <option>3/4</option>
+                <option>1/2</option>
+                <option>1/4</option>
+                <option>Vide</option>
+              </select>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Lavage effectué</label>
+              <select className="form-control" value={vehicle.lavage} onChange={e => setV('lavage', e.target.value)}>
+                <option>Oui</option>
+                <option>Non</option>
+              </select>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Options</label>
+              <input className="form-control" value={vehicle.options} onChange={e => setV('options', e.target.value)} placeholder="Ex: GPS, siège bébé…"/>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
+              <label className="form-label">Observations / dommages préexistants</label>
+              <textarea className="form-control" rows={3} value={vehicle.observations} onChange={e => setV('observations', e.target.value)} placeholder="Décrivez tout dommage visible sur le véhicule au départ"/>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+            <button className="btn btn-outline" onClick={() => setStep(1)}>← Retour</button>
+            <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setStep(3)}>Suivant →</button>
+          </div>
+        </div>
+      )}
+
+      {/* Étape 3 — CGC + Signature */}
+      {step === 3 && (
+        <div className="card" style={{ padding: 24 }}>
+          <h3 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 16, fontSize: 17 }}>Conditions générales & Signature</h3>
+
+          {/* Affichage des CGC */}
+          <div style={{ background: 'var(--light)', borderRadius: 10, padding: '14px 16px', maxHeight: 260, overflowY: 'auto', fontSize: 12, lineHeight: 1.7, color: 'var(--gray-700)', marginBottom: 16, whiteSpace: 'pre-wrap', border: '1px solid var(--gray-200)' }}>
+            {CGC_TEXT}
+          </div>
+
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 20, cursor: 'pointer' }}>
+            <input type="checkbox" checked={cgcRead} onChange={e => setCgcRead(e.target.checked)}
+              style={{ width: 16, height: 16, marginTop: 2, accentColor: 'var(--accent)', flexShrink: 0 }}/>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--primary)' }}>
+              J'ai lu et j'accepte les conditions générales de location. Je reconnais que ma signature électronique a la même valeur qu'une signature manuscrite.
+            </span>
+          </label>
+
+          <div className="form-group">
+            <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <PenLine size={14}/> Votre signature *
+            </label>
+            <SignaturePad onSign={setSignature}/>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+            <button className="btn btn-outline" onClick={() => setStep(2)}>← Retour</button>
+            <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', fontSize: 15 }} onClick={handleSubmit} disabled={submitting}>
+              {submitting ? 'Envoi en cours...' : 'Signer et valider le contrat'}
+            </button>
+          </div>
+          <p style={{ fontSize: 11, color: 'var(--gray-400)', textAlign: 'center', marginTop: 8 }}>
+            Réservation N°{id} — {r.customer_name} — {r.car_name}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
