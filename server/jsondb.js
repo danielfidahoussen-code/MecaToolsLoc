@@ -1,7 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = process.env.DATA_DIR || __dirname;
+// Sur Railway, on utilise /app/data (volume persistant)
+// En local, on utilise le dossier server/
+const DATA_DIR = process.env.DATA_DIR
+  || (process.env.RAILWAY_ENVIRONMENT ? '/app/data' : __dirname);
 fs.mkdirSync(DATA_DIR, { recursive: true });
 const DB_PATH = path.join(DATA_DIR, 'data.json');
 console.log('[DB] Using data file:', DB_PATH);
