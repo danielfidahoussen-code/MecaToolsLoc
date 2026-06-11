@@ -23,7 +23,7 @@ if (categories.count() === 0) {
 
 // Seed admin
 if (users.count() === 0) {
-  users.insert({ email: 'admin@lvtools.re', password: bcrypt.hashSync('admin123', 10), role: 'admin' });
+  users.insert({ email: 'admin@lvtools.re', password: bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'admin123', 10), role: 'admin' });
 }
 
 // Seed FAQs
