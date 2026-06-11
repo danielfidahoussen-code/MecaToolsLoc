@@ -35,10 +35,6 @@ export default function ProductCard({ product }) {
               <p style={{ color: 'var(--gray-400)', fontSize: 13, fontWeight: 600 }}>Photo à venir</p>
             </div>
           )}
-          <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 5 }}>
-            {product.available_for_rent && <span className="badge badge-rent">Location</span>}
-            {product.available_for_sale && <span className="badge badge-sale">Achat</span>}
-          </div>
           <div style={{ position: 'absolute', top: 10, right: 10 }}>
             <span style={{ background: 'white', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, color: stockColor, boxShadow: 'var(--shadow-sm)' }}>
               ● {stockLabel}
