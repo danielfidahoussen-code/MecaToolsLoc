@@ -76,9 +76,11 @@ function CarCard({ car }) {
   return (
     <div className="card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
       {/* Image */}
-      <div style={{ height: 200, background: 'linear-gradient(135deg, #0f172a, #1e293b)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
+      <div style={{ height: 200, background: 'linear-gradient(135deg, #0f172a, #1e293b)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0, overflow: 'hidden' }}>
         {car.image
-          ? <img src={car.image} alt={car.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+          ? <img src={car.image} alt={car.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .4s ease' }}
+              onMouseOver={e => e.currentTarget.style.transform = 'scale(1.07)'}
+              onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}/>
           : <p style={{ color: 'rgba(255,255,255,.25)', fontSize: 13 }}>Photo à venir</p>
         }
         <div style={{ position: 'absolute', top: 12, left: 12, background: 'var(--accent)', padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 800, color: 'white', textTransform: 'uppercase', letterSpacing: 0.5 }}>
