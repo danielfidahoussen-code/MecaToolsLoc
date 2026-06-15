@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -58,6 +58,7 @@ function ProductGallery({ product }) {
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const { addItem } = useCart();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -73,7 +74,8 @@ export default function ProductDetail() {
   useEffect(() => {
     axios.get(`/api/products/${id}`).then(r => {
       setProduct(r.data);
-      if (r.data.available_for_rent && !r.data.available_for_sale) setActiveTab('rent');
+      const wantRent = searchParams.get('tab') === 'rent';
+      if (r.data.available_for_rent && (wantRent || !r.data.available_for_sale)) setActiveTab('rent');
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [id]);

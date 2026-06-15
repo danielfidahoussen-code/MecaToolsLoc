@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Eye } from 'lucide-react';
+import { ShoppingCart, Eye, Calendar } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
@@ -67,12 +67,17 @@ export default function ProductCard({ product }) {
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Link to={`/produit/${product.id}`} className="btn btn-outline btn-sm" style={{ flex: 1, justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <Link to={`/produit/${product.id}`} className="btn btn-outline btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 90 }}>
               <Eye size={14}/> Détails
             </Link>
+            {product.available_for_rent && product.stock > 0 && (
+              <Link to={`/produit/${product.id}?tab=rent`} className="btn btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 90, background: 'var(--warning)', color: 'var(--primary)', fontWeight: 700 }}>
+                <Calendar size={14}/> Louer
+              </Link>
+            )}
             {product.available_for_sale && product.stock > 0 && (
-              <button className="btn btn-primary btn-sm" onClick={handleBuy} style={{ flex: 1, justifyContent: 'center' }}>
+              <button className="btn btn-primary btn-sm" onClick={handleBuy} style={{ flex: 1, justifyContent: 'center', minWidth: 90 }}>
                 <ShoppingCart size={14}/> Acheter
               </button>
             )}
