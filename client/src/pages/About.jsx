@@ -7,7 +7,14 @@ export default function About() {
       <div className="page-header">
         <div className="container">
           <h1>À propos de LVTools</h1>
-          <p>"Par un mécanicien, pour les mécaniciens"</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 12 }}>
+            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 15 }}>"Par un mécanicien, pour les mécaniciens"</p>
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>—</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <img src="https://res.cloudinary.com/dw6hfofqr/image/upload/v1781508023/mecatoolsloc/mhtj0pnnadaelsj0hu3z.jpg" alt="AutoPresto" style={{ height: 28, width: 'auto', borderRadius: 4, objectFit: 'contain' }}/>
+              <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 600, letterSpacing: 0.5 }}>by AutoPresto</span>
+            </div>
+          </div>
         </div>
       </div>
 
