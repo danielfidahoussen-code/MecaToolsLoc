@@ -72,7 +72,7 @@ export default function ProductCard({ product }) {
               <Eye size={14}/> Détails
             </Link>
             {product.available_for_rent && product.stock > 0 && (
-              <Link to={`/produit/${product.id}?tab=rent`} className="btn btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 90, background: 'var(--warning)', color: 'var(--primary)', fontWeight: 700 }}>
+              <Link to={`/produit/${product.id}?tab=rent`} className="btn btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 90, background: 'var(--primary)', color: 'white', fontWeight: 700 }}>
                 <Calendar size={14}/> Louer
               </Link>
             )}
