@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Car } from 'lucide-react';
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
 
@@ -33,6 +34,47 @@ export default function Home() {
 
   return (
     <div className="container" style={{ paddingTop: 24, paddingBottom: 48 }}>
+
+      {/* Bannière Location de véhicules */}
+      <Link to="/autres-services" style={{ textDecoration: 'none', display: 'block', marginBottom: 24 }}>
+        <div style={{
+          background: 'linear-gradient(135deg, var(--primary) 0%, #3a0808 100%)',
+          borderRadius: 16,
+          padding: '18px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 16,
+          boxShadow: 'var(--shadow)',
+          cursor: 'pointer',
+          transition: 'var(--transition)',
+        }}
+          onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseOut={e => e.currentTarget.style.transform = ''}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ background: 'rgba(255,51,51,0.25)', borderRadius: 12, padding: 10, flexShrink: 0 }}>
+              <Car size={24} color="white"/>
+            </div>
+            <div>
+              <p style={{ fontWeight: 800, fontSize: 15, color: 'white', lineHeight: 1.2 }}>Location de véhicules</p>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 3 }}>Yaris, Picanto, C3, Auris, Lexus CT200h, Outlander…</p>
+            </div>
+          </div>
+          <div style={{
+            background: 'var(--accent)',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: 13,
+            padding: '9px 18px',
+            borderRadius: 10,
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+          }}>
+            Louer
+          </div>
+        </div>
+      </Link>
 
       {/* Filtres */}
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 20, paddingBottom: 4 }}>
