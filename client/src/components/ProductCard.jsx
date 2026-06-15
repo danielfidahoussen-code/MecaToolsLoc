@@ -18,8 +18,8 @@ export default function ProductCard({ product }) {
   const stockLabel = product.stock > 5 ? 'En stock' : product.stock > 0 ? `${product.stock} restant${product.stock > 1 ? 's' : ''}` : 'Rupture';
 
   return (
-    <Link to={`/produit/${product.id}`} style={{ textDecoration: 'none' }}>
-      <div className="card" style={{ transition: 'var(--transition)', cursor: 'pointer' }}
+    <Link to={`/produit/${product.id}`} style={{ textDecoration: 'none', height: '100%' }}>
+      <div className="card" style={{ transition: 'var(--transition)', cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}
         onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
         onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}>
 
@@ -43,11 +43,11 @@ export default function ProductCard({ product }) {
         </div>
 
         {/* Content */}
-        <div style={{ padding: '16px 18px' }}>
+        <div style={{ padding: '16px 18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <p style={{ fontSize: 11, color: 'var(--gray-400)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 5 }}>
             {product.category_name}
           </p>
-          <h3 style={{ fontWeight: 700, fontSize: 15, color: 'var(--primary)', marginBottom: 10, lineHeight: 1.3 }}>
+          <h3 style={{ fontWeight: 700, fontSize: 15, color: 'var(--primary)', marginBottom: 10, lineHeight: 1.3, minHeight: 39 }}>
             {product.name}
           </h3>
 
@@ -67,7 +67,7 @@ export default function ProductCard({ product }) {
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 'auto' }}>
             <Link to={`/produit/${product.id}`} className="btn btn-outline btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 90 }}>
               <Eye size={14}/> Détails
             </Link>
