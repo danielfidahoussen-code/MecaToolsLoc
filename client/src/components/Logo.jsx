@@ -27,6 +27,10 @@ export default function Logo({ size = 44, light = false }) {
           Location · Vente · Outillage
         </div>
       </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 8, paddingLeft: 8, borderLeft: `1px solid ${light ? 'rgba(255,255,255,0.2)' : 'rgba(26,2,2,0.15)'}` }}>
+        <img src="https://res.cloudinary.com/dw6hfofqr/image/upload/v1781508023/mecatoolsloc/mhtj0pnnadaelsj0hu3z.jpg" alt="AutoPresto" style={{ height: size * 0.5, width: 'auto', borderRadius: 4, objectFit: 'contain' }}/>
+        <span style={{ fontFamily: 'Inter,Arial,sans-serif', fontSize: size * 0.17, color: light ? 'rgba(255,255,255,0.5)' : 'rgba(26,2,2,0.45)', letterSpacing: 1, textTransform: 'uppercase' }}>by AutoPresto</span>
+      </div>
     </div>
   );
 }
