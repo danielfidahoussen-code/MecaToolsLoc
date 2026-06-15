@@ -40,7 +40,7 @@ export default function About() {
               </Link>
             </div>
             <div style={{ position: 'relative' }}>
-              <img src="/api/placeholder/540/440?text=LVTools+Atelier" alt="Notre atelier"
+              <img src="https://res.cloudinary.com/dw6hfofqr/image/upload/v1781506939/mecatoolsloc/zcgu6pvjxq6ugpggnoqg.webp" alt="Notre atelier"
                 style={{ width: '100%', borderRadius: 20, boxShadow: 'var(--shadow-lg)' }}/>
               <div style={{ position: 'absolute', bottom: -20, left: -20, background: 'var(--accent)', borderRadius: 16, padding: '20px 28px', boxShadow: 'var(--shadow)' }}>
                 <p style={{ fontWeight: 900, fontSize: 32, color: 'white', lineHeight: 1 }}>8+</p>
