@@ -2,6 +2,7 @@ const router = require('express').Router();
 const Stripe = require('stripe');
 const { car_reservations } = require('../database');
 const { authMiddleware } = require('../middleware/auth');
+const { notifyNewCarReservation } = require('../notify');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -167,6 +168,8 @@ router.get('/session/:sessionId', async (req, res) => {
           });
           existing = car_reservations.all().find(r => r.stripe_session_id === session.id);
         }
+        // Notification Telegram au propriétaire (seulement à la 1ère confirmation)
+        notifyNewCarReservation(existing).catch(err => console.error('[NOTIFY] notifyNewCarReservation:', err.message));
       }
       res.json({ paid: true, reservation_id: existing?.id, customer_name: existing?.customer_name, customer_email: existing?.customer_email });
     } else {
