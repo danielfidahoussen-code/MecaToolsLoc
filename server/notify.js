@@ -83,4 +83,17 @@ async function notifyNewCarReservation(r) {
   await sendTelegram(text);
 }
 
-module.exports = { sendTelegram, notifyNewOrder, notifyNewCarReservation };
+// Notifie un nouveau message envoyé via le formulaire de contact
+async function notifyContactMessage({ name, email, phone, subject, message }) {
+  const text =
+    `<b>Nouveau message de contact</b>\n\n` +
+    `Nom : <b>${esc(name) || '—'}</b>\n` +
+    `Email : ${esc(email) || '—'}\n` +
+    `Téléphone : ${esc(phone) || '—'}\n` +
+    `Sujet : ${esc(subject) || '—'}\n\n` +
+    `Message :\n${esc(message) || '—'}`;
+
+  await sendTelegram(text);
+}
+
+module.exports = { sendTelegram, notifyNewOrder, notifyNewCarReservation, notifyContactMessage };

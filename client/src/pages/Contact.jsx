@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 import { Phone, Mail, MapPin, Clock, Send, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -12,10 +13,15 @@ export default function Contact() {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) { toast.error('Veuillez remplir tous les champs obligatoires'); return; }
     setSending(true);
-    await new Promise(r => setTimeout(r, 1000));
-    setSent(true);
-    setSending(false);
-    toast.success('Message envoyé ! Nous vous répondrons sous 24h.');
+    try {
+      await axios.post('/api/contact', form);
+      setSent(true);
+      toast.success('Message envoyé ! Nous vous répondrons sous 24h.');
+    } catch (err) {
+      toast.error('Erreur lors de l\'envoi — réessayez ou appelez-nous.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
