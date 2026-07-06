@@ -236,8 +236,8 @@ export default function ProductDetail() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(59,130,246,.07)', border: '1.5px solid rgba(59,130,246,.2)', borderRadius: 10, padding: '10px 14px', marginBottom: 20 }}>
                       <span style={{ fontSize: 16, fontWeight: 800, color: '#1e40af' }}>C</span>
                       <div>
-                        <p style={{ fontWeight: 700, fontSize: 13, color: '#1e40af' }}>Caution : {product.caution.toFixed(2)} €</p>
-                        <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Collectée à la remise du matériel — restituée en fin de location</p>
+                        <p style={{ fontWeight: 700, fontSize: 13, color: '#1e40af' }}>Une caution sera demandée</p>
+                        <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Prise lors de la remise de l'outil — restituée en fin de location</p>
                       </div>
                     </div>
                   )}

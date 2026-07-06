@@ -462,7 +462,7 @@ export default function Checkout() {
                     {totalCaution > 0 && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '8px 10px', background: 'rgba(59,130,246,.07)', border: '1.5px solid rgba(59,130,246,.2)', borderRadius: 8 }}>
                         <span>🔒</span>
-                        <span style={{ fontSize: 12, color: '#1e40af', fontWeight: 600 }}>Caution : {totalCaution.toFixed(2)} € — collectée à la remise, non débitée</span>
+                        <span style={{ fontSize: 12, color: '#1e40af', fontWeight: 600 }}>Une caution sera prise lors de la remise de l'outil</span>
                       </div>
                     )}
                   </div>
@@ -536,8 +536,8 @@ export default function Checkout() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, padding: '10px 12px', background: 'rgba(59,130,246,.07)', border: '1.5px solid rgba(59,130,246,.2)', borderRadius: 10, fontSize: 13 }}>
                     <span style={{ fontSize: 16 }}>🔒</span>
                     <div>
-                      <p style={{ fontWeight: 700, color: '#1e40af' }}>Caution : {totalCaution.toFixed(2)} €</p>
-                      <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Non débitée — collectée à la remise du matériel</p>
+                      <p style={{ fontWeight: 700, color: '#1e40af' }}>Caution</p>
+                      <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Prise lors de la remise de l'outil — restituée en fin de location</p>
                     </div>
                   </div>
                 )}
