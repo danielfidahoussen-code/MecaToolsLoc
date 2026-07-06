@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const Stripe = require('stripe');
 const { orders, products, reservations } = require('../database');
+const { notifyNewOrder } = require('../notify');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -174,6 +175,22 @@ async function createOrderFromSession(session) {
       });
     }
   });
+
+  // Notification Telegram au propriétaire (avec noms de produits résolus)
+  const itemsWithNames = items.map(i => {
+    const p = products.getById(i.id);
+    return { ...i, name: p ? p.name : `Produit #${i.id}` };
+  });
+  notifyNewOrder({
+    customer_name: meta.customer_name,
+    customer_email: session.customer_email,
+    customer_phone: meta.customer_phone,
+    customer_address: meta.customer_address,
+    items: itemsWithNames,
+    total_price: meta.total_price,
+    delivery_mode: meta.delivery_mode,
+    caution_total: meta.caution_total,
+  }).catch(err => console.error('[NOTIFY] notifyNewOrder:', err.message));
 }
 
 module.exports = router;
