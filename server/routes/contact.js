@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { sendTelegram, notifyContactMessage } = require('../notify');
+const { sendTest, isConfigured, notifyContactMessage } = require('../notify');
 
 // Envoi d'un message via le formulaire de contact
 router.post('/', async (req, res) => {
@@ -16,20 +16,19 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Route de test — vérifie que Telegram est bien configuré
+// Route de test — vérifie que l'email est bien configuré
 // Ouvrir dans le navigateur : https://ton-site/api/contact/test
 router.get('/test', async (req, res) => {
-  const configured = !!(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
-  if (!configured) {
+  if (!isConfigured()) {
     return res.json({
       ok: false,
-      message: 'Telegram non configuré. Ajoute TELEGRAM_BOT_TOKEN et TELEGRAM_CHAT_ID dans les variables Railway.',
-      has_token: !!process.env.TELEGRAM_BOT_TOKEN,
-      has_chat_id: !!process.env.TELEGRAM_CHAT_ID,
+      message: 'Email non configuré. Ajoute SMTP_USER et SMTP_PASS dans les variables Railway.',
+      has_smtp_user: !!process.env.SMTP_USER,
+      has_smtp_pass: !!process.env.SMTP_PASS,
     });
   }
-  await sendTelegram('Test LVTools : si tu vois ce message, les notifications Telegram fonctionnent correctement.');
-  res.json({ ok: true, message: 'Message de test envoyé. Vérifie ton Telegram.' });
+  await sendTest();
+  res.json({ ok: true, message: 'Email de test envoyé. Vérifie ta boîte mail (et les spams).' });
 });
 
 module.exports = router;
