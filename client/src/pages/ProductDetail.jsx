@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -60,6 +60,7 @@ export default function ProductDetail() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const { addItem } = useCart();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('buy');
@@ -67,9 +68,6 @@ export default function ProductDetail() {
   const [endDate, setEndDate] = useState(null);
   const [qty, setQty] = useState(1);
   const [reserving, setReserving] = useState(false);
-
-  // Customer form for reservation
-  const [form, setForm] = useState({ name: '', email: '', phone: '' });
 
   useEffect(() => {
     axios.get(`/api/products/${id}`).then(r => {
@@ -132,14 +130,14 @@ export default function ProductDetail() {
 
   const handleReserve = async () => {
     if (!startDate || !endDate) return toast.error('Choisissez vos dates');
-    if (!form.name || !form.email) return toast.error('Remplissez vos coordonnées');
     setReserving(true);
     try {
       addItem(product, 'rent', qty, {
         startDate: startDate.toISOString().split('T')[0],
         endDate: endDate.toISOString().split('T')[0],
       });
-      toast.success('Réservation ajoutée au panier !');
+      toast.success('Réservation ajoutée — finalisez votre commande');
+      navigate('/checkout');
     } catch (e) {
       toast.error('Erreur lors de la réservation');
     } finally {
@@ -286,21 +284,6 @@ export default function ProductDetail() {
                       <Info size={12} style={{ verticalAlign: 'middle', marginRight: 4 }}/> Les dates grisées sont complètes — sélection impossible
                     </p>
                   )}
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">Votre nom *</label>
-                      <input className="form-control" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Jean Dupont"/>
-                    </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">Téléphone</label>
-                      <input className="form-control" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="06 xx xx xx xx"/>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Email *</label>
-                    <input className="form-control" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="vous@exemple.fr"/>
-                  </div>
 
                   {product.stock === 0 ? (
                     <button className="btn btn-lg" disabled style={{ width: '100%', justifyContent: 'center', background: '#fee2e2', color: 'var(--danger)', cursor: 'not-allowed' }}>
