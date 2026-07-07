@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { sendTelegramTest, telegramConfigured, notifyContactMessage } = require('../notify');
+const { sendTelegramTest, telegramConfigured, notifyContactMessage, notifyNewOrder, notifyNewCarReservation } = require('../notify');
 
 // Envoi d'un message via le formulaire de contact
 router.post('/', async (req, res) => {
@@ -28,7 +28,33 @@ router.get('/test', async (req, res) => {
     });
   }
   await sendTelegramTest();
-  res.json({ ok: true, message: 'Message de test envoyé. Vérifie ton Telegram.' });
+
+  // Exemple de commande (aucun vrai achat)
+  await notifyNewOrder({
+    customer_name: 'EXEMPLE - Jean Dupont',
+    customer_email: 'jean@exemple.fr',
+    customer_phone: '06 12 34 56 78',
+    customer_address: 'Retrait sur place',
+    items: [
+      { name: 'Kit de calage distribution Opel', type: 'rent', qty: 1, start: '2026-07-10', end: '2026-07-15' },
+      { name: 'Testeur d\'étanchéité', type: 'sale', qty: 1 },
+    ],
+    total_price: 264.98,
+    caution_total: 150,
+  });
+
+  // Exemple de réservation véhicule (aucune vraie résa)
+  await notifyNewCarReservation({
+    car_name: 'EXEMPLE - Toyota Yaris',
+    customer_name: 'Marie Martin',
+    customer_email: 'marie@exemple.fr',
+    customer_phone: '06 98 76 54 32',
+    start_date: '2026-07-20', end_date: '2026-07-25', days: 5,
+    delivery: false,
+    total: 175, caution_amount: 500,
+  });
+
+  res.json({ ok: true, message: 'Test envoyé : 1 message de test + 1 exemple de commande + 1 exemple de réservation. Vérifie ton Telegram.' });
 });
 
 module.exports = router;
