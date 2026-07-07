@@ -13,8 +13,9 @@ export default function Confidentialite() {
           <LegalSection title="1. Responsable du traitement">
             <p>Le responsable du traitement des données personnelles collectées via ce site est :</p>
             <ul>
-              <li><strong>LVTools</strong></li>
-              <li>3 rue de la Guadeloupe, Moufia 97490 Saint-Denis, La Réunion</li>
+              <li><strong>PRESTO EQUIPEMENT</strong> (SAS), exploitant les enseignes LVTools et PrestoLoc</li>
+              <li>3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis, La Réunion</li>
+              <li>SIREN 851 826 537</li>
               <li>Téléphone : 06 93 83 96 54</li>
               <li>Email : Locationautopresto@gmail.com</li>
             </ul>
@@ -27,8 +28,9 @@ export default function Confidentialite() {
               <li><strong>Coordonnées :</strong> adresse email, numéro de téléphone, adresse de livraison</li>
               <li><strong>Données de commande :</strong> articles commandés, montants, mode de livraison, dates de location</li>
               <li><strong>Données de navigation :</strong> adresse IP, cookies techniques nécessaires au fonctionnement du site</li>
+              <li><strong>Location de véhicules uniquement :</strong> numéro et photo du permis de conduire, date de naissance. Ces données, nécessaires à l'établissement du contrat de location, sont conservées de manière sécurisée et ne sont utilisées qu'à cette fin.</li>
             </ul>
-            <p>Aucune donnée bancaire n'est stockée sur nos serveurs. Les paiements sont traités par un prestataire certifié.</p>
+            <p>Aucune donnée bancaire n'est stockée sur nos serveurs. Les paiements sont traités par notre prestataire de paiement certifié PCI-DSS (Stripe).</p>
           </LegalSection>
 
           <LegalSection title="3. Finalités du traitement">
@@ -60,8 +62,16 @@ export default function Confidentialite() {
             </ul>
           </LegalSection>
 
-          <LegalSection title="6. Destinataires des données">
-            <p>Vos données sont destinées à LVTools uniquement. Elles ne sont pas vendues ni cédées à des tiers, sauf obligations légales ou nécessité contractuelle (ex : prestataire de paiement).</p>
+          <LegalSection title="6. Destinataires et sous-traitants">
+            <p>Vos données ne sont ni vendues ni cédées à des tiers à des fins commerciales. Elles sont traitées par PRESTO EQUIPEMENT et par les sous-traitants techniques strictement nécessaires au fonctionnement du service :</p>
+            <ul>
+              <li><strong>Stripe</strong> — traitement des paiements (certifié PCI-DSS)</li>
+              <li><strong>Railway</strong> — hébergement du site et de la base de données</li>
+              <li><strong>Cloudinary</strong> — hébergement des images (y compris, pour la location de véhicules, les photos de permis de conduire)</li>
+              <li><strong>OpenStreetMap / Nominatim</strong> — calcul de la distance de livraison à partir de l'adresse saisie</li>
+            </ul>
+            <p><strong>Transferts hors Union européenne :</strong> certains de ces prestataires (notamment Railway, Stripe et Cloudinary) sont susceptibles d'héberger ou de traiter des données en dehors de l'Union européenne, notamment aux États-Unis. Ces transferts sont encadrés par des garanties appropriées (clauses contractuelles types de la Commission européenne ou mécanismes équivalents).</p>
+            <p>Vos données peuvent également être communiquées aux autorités compétentes en cas d'obligation légale.</p>
           </LegalSection>
 
           <LegalSection title="7. Vos droits">
@@ -91,7 +101,7 @@ export default function Confidentialite() {
           </LegalSection>
 
           <p style={{ fontSize: 13, color: 'var(--gray-400)', marginTop: 40 }}>
-            Dernière mise à jour : juin 2025
+            Dernière mise à jour : juillet 2026
           </p>
         </div>
       </div>

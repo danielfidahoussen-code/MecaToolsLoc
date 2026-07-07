@@ -11,22 +11,23 @@ export default function CGV() {
         <div className="container" style={{ maxWidth: 800 }}>
 
           <LegalSection title="1. Objet">
-            <p>Les présentes Conditions Générales de Vente (CGV) régissent l'ensemble des transactions conclues entre <strong>LVTools</strong> (ci-après « le Vendeur ») et tout client (ci-après « le Client ») pour la location et la vente d'outillage professionnel.</p>
+            <p>Les présentes Conditions Générales de Vente (CGV) régissent l'ensemble des transactions conclues entre la société <strong>PRESTO EQUIPEMENT</strong> (SAS, SIREN 851 826 537, siège 3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis), exploitant l'activité d'outillage sous l'enseigne <strong>LVTools</strong> (ci-après « le Vendeur »), et tout client (ci-après « le Client ») pour la location et la vente d'outillage.</p>
             <p>Toute commande passée sur le site implique l'acceptation pleine et entière des présentes CGV.</p>
           </LegalSection>
 
           <LegalSection title="2. Produits et services">
             <p>LVTools propose :</p>
             <ul>
-              <li><strong>La location de matériel :</strong> mise à disposition temporaire d'outillage professionnel pour une durée définie.</li>
-              <li><strong>La vente de matériel :</strong> cession définitive d'outillage professionnel.</li>
+              <li><strong>La location de matériel :</strong> mise à disposition temporaire d'outillage pour une durée définie.</li>
+              <li><strong>La vente de matériel :</strong> cession définitive d'outillage.</li>
             </ul>
-            <p>Les descriptions, photos et tarifs présents sur le site sont donnés à titre indicatif et peuvent être modifiés sans préavis.</p>
+            <p>Les descriptions et photos des produits sont fournies avec le plus grand soin. Le Vendeur s'efforce d'en assurer l'exactitude, sans que d'éventuelles erreurs ou omissions puissent engager sa responsabilité.</p>
           </LegalSection>
 
           <LegalSection title="3. Tarifs">
-            <p>Les prix sont indiqués en euros TTC. LVTools se réserve le droit de modifier ses tarifs à tout moment, les prix applicables étant ceux en vigueur au moment de la commande.</p>
-            <p><strong>Remise retrait sur place :</strong> une remise de 10 % est accordée au Client qui récupère le matériel directement à notre adresse (3 rue de la Guadeloupe, Moufia 97490 Saint-Denis).</p>
+            <p>Les prix sont indiqués en euros toutes taxes comprises (TTC). Le prix applicable à une commande est celui affiché sur le site au moment de la validation de la commande par le Client. Le Vendeur peut faire évoluer ses tarifs à tout moment, sans que cela n'affecte les commandes déjà validées.</p>
+            <p>Le montant total dû (produits + frais de livraison éventuels) est présenté au Client avant la validation définitive de sa commande.</p>
+            <p><strong>Remise retrait sur place :</strong> une remise de 10 % est accordée au Client qui récupère le matériel directement à notre adresse (3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis).</p>
           </LegalSection>
 
           <LegalSection title="4. Livraison">
@@ -39,7 +40,7 @@ export default function CGV() {
             </ul>
             <p>Le Client choisit librement s'il souhaite la livraison aller uniquement, le retour uniquement, ou les deux trajets. Chaque trajet est facturé séparément au tarif de la zone.</p>
             <p><strong>Restriction location :</strong> la livraison des articles en location est limitée à 15 km. Au-delà, le retrait sur place est requis.</p>
-            <p>Les délais de livraison sont donnés à titre indicatif. LVTools ne pourra être tenu responsable de retards dus à des circonstances indépendantes de sa volonté.</p>
+            <p>Sauf indication contraire au moment de la commande, le matériel est livré ou mis à disposition dans un délai maximum de <strong>30 jours</strong> à compter de la validation du paiement (art. L.216-1 du Code de la consommation). En cas de dépassement de ce délai et après mise en demeure restée infructueuse, le Client peut annuler sa commande et être remboursé.</p>
           </LegalSection>
 
           <LegalSection title="5. Commande et paiement">
@@ -47,15 +48,15 @@ export default function CGV() {
             <p>LVTools ne stocke aucune donnée bancaire. Les transactions sont traitées par un prestataire de paiement certifié PCI-DSS.</p>
           </LegalSection>
 
-          <LegalSection title="6. Chèque de caution (Location)">
-            <p>Pour toute location, un chèque de caution est demandé. Ce chèque de caution :</p>
+          <LegalSection title="6. Caution (Location)">
+            <p>Pour toute location, une caution (dépôt de garantie) est demandée. Cette caution :</p>
             <ul>
-              <li>Est signé en ligne via un contrat électronique sécurisé</li>
-              <li><strong>Ne bloque pas les fonds</strong> sur le compte bancaire du Client</li>
-              <li>Est encaissé uniquement en cas de dommage, perte ou non-restitution du matériel dans les délais convenus</li>
-              <li>Est restitué (annulé) automatiquement à la fin de la période de location, si le matériel est rendu en bon état</li>
+              <li>Est constituée <strong>lors de la remise du matériel</strong>, par empreinte de carte bancaire, chèque non encaissé ou tout autre moyen convenu ;</li>
+              <li><strong>Ne bloque pas les fonds</strong> sur le compte bancaire du Client : aucun montant n'est débité tant que le matériel est restitué en bon état ;</li>
+              <li>N'est débitée ou encaissée qu'en cas de dommage, de perte, de vol ou de non-restitution du matériel dans les délais convenus, à hauteur du préjudice réellement subi ;</li>
+              <li>Est libérée (empreinte annulée ou chèque restitué) à la fin de la période de location, dès lors que le matériel est rendu complet et en bon état.</li>
             </ul>
-            <p>Le montant de la caution est précisé pour chaque article et varie selon la valeur du matériel loué.</p>
+            <p>Le montant de la caution correspond à la valeur du matériel loué ; il est communiqué au Client lors de la remise du matériel. Si les dommages excèdent le montant de la caution, la différence pourra être facturée au Client.</p>
           </LegalSection>
 
           <LegalSection title="7. Contrat de location">
@@ -80,20 +81,38 @@ export default function CGV() {
             <p>En cas de dommage, perte ou vol, le Client sera tenu responsable et la caution pourra être encaissée. Des frais supplémentaires pourront être facturés si les dommages excèdent le montant de la caution.</p>
           </LegalSection>
 
-          <LegalSection title="9. Rétractation">
-            <p>Conformément à l'article L.221-28 du Code de la consommation, le droit de rétractation ne s'applique pas aux contrats de location pour une date ou période déterminée. Pour les achats, le droit de rétractation de 14 jours s'applique pour tout produit non utilisé et retourné dans son emballage d'origine.</p>
+          <LegalSection title="9. Droit de rétractation (Achat)">
+            <p>Conformément aux articles L.221-18 et suivants du Code de la consommation, le Client consommateur dispose d'un délai de <strong>14 jours</strong> à compter de la réception du produit pour exercer son droit de rétractation, sans avoir à motiver sa décision.</p>
+            <p>Pour exercer ce droit, le Client informe le Vendeur de sa décision par une déclaration dénuée d'ambiguïté (courrier ou email à Locationautopresto@gmail.com), le cas échéant au moyen du formulaire type de rétractation. Le produit doit ensuite être renvoyé dans un délai de 14 jours.</p>
+            <p>Le Client peut manipuler et essayer le produit comme il pourrait le faire en magasin ; sa responsabilité n'est engagée qu'à raison de la <strong>dépréciation</strong> résultant de manipulations excédant ce qui est nécessaire pour établir la nature et les caractéristiques du bien.</p>
+            <p><strong>Les frais de retour sont à la charge du Client.</strong> Le Vendeur rembourse le Client de la totalité des sommes versées, y compris les frais de livraison initiaux (hors frais supplémentaires liés à un mode de livraison plus coûteux choisi par le Client), au plus tard dans les 14 jours suivant la récupération du produit ou la preuve de son expédition.</p>
+            <p>Conformément à l'article L.221-28 du Code de la consommation, le droit de rétractation ne s'applique pas aux contrats de <strong>location</strong> pour une date ou une période déterminée.</p>
           </LegalSection>
 
-          <LegalSection title="10. Responsabilité">
-            <p>LVTools garantit que le matériel loué ou vendu est en bon état de fonctionnement au moment de la mise à disposition. La responsabilité de LVTools ne saurait être engagée pour tout dommage résultant d'une mauvaise utilisation du matériel.</p>
+          <LegalSection title="10. Garanties légales (Achat)">
+            <p>Indépendamment de toute garantie commerciale, le Vendeur reste tenu des garanties légales suivantes pour les produits vendus :</p>
+            <ul>
+              <li><strong>Garantie légale de conformité</strong> (art. L.217-3 et suivants du Code de la consommation) : le Client dispose d'un délai de <strong>2 ans</strong> à compter de la délivrance du bien pour agir ; il peut choisir entre la réparation ou le remplacement du bien, et bénéficie d'une présomption d'antériorité du défaut.</li>
+              <li><strong>Garantie des vices cachés</strong> (art. 1641 et suivants du Code civil) : le Client peut obtenir la résolution de la vente ou une réduction du prix, dans un délai de 2 ans à compter de la découverte du vice.</li>
+            </ul>
+            <p>Pour toute mise en œuvre de ces garanties, le Client peut contacter le Vendeur à Locationautopresto@gmail.com.</p>
           </LegalSection>
 
-          <LegalSection title="11. Litiges">
-            <p>En cas de litige, une solution amiable sera recherchée en priorité. À défaut, les tribunaux compétents du ressort de Saint-Denis de La Réunion seront saisis. Le droit français est applicable.</p>
+          <LegalSection title="11. Responsabilité">
+            <p>Le Vendeur garantit que le matériel loué ou vendu est en bon état de fonctionnement au moment de la mise à disposition. Sa responsabilité ne saurait être engagée pour tout dommage résultant d'une mauvaise utilisation du matériel par le Client.</p>
+          </LegalSection>
+
+          <LegalSection title="12. Médiation et litiges">
+            <p>En cas de litige, le Client adresse au préalable une réclamation écrite au Vendeur (Locationautopresto@gmail.com). À défaut de résolution amiable, le Client consommateur peut recourir gratuitement à un médiateur de la consommation :</p>
+            <ul>
+              <li><strong>Médiateur désigné :</strong> [nom du médiateur à compléter] — [adresse / site du médiateur]</li>
+              <li><strong>Plateforme européenne RLL :</strong> <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noreferrer">ec.europa.eu/consumers/odr</a></li>
+            </ul>
+            <p>À défaut d'accord amiable, les tribunaux compétents seront saisis. Le droit français est applicable.</p>
           </LegalSection>
 
           <p style={{ fontSize: 13, color: 'var(--gray-400)', marginTop: 40 }}>
-            Dernière mise à jour : juin 2025
+            Dernière mise à jour : juillet 2026
           </p>
         </div>
       </div>
