@@ -46,6 +46,7 @@ export default function Checkout() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [detectedCity, setDetectedCity] = useState('');
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', cardNumber: '', cardExpiry: '', cardCVC: '' });
+  const [cgvAccepted, setCgvAccepted] = useState(false);
   const debounceRef = useRef(null);
   const suggestionsRef = useRef(null);
 
@@ -181,6 +182,7 @@ export default function Checkout() {
     if (!isPickup && !deliveryZone) { toast.error('Calculez d\'abord votre zone de livraison'); return; }
     if (!isPickup && !deliveryTrips.aller && !deliveryTrips.retour) { toast.error('Sélectionnez au moins un trajet (aller ou retour)'); return; }
     if (rentalZoneError) { toast.error('La livraison des locations est limitée à 15 km'); return; }
+    if (!cgvAccepted) { toast.error('Veuillez accepter les conditions générales de vente'); return; }
     setStep(2);
   };
 
@@ -425,7 +427,16 @@ export default function Checkout() {
                     </>
                   )}
 
-                  <button className="btn btn-primary btn-lg" onClick={validateStep1} style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginTop: 20, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={cgvAccepted} onChange={e => setCgvAccepted(e.target.checked)}
+                      style={{ width: 16, height: 16, marginTop: 2, accentColor: 'var(--accent)', flexShrink: 0 }}/>
+                    <span style={{ fontSize: 13, color: 'var(--gray-700)', lineHeight: 1.5 }}>
+                      J'ai lu et j'accepte les{' '}
+                      <a href="/cgv" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', fontWeight: 600 }}>conditions générales de vente</a>.
+                    </span>
+                  </label>
+
+                  <button className="btn btn-primary btn-lg" onClick={validateStep1} style={{ width: '100%', justifyContent: 'center', marginTop: 16 }}>
                     Continuer vers le paiement →
                   </button>
                 </div>
