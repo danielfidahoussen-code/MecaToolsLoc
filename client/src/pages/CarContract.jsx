@@ -296,7 +296,7 @@ export default function CarContract() {
 
       {/* Étapes */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 28 }}>
-        {['Conducteur', 'Véhicule', 'CGC & Signature'].map((label, i) => (
+        {['Conducteur', 'CGC & Signature'].map((label, i) => (
           <div key={i} style={{ flex: 1, textAlign: 'center' }}>
             <div style={{ height: 4, borderRadius: 2, background: step > i ? 'var(--accent)' : step === i + 1 ? 'var(--primary)' : 'var(--gray-200)', marginBottom: 4 }}/>
             <span style={{ fontSize: 11, fontWeight: 700, color: step === i + 1 ? 'var(--primary)' : step > i + 1 ? 'var(--accent)' : 'var(--gray-400)' }}>{label}</span>
@@ -401,63 +401,18 @@ export default function CarContract() {
         </div>
       )}
 
-      {/* Étape 2 — État du véhicule (optionnel, peut être rempli par admin) */}
+      {/* Étape 2 — CGC + Signature */}
       {step === 2 && (
         <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 6, fontSize: 17 }}>État du véhicule au départ</h3>
-          <p style={{ color: 'var(--gray-500)', fontSize: 12, marginBottom: 20 }}>Ces informations seront complétées lors de la remise des clés. Vous pouvez les laisser vides.</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Immatriculation</label>
-              <input className="form-control" value={vehicle.immatriculation} onChange={e => setV('immatriculation', e.target.value)} placeholder="Ex: AA-123-BB"/>
-            </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Caution versée</label>
-              <input className="form-control" value={vehicle.caution} onChange={e => setV('caution', e.target.value)} placeholder="Ex: 500 €"/>
-            </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Km compteur départ</label>
-              <input className="form-control" value={vehicle.km} onChange={e => setV('km', e.target.value)} placeholder="Ex: 45 230"/>
-            </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Carburant au départ</label>
-              <select className="form-control" value={vehicle.carburant} onChange={e => setV('carburant', e.target.value)}>
-                <option value="">—</option>
-                <option>Plein</option>
-                <option>3/4</option>
-                <option>1/2</option>
-                <option>1/4</option>
-                <option>Vide</option>
-              </select>
-            </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Lavage effectué</label>
-              <select className="form-control" value={vehicle.lavage} onChange={e => setV('lavage', e.target.value)}>
-                <option>Oui</option>
-                <option>Non</option>
-              </select>
-            </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Options</label>
-              <input className="form-control" value={vehicle.options} onChange={e => setV('options', e.target.value)} placeholder="Ex: GPS, siège bébé…"/>
-            </div>
-            <div className="form-group" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
-              <label className="form-label">Observations / dommages préexistants</label>
-              <textarea className="form-control" rows={3} value={vehicle.observations} onChange={e => setV('observations', e.target.value)} placeholder="Décrivez tout dommage visible sur le véhicule au départ"/>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
-            <button className="btn btn-outline" onClick={() => setStep(1)}>← Retour</button>
-            <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setStep(3)}>Suivant →</button>
-          </div>
-        </div>
-      )}
-
-      {/* Étape 3 — CGC + Signature */}
-      {step === 3 && (
-        <div className="card" style={{ padding: 24 }}>
           <h3 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 16, fontSize: 17 }}>Conditions générales & Signature</h3>
+
+          {/* Vérifications sur place */}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
+            <CheckCircle size={18} color="#0284c7" style={{ flexShrink: 0, marginTop: 1 }}/>
+            <p style={{ fontSize: 13, color: '#0c4a6e', lineHeight: 1.6 }}>
+              L'état du véhicule (immatriculation, kilométrage, carburant, dommages éventuels), la vérification de votre pièce d'identité et le versement de la caution se feront <strong>sur place, lors de la remise des clés</strong>.
+            </p>
+          </div>
 
           {/* Affichage des CGC */}
           <div style={{ background: 'var(--light)', borderRadius: 10, padding: '14px 16px', maxHeight: 260, overflowY: 'auto', fontSize: 12, lineHeight: 1.7, color: 'var(--gray-700)', marginBottom: 16, whiteSpace: 'pre-wrap', border: '1px solid var(--gray-200)' }}>
@@ -480,7 +435,7 @@ export default function CarContract() {
           </div>
 
           <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
-            <button className="btn btn-outline" onClick={() => setStep(2)}>← Retour</button>
+            <button className="btn btn-outline" onClick={() => setStep(1)}>← Retour</button>
             <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', fontSize: 15 }} onClick={handleSubmit} disabled={submitting}>
               {submitting ? 'Envoi en cours...' : 'Signer et valider le contrat'}
             </button>
