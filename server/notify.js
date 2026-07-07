@@ -153,6 +153,12 @@ async function confirmCustomerCarReservation(r) {
   await sendCustomerEmail(r.customer_email, 'Confirmation de votre location — PrestoLoc', html);
 }
 
+const emailConfigured = () => !!mailer;
+async function sendEmailTest(to) {
+  await sendCustomerEmail(to, 'Test email — Auto Presto / LVTools',
+    '<p>Si vous recevez cet email, l\'envoi des confirmations de commande par email fonctionne correctement.</p>');
+}
+
 const telegramConfigured = () => !!(BOT_TOKEN && CHAT_ID);
 async function sendTelegramTest() {
   await sendTelegram('Test LVTools : si tu vois ce message, les notifications Telegram fonctionnent (commandes, réservations et contact).');
@@ -162,4 +168,5 @@ module.exports = {
   notifyNewOrder, notifyNewCarReservation, notifyContactMessage,
   confirmCustomerOrder, confirmCustomerCarReservation,
   telegramConfigured, sendTelegramTest,
+  emailConfigured, sendEmailTest,
 };

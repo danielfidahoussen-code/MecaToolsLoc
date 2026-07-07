@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { sendTelegramTest, telegramConfigured, notifyContactMessage, notifyNewOrder, notifyNewCarReservation } = require('../notify');
+const { sendTelegramTest, telegramConfigured, notifyContactMessage, notifyNewOrder, notifyNewCarReservation, emailConfigured, sendEmailTest } = require('../notify');
 
 // Envoi d'un message via le formulaire de contact
 router.post('/', async (req, res) => {
@@ -16,45 +16,51 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Route de test — vérifie que Telegram est bien configuré
-// Ouvrir dans le navigateur : https://ton-site/api/contact/test
+// Route de test — vérifie les notifications Telegram ET l'email client.
+// Telegram (proprio)  : https://ton-site/api/contact/test
+// Email client (test) : https://ton-site/api/contact/test?email=ton-adresse@gmail.com
 router.get('/test', async (req, res) => {
-  if (!telegramConfigured()) {
-    return res.json({
-      ok: false,
-      message: 'Telegram non configuré. Ajoute TELEGRAM_BOT_TOKEN et TELEGRAM_CHAT_ID dans les variables Railway.',
-      has_token: !!process.env.TELEGRAM_BOT_TOKEN,
-      has_chat_id: !!process.env.TELEGRAM_CHAT_ID,
+  const result = { telegram: {}, email: {} };
+
+  // --- Telegram (notifications proprio) ---
+  if (telegramConfigured()) {
+    await sendTelegramTest();
+    await notifyNewOrder({
+      customer_name: 'EXEMPLE - Jean Dupont', customer_email: 'jean@exemple.fr',
+      customer_phone: '06 12 34 56 78', customer_address: 'Retrait sur place',
+      items: [
+        { name: 'Kit de calage distribution Opel', type: 'rent', qty: 1, start: '2026-07-10', end: '2026-07-15' },
+        { name: 'Testeur d\'étanchéité', type: 'sale', qty: 1 },
+      ],
+      total_price: 264.98, caution_total: 150,
     });
+    await notifyNewCarReservation({
+      car_name: 'EXEMPLE - Toyota Yaris', customer_name: 'Marie Martin',
+      customer_email: 'marie@exemple.fr', customer_phone: '06 98 76 54 32',
+      start_date: '2026-07-20', end_date: '2026-07-25', days: 5, delivery: false,
+      total: 175, caution_amount: 500,
+    });
+    result.telegram = { configured: true, message: 'Messages de test envoyés sur Telegram.' };
+  } else {
+    result.telegram = { configured: false, message: 'Non configuré : ajoute TELEGRAM_BOT_TOKEN et TELEGRAM_CHAT_ID sur Railway.' };
   }
-  await sendTelegramTest();
 
-  // Exemple de commande (aucun vrai achat)
-  await notifyNewOrder({
-    customer_name: 'EXEMPLE - Jean Dupont',
-    customer_email: 'jean@exemple.fr',
-    customer_phone: '06 12 34 56 78',
-    customer_address: 'Retrait sur place',
-    items: [
-      { name: 'Kit de calage distribution Opel', type: 'rent', qty: 1, start: '2026-07-10', end: '2026-07-15' },
-      { name: 'Testeur d\'étanchéité', type: 'sale', qty: 1 },
-    ],
-    total_price: 264.98,
-    caution_total: 150,
-  });
+  // --- Email (confirmation client) ---
+  const testEmail = req.query.email;
+  if (!emailConfigured()) {
+    result.email = {
+      configured: false,
+      message: 'Non configuré : ajoute SMTP_USER et SMTP_PASS sur Railway.',
+      has_smtp_user: !!process.env.SMTP_USER, has_smtp_pass: !!process.env.SMTP_PASS,
+    };
+  } else if (!testEmail) {
+    result.email = { configured: true, message: 'Email configuré. Ajoute ?email=ton-adresse@gmail.com à l\'URL pour recevoir un email de test.' };
+  } else {
+    await sendEmailTest(testEmail);
+    result.email = { configured: true, message: `Email de test envoyé à ${testEmail}. Vérifie ta boîte (et les spams).` };
+  }
 
-  // Exemple de réservation véhicule (aucune vraie résa)
-  await notifyNewCarReservation({
-    car_name: 'EXEMPLE - Toyota Yaris',
-    customer_name: 'Marie Martin',
-    customer_email: 'marie@exemple.fr',
-    customer_phone: '06 98 76 54 32',
-    start_date: '2026-07-20', end_date: '2026-07-25', days: 5,
-    delivery: false,
-    total: 175, caution_amount: 500,
-  });
-
-  res.json({ ok: true, message: 'Test envoyé : 1 message de test + 1 exemple de commande + 1 exemple de réservation. Vérifie ton Telegram.' });
+  res.json({ ok: true, ...result });
 });
 
 module.exports = router;
