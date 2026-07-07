@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { sendTest, isConfigured, notifyContactMessage } = require('../notify');
+const { sendEmailTest, sendTelegramTest, emailConfigured, telegramConfigured, notifyContactMessage } = require('../notify');
 
 // Envoi d'un message via le formulaire de contact
 router.post('/', async (req, res) => {
@@ -16,19 +16,23 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Route de test — vérifie que l'email est bien configuré
+// Route de test — vérifie les deux canaux (email pour contact, Telegram pour commandes)
 // Ouvrir dans le navigateur : https://ton-site/api/contact/test
 router.get('/test', async (req, res) => {
-  if (!isConfigured()) {
-    return res.json({
-      ok: false,
-      message: 'Email non configuré. Ajoute SMTP_USER et SMTP_PASS dans les variables Railway.',
-      has_smtp_user: !!process.env.SMTP_USER,
-      has_smtp_pass: !!process.env.SMTP_PASS,
-    });
-  }
-  await sendTest();
-  res.json({ ok: true, message: 'Email de test envoyé. Vérifie ta boîte mail (et les spams).' });
+  const email = emailConfigured();
+  const telegram = telegramConfigured();
+  if (email) await sendEmailTest();
+  if (telegram) await sendTelegramTest();
+  res.json({
+    email: {
+      configured: email,
+      message: email ? 'Email de test envoyé — vérifie ta boîte (et les spams).' : 'Non configuré : ajoute SMTP_USER et SMTP_PASS sur Railway.',
+    },
+    telegram: {
+      configured: telegram,
+      message: telegram ? 'Message Telegram de test envoyé.' : 'Non configuré : ajoute TELEGRAM_BOT_TOKEN et TELEGRAM_CHAT_ID sur Railway.',
+    },
+  });
 });
 
 module.exports = router;
