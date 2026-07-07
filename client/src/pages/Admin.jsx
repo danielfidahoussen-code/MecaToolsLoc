@@ -565,10 +565,11 @@ export default function Admin() {
                           {o.status === 'paid' ? '✅ Payé' : '⏳ ' + o.status}
                         </span>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, alignItems: 'center' }}>
                         <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{o.total_price.toFixed(2)} €</span>
                         <span style={{ color: 'var(--gray-400)' }}>{new Date(o.created_at).toLocaleDateString('fr-FR')}</span>
                       </div>
+                      <button className="btn btn-sm btn-danger" onClick={() => deleteOrder(o.id)} style={{ marginTop: 10, width: '100%', justifyContent: 'center' }}><Trash2 size={13}/> Supprimer</button>
                     </div>
                   ))}
                 </div>
@@ -577,8 +578,8 @@ export default function Admin() {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <thead>
                       <tr style={{ background: 'var(--primary)', color: 'white' }}>
-                        {['#', 'Client', 'Email', 'Total', 'Type', 'Statut', 'Date'].map(h => (
-                          <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700 }}>{h}</th>
+                        {['#', 'Client', 'Email', 'Total', 'Type', 'Statut', 'Date', ''].map((h, hi) => (
+                          <th key={hi} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700 }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -596,6 +597,9 @@ export default function Admin() {
                             </span>
                           </td>
                           <td style={{ padding: '11px 14px', color: 'var(--gray-500)', fontSize: 12 }}>{new Date(o.created_at).toLocaleDateString('fr-FR')}</td>
+                          <td style={{ padding: '11px 14px' }}>
+                            <button className="btn btn-sm btn-danger" onClick={() => deleteOrder(o.id)} title="Supprimer"><Trash2 size={13}/></button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -637,6 +641,7 @@ export default function Admin() {
                         <option value="cancelled">❌ Annulée</option>
                         <option value="completed">🏁 Terminée</option>
                       </select>
+                      <button className="btn btn-sm btn-danger" onClick={() => deleteReservation(r.id)} style={{ marginTop: 10, width: '100%', justifyContent: 'center' }}><Trash2 size={13}/> Supprimer</button>
                     </div>
                   ))}
                 </div>
@@ -645,8 +650,8 @@ export default function Admin() {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <thead>
                       <tr style={{ background: 'var(--primary)', color: 'white' }}>
-                        {['#', 'Produit', 'Client', 'Téléphone', 'Dates', 'Total', 'Statut', 'Date'].map(h => (
-                          <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700 }}>{h}</th>
+                        {['#', 'Produit', 'Client', 'Téléphone', 'Dates', 'Total', 'Statut', 'Date', ''].map((h, hi) => (
+                          <th key={hi} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700 }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -672,6 +677,9 @@ export default function Admin() {
                             </select>
                           </td>
                           <td style={{ padding: '11px 14px', fontSize: 12, color: 'var(--gray-400)' }}>{new Date(r.created_at).toLocaleDateString('fr-FR')}</td>
+                          <td style={{ padding: '11px 14px' }}>
+                            <button className="btn btn-sm btn-danger" onClick={() => deleteReservation(r.id)} title="Supprimer"><Trash2 size={13}/></button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -747,6 +755,7 @@ export default function Admin() {
                         <option value="completed">Terminée</option>
                         <option value="cancelled">Annulée</option>
                       </select>
+                      <button className="btn btn-sm btn-danger" onClick={() => deleteCarReservation(r.id)} style={{ marginTop: 10, width: '100%', justifyContent: 'center' }}><Trash2 size={13}/> Supprimer</button>
                     </div>
                   ))}
                 </div>
@@ -755,8 +764,8 @@ export default function Admin() {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <thead>
                       <tr style={{ background: 'var(--light)', borderBottom: '2px solid var(--gray-200)' }}>
-                        {['#', 'Véhicule', 'Client', 'Téléphone', 'Dates', 'Durée', 'Total', 'Livraison', 'Contrat', 'Statut'].map(h => (
-                          <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
+                        {['#', 'Véhicule', 'Client', 'Téléphone', 'Dates', 'Durée', 'Total', 'Livraison', 'Contrat', 'Statut', ''].map((h, hi) => (
+                          <th key={hi} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -797,6 +806,9 @@ export default function Admin() {
                               <option value="completed">Terminée</option>
                               <option value="cancelled">Annulée</option>
                             </select>
+                          </td>
+                          <td style={{ padding: '11px 14px' }}>
+                            <button className="btn btn-sm btn-danger" onClick={() => deleteCarReservation(r.id)} title="Supprimer"><Trash2 size={13}/></button>
                           </td>
                         </tr>
                       ))}
