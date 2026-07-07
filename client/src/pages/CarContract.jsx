@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle, Loader, PenLine, Trash2, Upload, X } from 'lucide-react';
+import { CheckCircle, Loader, PenLine, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -165,8 +165,6 @@ export default function CarContract() {
   const [signed, setSigned] = useState(false);
   const [paying, setPaying] = useState(false);
   const [secondDriver, setSecondDriver] = useState(false);
-  const [permisPhoto, setPermisPhoto] = useState(null);
-  const [uploadingPermis, setUploadingPermis] = useState(false);
 
   useEffect(() => {
     axios.get(`/api/car-reservations/public/${id}`)
@@ -181,20 +179,6 @@ export default function CarContract() {
   }, [id]);
 
   const setD = (k, v) => setDriver(d => ({ ...d, [k]: v }));
-
-  const handlePermisUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploadingPermis(true);
-    try {
-      const fd = new FormData();
-      fd.append('image', file);
-      const { data } = await axios.post('/api/upload', fd);
-      setPermisPhoto(data.url);
-      toast.success('Permis importé !');
-    } catch { toast.error("Erreur lors de l'import"); }
-    finally { setUploadingPermis(false); }
-  };
   const setV = (k, v) => setVehicle(v2 => ({ ...v2, [k]: v }));
 
   const handleSubmit = async () => {
@@ -205,7 +189,7 @@ export default function CarContract() {
     }
     setSubmitting(true);
     try {
-      await axios.post(`/api/car-reservations/${id}/contract`, { driver: { ...driver, permis_photo: permisPhoto }, vehicle_state: vehicle, signature });
+      await axios.post(`/api/car-reservations/${id}/contract`, { driver, vehicle_state: vehicle, signature });
       toast.success('Contrat signé !');
       setSigned(true);
     } catch { toast.error('Erreur lors de la signature'); }
@@ -331,31 +315,8 @@ export default function CarContract() {
             </div>
           </div>
 
-          {/* Upload photo permis */}
-          <div style={{ marginTop: 16, padding: '14px 16px', border: `2px solid ${permisPhoto ? '#86efac' : '#fca5a5'}`, borderRadius: 12, background: permisPhoto ? 'rgba(134,239,172,.08)' : 'rgba(252,165,165,.06)' }}>
-            <p style={{ fontWeight: 700, fontSize: 13, marginBottom: 8, color: permisPhoto ? '#166534' : 'var(--danger)', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Upload size={14}/> Photo du permis de conduire *
-              {!permisPhoto && <span style={{ fontWeight: 500, color: 'var(--gray-500)', fontSize: 12 }}>(recto ou recto/verso)</span>}
-            </p>
-
-            {permisPhoto ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <img src={permisPhoto} alt="Permis" style={{ height: 80, borderRadius: 8, objectFit: 'cover', border: '1px solid #86efac' }}/>
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: '#166534', marginBottom: 6 }}>Permis importé</p>
-                  <button type="button" onClick={() => setPermisPhoto(null)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--danger)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                    <X size={12}/> Supprimer
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', border: '2px dashed #fca5a5', borderRadius: 10, cursor: 'pointer', background: 'white', fontWeight: 600, fontSize: 13, color: 'var(--gray-600)' }}>
-                <input type="file" accept="image/*" onChange={handlePermisUpload} style={{ display: 'none' }}/>
-                <Upload size={16} color="var(--danger)"/>
-                {uploadingPermis ? 'Import en cours...' : 'Choisir une photo (JPG, PNG…)'}
-              </label>
-            )}
+          <div style={{ marginTop: 16, padding: '12px 14px', background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 10, fontSize: 13, color: '#0c4a6e', lineHeight: 1.6 }}>
+            Votre <strong>permis de conduire original</strong> et votre pièce d'identité vous seront demandés et vérifiés <strong>sur place, lors de la remise des clés</strong>. Aucune photo n'est à téléverser ici.
           </div>
 
           <div style={{ marginTop: 20 }}>
@@ -390,9 +351,6 @@ export default function CarContract() {
               }
               if (!driver.permis.trim()) {
                 toast.error('Le numéro de permis est requis'); return;
-              }
-              if (!permisPhoto) {
-                toast.error('Veuillez téléverser une photo de votre permis de conduire'); return;
               }
               setStep(2);
             }}>
