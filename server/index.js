@@ -39,6 +39,7 @@ app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/car-reservations', require('./routes/car-reservations'));
 app.use('/api/cars', require('./routes/cars'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Serve React build in production
 const distPath = path.join(__dirname, '../client/dist');
@@ -47,5 +48,13 @@ app.get('*', (req, res) => {
   if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) return res.status(404).json({ error: 'Not found' });
   res.sendFile(path.join(distPath, 'index.html'));
 });
+
+// Sauvegarde automatique : au démarrage puis toutes les 24h
+try {
+  const db = require('./jsondb');
+  const snapshot = () => db.makeBackup(new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-'));
+  snapshot();
+  setInterval(snapshot, 24 * 60 * 60 * 1000);
+} catch (e) { console.error('[DB] snapshot init:', e.message); }
 
 app.listen(PORT, () => console.log(`MecaToolsLoc server running on port ${PORT}`));

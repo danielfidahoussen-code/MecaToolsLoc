@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, FileText } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, FileText, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -396,6 +396,19 @@ export default function Admin() {
           {/* ── Stats ── */}
           {tab === 'stats' && (
             <div>
+              {/* Sauvegarde des données */}
+              <div className="card" style={{ padding: 18, marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', background: 'var(--light)' }}>
+                <div>
+                  <p style={{ fontWeight: 700, color: 'var(--primary)', fontSize: 14 }}>Sauvegarde des données</p>
+                  <p style={{ fontSize: 12, color: 'var(--gray-500)', marginTop: 2 }}>Téléchargez et conservez régulièrement une copie de toutes vos commandes, réservations et contrats.</p>
+                </div>
+                <a className="btn btn-primary btn-sm"
+                  href={`/api/admin/backup?stamp=${new Date().toISOString().slice(0,10)}&token=${token}`}
+                  style={{ whiteSpace: 'nowrap' }}>
+                  <Download size={14}/> Télécharger une sauvegarde
+                </a>
+              </div>
+
               {/* Chiffres clés */}
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(5,1fr)', gap: 14, marginBottom: 28 }}>
                 {[

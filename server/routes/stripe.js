@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const Stripe = require('stripe');
 const { orders, products, reservations } = require('../database');
-const { notifyNewOrder } = require('../notify');
+const { notifyNewOrder, confirmCustomerOrder } = require('../notify');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -191,6 +191,15 @@ async function createOrderFromSession(session) {
     delivery_mode: meta.delivery_mode,
     caution_total: meta.caution_total,
   }).catch(err => console.error('[NOTIFY] notifyNewOrder:', err.message));
+
+  // Email de confirmation au client
+  confirmCustomerOrder({
+    customer_name: meta.customer_name,
+    customer_email: session.customer_email,
+    customer_address: meta.customer_address,
+    items: itemsWithNames,
+    total_price: meta.total_price,
+  }).catch(err => console.error('[NOTIFY] confirmCustomerOrder:', err.message));
 }
 
 module.exports = router;

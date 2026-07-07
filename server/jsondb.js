@@ -20,6 +20,35 @@ function save(data) {
   fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 }
 
+// Dossier de sauvegardes rotatives dans le volume
+const BACKUP_DIR = path.join(DATA_DIR, 'backups');
+const MAX_BACKUPS = 14;
+
+// Crée une sauvegarde horodatée et purge les plus anciennes.
+// stamp doit être fourni par l'appelant (Date.now() interdit ici).
+function makeBackup(stamp) {
+  try {
+    if (!fs.existsSync(DB_PATH)) return null;
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    const dest = path.join(BACKUP_DIR, `data-${stamp}.json`);
+    fs.copyFileSync(DB_PATH, dest);
+    // Purge : ne garder que les MAX_BACKUPS plus récentes
+    const files = fs.readdirSync(BACKUP_DIR)
+      .filter(f => f.startsWith('data-') && f.endsWith('.json'))
+      .sort();
+    while (files.length > MAX_BACKUPS) {
+      const old = files.shift();
+      try { fs.unlinkSync(path.join(BACKUP_DIR, old)); } catch {}
+    }
+    return dest;
+  } catch (err) {
+    console.error('[DB] Backup error:', err.message);
+    return null;
+  }
+}
+
+function getDbPath() { return DB_PATH; }
+
 class Table {
   constructor(store, name) {
     this.store = store;
@@ -80,4 +109,8 @@ class JsonDB {
   table(name) { return new Table(this, name); }
 }
 
-module.exports = new JsonDB();
+const db = new JsonDB();
+db.makeBackup = makeBackup;
+db.getDbPath = getDbPath;
+
+module.exports = db;

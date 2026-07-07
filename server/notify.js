@@ -26,6 +26,25 @@ async function sendTelegram(text) {
   }
 }
 
+// ---------- Email de confirmation au CLIENT ----------
+// Variables : SMTP_USER, SMTP_PASS (mot de passe d'application Gmail). Sinon ignoré.
+const nodemailer = require('nodemailer');
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+let mailer = null;
+if (SMTP_USER && SMTP_PASS) {
+  mailer = nodemailer.createTransport({ service: 'gmail', auth: { user: SMTP_USER, pass: SMTP_PASS } });
+}
+async function sendCustomerEmail(to, subject, html) {
+  if (!mailer) { console.warn('[NOTIFY] Email client non configuré (SMTP_USER/SMTP_PASS) — ignoré'); return; }
+  if (!to) return;
+  try {
+    await mailer.sendMail({ from: `"Auto Presto - LVTools" <${SMTP_USER}>`, to, subject, html });
+  } catch (err) {
+    console.error('[NOTIFY] Erreur email client:', err.message);
+  }
+}
+
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 // Commande d'outils
@@ -88,6 +107,52 @@ async function notifyContactMessage({ name, email, phone, subject, message }) {
   await sendTelegram(text);
 }
 
+// Confirmation client — commande d'outils
+async function confirmCustomerOrder({ customer_name, customer_email, customer_address, items, total_price }) {
+  const lignes = (items || []).map(i => {
+    const type = i.type === 'rent' ? 'Location' : 'Achat';
+    const dates = (i.start || i.rentDates?.startDate) ? ` — du ${i.start || i.rentDates?.startDate} au ${i.end || i.rentDates?.endDate}` : '';
+    return `<li>${type} : ${esc(i.name) || 'Produit'} × ${i.qty || i.quantity || 1}${dates}</li>`;
+  }).join('');
+  const isPickup = !customer_address || customer_address === 'Retrait sur place';
+  const recup = isPickup
+    ? `<p><strong>Retrait sur place :</strong> 3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis. Du lundi au samedi, 8h–18h.</p>`
+    : `<p><strong>Livraison prévue à :</strong> ${esc(customer_address)}. Nous vous contacterons pour convenir du créneau.</p>`;
+  const aRent = (items || []).some(i => i.type === 'rent');
+
+  const html =
+    `<p>Bonjour ${esc(customer_name) || ''},</p>` +
+    `<p>Merci pour votre commande chez <strong>LVTools</strong> (Auto Presto). Voici le récapitulatif :</p>` +
+    `<ul>${lignes || '<li>—</li>'}</ul>` +
+    `<p><strong>Total payé : ${Number(total_price || 0).toFixed(2)} €</strong></p>` +
+    recup +
+    (aRent ? `<p><strong>Pour votre location :</strong> merci de vous munir d'une <strong>pièce d'identité</strong> et d'un <strong>moyen de caution</strong> (carte bancaire ou chèque). La caution est prise lors de la remise du matériel et n'est pas débitée si le matériel est rendu en bon état.</p>` : '') +
+    `<p>Une question ? Répondez à cet email ou appelez le 06 93 83 96 54.</p>` +
+    `<p>À très vite,<br/>L'équipe Auto Presto — LVTools</p>`;
+
+  await sendCustomerEmail(customer_email, 'Confirmation de votre commande — LVTools', html);
+}
+
+// Confirmation client — réservation véhicule
+async function confirmCustomerCarReservation(r) {
+  if (!r) return;
+  const recup = r.delivery
+    ? `<p><strong>Livraison prévue à :</strong> ${esc(r.delivery_address) || 'votre adresse'}. Nous vous contacterons pour le créneau.</p>`
+    : `<p><strong>Retrait sur place :</strong> 3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis.</p>`;
+  const html =
+    `<p>Bonjour ${esc(r.customer_name) || ''},</p>` +
+    `<p>Votre réservation de véhicule chez <strong>PrestoLoc</strong> (Auto Presto) est confirmée :</p>` +
+    `<ul><li><strong>${esc(r.car_name)}</strong></li>` +
+    `<li>Du ${esc(r.start_date)} au ${esc(r.end_date)} (${r.days} jour${r.days > 1 ? 's' : ''})</li></ul>` +
+    `<p><strong>Total payé : ${Number(r.total || 0).toFixed(2)} €</strong></p>` +
+    recup +
+    `<p>Merci de vous munir de votre <strong>permis de conduire</strong>, d'une <strong>pièce d'identité</strong> et d'un <strong>moyen de caution</strong>. L'état du véhicule et la caution seront vérifiés lors de la remise des clés.</p>` +
+    `<p>Une question ? Répondez à cet email ou appelez le 06 93 83 96 54.</p>` +
+    `<p>À très vite,<br/>L'équipe Auto Presto — PrestoLoc</p>`;
+
+  await sendCustomerEmail(r.customer_email, 'Confirmation de votre location — PrestoLoc', html);
+}
+
 const telegramConfigured = () => !!(BOT_TOKEN && CHAT_ID);
 async function sendTelegramTest() {
   await sendTelegram('Test LVTools : si tu vois ce message, les notifications Telegram fonctionnent (commandes, réservations et contact).');
@@ -95,5 +160,6 @@ async function sendTelegramTest() {
 
 module.exports = {
   notifyNewOrder, notifyNewCarReservation, notifyContactMessage,
+  confirmCustomerOrder, confirmCustomerCarReservation,
   telegramConfigured, sendTelegramTest,
 };
