@@ -365,4 +365,15 @@ router.put('/:id', authMiddleware, (req, res) => {
   res.json({ success: true });
 });
 
+// Admin — supprime toutes les réservations véhicules (doit être AVANT /:id)
+router.delete('/all', authMiddleware, (req, res) => {
+  car_reservations.all().forEach(r => car_reservations.delete(r.id));
+  res.json({ success: true });
+});
+
+router.delete('/:id', authMiddleware, (req, res) => {
+  car_reservations.delete(Number(req.params.id));
+  res.json({ success: true });
+});
+
 module.exports = router;

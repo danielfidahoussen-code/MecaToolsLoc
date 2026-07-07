@@ -312,6 +312,45 @@ export default function Admin() {
     loadData();
   };
 
+  const deleteOrder = async (id) => {
+    if (!confirm('Supprimer cette commande ?')) return;
+    await axios.delete(`/api/orders/${id}`, API(token));
+    toast.success('Commande supprimée');
+    loadData();
+  };
+  const clearOrders = async () => {
+    if (!confirm('Supprimer TOUTES les commandes ? Cette action est irréversible.')) return;
+    await axios.delete('/api/orders/all', API(token));
+    toast.success('Historique des commandes vidé');
+    loadData();
+  };
+
+  const deleteReservation = async (id) => {
+    if (!confirm('Supprimer cette réservation ?')) return;
+    await axios.delete(`/api/reservations/${id}`, API(token));
+    toast.success('Réservation supprimée');
+    loadData();
+  };
+  const clearReservations = async () => {
+    if (!confirm('Supprimer TOUTES les réservations ? Cette action est irréversible.')) return;
+    await axios.delete('/api/reservations/all', API(token));
+    toast.success('Historique des réservations vidé');
+    loadData();
+  };
+
+  const deleteCarReservation = async (id) => {
+    if (!confirm('Supprimer cette réservation ?')) return;
+    await axios.delete(`/api/car-reservations/${id}`, API(token));
+    toast.success('Réservation supprimée');
+    loadData();
+  };
+  const clearCarReservations = async () => {
+    if (!confirm('Supprimer TOUTES les réservations de véhicules ? Cette action est irréversible.')) return;
+    await axios.delete('/api/car-reservations/all', API(token));
+    toast.success('Historique des réservations vidé');
+    loadData();
+  };
+
   const tabs = [
     { id: 'products',        label: 'Produits',        icon: <Package size={15}/> },
     { id: 'orders',          label: 'Commandes',        icon: <ShoppingBag size={15}/> },
@@ -507,7 +546,12 @@ export default function Admin() {
           {/* ── Orders ── */}
           {tab === 'orders' && (
             <div>
-              <h2 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 20, fontSize: isMobile ? 17 : 22 }}>Commandes ({orders.length})</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}>
+                <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: isMobile ? 17 : 22 }}>Commandes ({orders.length})</h2>
+                {orders.length > 0 && (
+                  <button className="btn btn-sm btn-danger" onClick={clearOrders}><Trash2 size={13}/> Tout supprimer</button>
+                )}
+              </div>
               {orders.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucune commande pour le moment</p> : isMobile ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {orders.map(o => (
@@ -564,7 +608,12 @@ export default function Admin() {
           {/* ── Reservations ── */}
           {tab === 'reservations' && (
             <div>
-              <h2 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 20, fontSize: isMobile ? 17 : 22 }}>Réservations ({reservations.length})</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}>
+                <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: isMobile ? 17 : 22 }}>Réservations ({reservations.length})</h2>
+                {reservations.length > 0 && (
+                  <button className="btn btn-sm btn-danger" onClick={clearReservations}><Trash2 size={13}/> Tout supprimer</button>
+                )}
+              </div>
               {reservations.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucune réservation pour le moment</p> : isMobile ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {reservations.map(r => (
@@ -640,6 +689,12 @@ export default function Admin() {
                   <button className="btn btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}
                     onClick={() => { setEditCar(null); setShowCarForm(true); }}>
                     <Plus size={14}/> Ajouter un véhicule
+                  </button>
+                )}
+                {carSubTab === 'reservations' && carReservations.length > 0 && (
+                  <button className="btn btn-danger btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                    onClick={clearCarReservations}>
+                    <Trash2 size={14}/> Tout supprimer
                   </button>
                 )}
               </div>

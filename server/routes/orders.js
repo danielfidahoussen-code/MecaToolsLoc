@@ -48,4 +48,15 @@ router.put('/:id/status', authMiddleware, (req, res) => {
   res.json({ success: true });
 });
 
+// Supprime toutes les commandes (doit être AVANT /:id)
+router.delete('/all', authMiddleware, (req, res) => {
+  orders.all().forEach(o => orders.delete(o.id));
+  res.json({ success: true });
+});
+
+router.delete('/:id', authMiddleware, (req, res) => {
+  orders.delete(Number(req.params.id));
+  res.json({ success: true });
+});
+
 module.exports = router;

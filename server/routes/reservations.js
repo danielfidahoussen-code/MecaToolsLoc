@@ -49,4 +49,15 @@ router.put('/:id/status', authMiddleware, (req, res) => {
   res.json({ success: true });
 });
 
+// Supprime toutes les réservations (doit être AVANT /:id)
+router.delete('/all', authMiddleware, (req, res) => {
+  reservations.all().forEach(r => reservations.delete(r.id));
+  res.json({ success: true });
+});
+
+router.delete('/:id', authMiddleware, (req, res) => {
+  reservations.delete(Number(req.params.id));
+  res.json({ success: true });
+});
+
 module.exports = router;
