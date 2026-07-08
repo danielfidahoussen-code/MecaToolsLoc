@@ -31,15 +31,28 @@ async function sendTelegram(text) {
 const nodemailer = require('nodemailer');
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
+// Optionnel : SMTP générique (ex. Resend). Si SMTP_HOST est défini on l'utilise,
+// sinon on retombe sur Gmail. Resend : host smtp.resend.com, port 587,
+// user "resend", pass = clé API. From = MAIL_FROM (adresse vérifiée).
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = process.env.SMTP_PORT;
+const MAIL_FROM = process.env.MAIL_FROM || SMTP_USER;
 let mailer = null;
-if (SMTP_USER && SMTP_PASS) {
+if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+  mailer = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: Number(SMTP_PORT) || 587,
+    secure: Number(SMTP_PORT) === 465,
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+  });
+} else if (SMTP_USER && SMTP_PASS) {
   mailer = nodemailer.createTransport({ service: 'gmail', auth: { user: SMTP_USER, pass: SMTP_PASS } });
 }
 async function sendCustomerEmail(to, subject, html) {
   if (!mailer) { console.warn('[NOTIFY] Email client non configuré (SMTP_USER/SMTP_PASS) — ignoré'); return; }
   if (!to) return;
   try {
-    await mailer.sendMail({ from: `"Auto Presto - LVTools" <${SMTP_USER}>`, to, subject, html });
+    await mailer.sendMail({ from: `"Auto Presto - LVTools" <${MAIL_FROM}>`, to, subject, html });
   } catch (err) {
     console.error('[NOTIFY] Erreur email client:', err.message);
   }
