@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { sendTelegramTest, telegramConfigured, notifyContactMessage, notifyNewOrder, notifyNewCarReservation, emailConfigured, sendEmailTest } = require('../notify');
+const { sendTelegramTest, telegramConfigured, notifyContactMessage, notifyNewOrder, notifyNewCarReservation, emailDiagnostic } = require('../notify');
 
 // Envoi d'un message via le formulaire de contact
 router.post('/', async (req, res) => {
@@ -45,20 +45,13 @@ router.get('/test', async (req, res) => {
     result.telegram = { configured: false, message: 'Non configuré : ajoute TELEGRAM_BOT_TOKEN et TELEGRAM_CHAT_ID sur Railway.' };
   }
 
-  // --- Email (confirmation client) ---
-  const testEmail = req.query.email;
-  if (!emailConfigured()) {
-    result.email = {
-      configured: false,
-      message: 'Non configuré : ajoute SMTP_USER et SMTP_PASS sur Railway.',
-      has_smtp_user: !!process.env.SMTP_USER, has_smtp_pass: !!process.env.SMTP_PASS,
-    };
-  } else if (!testEmail) {
-    result.email = { configured: true, message: 'Email configuré. Ajoute ?email=ton-adresse@gmail.com à l\'URL pour recevoir un email de test.' };
-  } else {
-    await sendEmailTest(testEmail);
-    result.email = { configured: true, message: `Email de test envoyé à ${testEmail}. Vérifie ta boîte (et les spams).` };
-  }
+  // --- Email (confirmation client) : diagnostic réel (remonte l'erreur exacte) ---
+  result.email = {
+    ...(await emailDiagnostic(req.query.email)),
+    has_smtp_user: !!process.env.SMTP_USER,
+    has_smtp_pass: !!process.env.SMTP_PASS,
+    smtp_host: process.env.SMTP_HOST || '(gmail par défaut)',
+  };
 
   res.json({ ok: true, ...result });
 });

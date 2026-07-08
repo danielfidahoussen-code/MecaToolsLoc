@@ -171,6 +171,23 @@ async function sendEmailTest(to) {
   await sendCustomerEmail(to, 'Test email — Auto Presto / LVTools',
     '<p>Si vous recevez cet email, l\'envoi des confirmations de commande par email fonctionne correctement.</p>');
 }
+// Diagnostic : vérifie la connexion SMTP et tente un envoi RÉEL en remontant l'erreur exacte
+async function emailDiagnostic(to) {
+  if (!mailer) return { configured: false, error: 'SMTP_USER / SMTP_PASS non définis sur Railway' };
+  try {
+    await mailer.verify(); // teste connexion + authentification
+  } catch (err) {
+    return { configured: true, verified: false, error: `Connexion/auth SMTP échouée : ${err.message}` };
+  }
+  if (!to) return { configured: true, verified: true, sent: false, message: 'Connexion SMTP OK. Ajoute ?email=... pour tester un envoi réel.' };
+  try {
+    await mailer.sendMail({ from: `"Auto Presto - LVTools" <${MAIL_FROM}>`, to, subject: 'Test email — Auto Presto / LVTools',
+      html: '<p>Si vous recevez cet email, l\'envoi fonctionne correctement.</p>' });
+    return { configured: true, verified: true, sent: true, message: `Email réellement envoyé à ${to}.` };
+  } catch (err) {
+    return { configured: true, verified: true, sent: false, error: `Envoi refusé : ${err.message}` };
+  }
+}
 
 const telegramConfigured = () => !!(BOT_TOKEN && CHAT_ID);
 async function sendTelegramTest() {
@@ -181,5 +198,5 @@ module.exports = {
   notifyNewOrder, notifyNewCarReservation, notifyContactMessage,
   confirmCustomerOrder, confirmCustomerCarReservation,
   telegramConfigured, sendTelegramTest,
-  emailConfigured, sendEmailTest,
+  emailConfigured, sendEmailTest, emailDiagnostic,
 };
