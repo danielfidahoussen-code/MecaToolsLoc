@@ -3,10 +3,13 @@ const Stripe = require('stripe');
 const { orders, products, reservations } = require('../database');
 const { notifyNewOrder, confirmCustomerOrder } = require('../notify');
 
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+// Init tolérante : si la clé manque, le site reste en ligne (seul le paiement échoue proprement)
+const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
+if (!stripe) console.error('[STRIPE] STRIPE_SECRET_KEY manquante — les paiements sont désactivés');
 
 // Crée une session Stripe Checkout
 router.post('/create-checkout-session', async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Paiement momentanément indisponible' });
   try {
     const {
       customer_name, customer_email, customer_phone, customer_address,
@@ -81,6 +84,7 @@ router.post('/create-checkout-session', async (req, res) => {
 
 // Webhook Stripe — body raw configuré dans index.js
 router.post('/webhook', async (req, res) => {
+  if (!stripe) return res.json({ received: true });
   const sig = req.headers['stripe-signature'];
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -113,6 +117,7 @@ router.post('/webhook', async (req, res) => {
 
 // Vérifie une session après retour sur /checkout/success
 router.get('/session/:sessionId', async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Paiement momentanément indisponible' });
   try {
     const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
     if (session.payment_status === 'paid') {

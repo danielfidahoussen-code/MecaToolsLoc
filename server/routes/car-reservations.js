@@ -4,7 +4,8 @@ const { car_reservations } = require('../database');
 const { authMiddleware } = require('../middleware/auth');
 const { notifyNewCarReservation, confirmCustomerCarReservation } = require('../notify');
 
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
+if (!stripe) console.error('[STRIPE] STRIPE_SECRET_KEY manquante — paiements véhicules désactivés');
 
 // Crée une réservation en attente (avant contrat + paiement)
 router.post('/create', (req, res) => {
@@ -30,6 +31,7 @@ router.post('/create', (req, res) => {
 
 // Crée une session Stripe pour une réservation existante (après signature du contrat)
 router.post('/:id/checkout', async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Paiement momentanément indisponible' });
   try {
     const r = car_reservations.getById(Number(req.params.id));
     if (!r) return res.status(404).json({ error: 'Réservation introuvable' });
@@ -84,6 +86,7 @@ router.post('/:id/checkout', async (req, res) => {
 
 // Ancien endpoint checkout (conservé pour rétrocompatibilité)
 router.post('/checkout', async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Paiement momentanément indisponible' });
   try {
     const { car_id, car_name, start_date, end_date, days, car_total, total, delivery, delivery_address, customer_name, customer_email, customer_phone } = req.body;
 
@@ -145,6 +148,7 @@ router.post('/checkout', async (req, res) => {
 
 // Vérifie la session après paiement
 router.get('/session/:sessionId', async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Paiement momentanément indisponible' });
   try {
     const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
     if (session.payment_status === 'paid') {
