@@ -27,32 +27,45 @@ async function sendTelegram(text) {
 }
 
 // ---------- Email de confirmation au CLIENT ----------
-// Variables : SMTP_USER, SMTP_PASS (mot de passe d'application Gmail). Sinon ignoré.
+// Recommandé sur Railway : Resend via API HTTP (port 443, non bloqué).
+//   RESEND_API_KEY = clé API Resend (re_...)
+//   MAIL_FROM      = adresse d'envoi (ex. onboarding@resend.dev pour démarrer,
+//                    ou contact@ton-domaine une fois le domaine vérifié)
+// Le SMTP (Gmail/autre) reste possible mais Railway bloque souvent les ports SMTP.
 const nodemailer = require('nodemailer');
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
-// Optionnel : SMTP générique (ex. Resend). Si SMTP_HOST est défini on l'utilise,
-// sinon on retombe sur Gmail. Resend : host smtp.resend.com, port 587,
-// user "resend", pass = clé API. From = MAIL_FROM (adresse vérifiée).
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = process.env.SMTP_PORT;
-const MAIL_FROM = process.env.MAIL_FROM || SMTP_USER;
+const MAIL_FROM = process.env.MAIL_FROM || (RESEND_API_KEY ? 'onboarding@resend.dev' : SMTP_USER);
+const FROM_HEADER = `Auto Presto - LVTools <${MAIL_FROM}>`;
+
 let mailer = null;
-if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
-  mailer = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT) || 587,
-    secure: Number(SMTP_PORT) === 465,
-    auth: { user: SMTP_USER, pass: SMTP_PASS },
-  });
-} else if (SMTP_USER && SMTP_PASS) {
-  mailer = nodemailer.createTransport({ service: 'gmail', auth: { user: SMTP_USER, pass: SMTP_PASS } });
+if (!RESEND_API_KEY) {
+  if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+    mailer = nodemailer.createTransport({ host: SMTP_HOST, port: Number(SMTP_PORT) || 587, secure: Number(SMTP_PORT) === 465, auth: { user: SMTP_USER, pass: SMTP_PASS } });
+  } else if (SMTP_USER && SMTP_PASS) {
+    mailer = nodemailer.createTransport({ service: 'gmail', auth: { user: SMTP_USER, pass: SMTP_PASS } });
+  }
 }
+
+// Envoi via l'API HTTP de Resend (lève une erreur en cas d'échec)
+async function sendViaResend(to, subject, html) {
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: FROM_HEADER, to, subject, html }),
+  });
+  if (!res.ok) throw new Error(`Resend ${res.status}: ${await res.text()}`);
+}
+
 async function sendCustomerEmail(to, subject, html) {
-  if (!mailer) { console.warn('[NOTIFY] Email client non configuré (SMTP_USER/SMTP_PASS) — ignoré'); return; }
   if (!to) return;
+  if (!RESEND_API_KEY && !mailer) { console.warn('[NOTIFY] Email non configuré (RESEND_API_KEY ou SMTP) — ignoré'); return; }
   try {
-    await mailer.sendMail({ from: `"Auto Presto - LVTools" <${MAIL_FROM}>`, to, subject, html });
+    if (RESEND_API_KEY) await sendViaResend(to, subject, html);
+    else await mailer.sendMail({ from: FROM_HEADER, to, subject, html });
   } catch (err) {
     console.error('[NOTIFY] Erreur email client:', err.message);
   }
@@ -166,26 +179,22 @@ async function confirmCustomerCarReservation(r) {
   await sendCustomerEmail(r.customer_email, 'Confirmation de votre location — PrestoLoc', html);
 }
 
-const emailConfigured = () => !!mailer;
+const emailConfigured = () => !!(RESEND_API_KEY || mailer);
 async function sendEmailTest(to) {
   await sendCustomerEmail(to, 'Test email — Auto Presto / LVTools',
     '<p>Si vous recevez cet email, l\'envoi des confirmations de commande par email fonctionne correctement.</p>');
 }
-// Diagnostic : vérifie la connexion SMTP et tente un envoi RÉEL en remontant l'erreur exacte
+// Diagnostic : tente un envoi RÉEL en remontant l'erreur exacte
 async function emailDiagnostic(to) {
-  if (!mailer) return { configured: false, error: 'SMTP_USER / SMTP_PASS non définis sur Railway' };
+  const provider = RESEND_API_KEY ? 'resend' : (mailer ? 'smtp' : null);
+  if (!provider) return { configured: false, error: 'Ni RESEND_API_KEY ni SMTP configurés sur Railway' };
+  if (!to) return { configured: true, provider, sent: false, message: 'Configuré. Ajoute ?email=... pour tester un envoi réel.' };
   try {
-    await mailer.verify(); // teste connexion + authentification
+    if (RESEND_API_KEY) await sendViaResend(to, 'Test email — Auto Presto / LVTools', '<p>Si vous recevez cet email, l\'envoi fonctionne correctement.</p>');
+    else await mailer.sendMail({ from: FROM_HEADER, to, subject: 'Test email — Auto Presto / LVTools', html: '<p>Test.</p>' });
+    return { configured: true, provider, sent: true, from: MAIL_FROM, message: `Email réellement envoyé à ${to}.` };
   } catch (err) {
-    return { configured: true, verified: false, error: `Connexion/auth SMTP échouée : ${err.message}` };
-  }
-  if (!to) return { configured: true, verified: true, sent: false, message: 'Connexion SMTP OK. Ajoute ?email=... pour tester un envoi réel.' };
-  try {
-    await mailer.sendMail({ from: `"Auto Presto - LVTools" <${MAIL_FROM}>`, to, subject: 'Test email — Auto Presto / LVTools',
-      html: '<p>Si vous recevez cet email, l\'envoi fonctionne correctement.</p>' });
-    return { configured: true, verified: true, sent: true, message: `Email réellement envoyé à ${to}.` };
-  } catch (err) {
-    return { configured: true, verified: true, sent: false, error: `Envoi refusé : ${err.message}` };
+    return { configured: true, provider, sent: false, from: MAIL_FROM, error: err.message };
   }
 }
 
