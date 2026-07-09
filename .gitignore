@@ -1,0 +1,11 @@
+node_modules/
+client/node_modules/
+client/dist/
+server/mecatoolsloc.db
+server/mecatoolsloc.db-shm
+server/mecatoolsloc.db-wal
+uploads/*
+!uploads/.gitkeep
+.env
+*.log
+server/backups/
