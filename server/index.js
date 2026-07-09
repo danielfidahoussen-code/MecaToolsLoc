@@ -6,6 +6,9 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Nécessaire pour que req.ip reflète l'IP réelle du client derrière le proxy Railway
+app.set('trust proxy', true);
+
 app.use(cors());
 // Webhook Stripe doit recevoir le body RAW avant express.json()
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
@@ -37,6 +40,7 @@ app.use('/api/faqs', require('./routes/faqs'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/car-reservations', require('./routes/car-reservations'));
+app.use('/api/tool-contracts', require('./routes/tool-contracts'));
 app.use('/api/cars', require('./routes/cars'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/admin', require('./routes/admin'));

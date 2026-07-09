@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { ShoppingBag, CreditCard, Lock, CheckCircle, ArrowLeft, AlertTriangle, MapPin, Loader } from 'lucide-react';
+import { ShoppingBag, CreditCard, Lock, CheckCircle, ArrowLeft, AlertTriangle, MapPin, Loader, FileText, PenLine, Trash2, ShieldCheck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
@@ -32,11 +32,85 @@ function kmToZone(km) {
   return '50+';
 }
 
+function SignaturePad({ onSign }) {
+  const canvasRef = useRef(null);
+  const drawing = useRef(false);
+  const [hasSignature, setHasSignature] = useState(false);
+
+  const getPos = (e, canvas) => {
+    const rect = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - rect.left) * (canvas.width / rect.width), y: (src.clientY - rect.top) * (canvas.height / rect.height) };
+  };
+
+  const start = (e) => {
+    e.preventDefault();
+    drawing.current = true;
+    const ctx = canvasRef.current.getContext('2d');
+    const pos = getPos(e, canvasRef.current);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  };
+
+  const move = (e) => {
+    e.preventDefault();
+    if (!drawing.current) return;
+    const ctx = canvasRef.current.getContext('2d');
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    const pos = getPos(e, canvasRef.current);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    setHasSignature(true);
+  };
+
+  const end = () => {
+    drawing.current = false;
+    if (hasSignature) onSign(canvasRef.current.toDataURL('image/png'));
+  };
+
+  const clear = () => {
+    const canvas = canvasRef.current;
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    setHasSignature(false);
+    onSign(null);
+  };
+
+  return (
+    <div>
+      <div style={{ position: 'relative', border: '2px solid var(--gray-200)', borderRadius: 10, background: '#fafafa', overflow: 'hidden' }}>
+        <canvas ref={canvasRef} width={560} height={150} style={{ width: '100%', height: 150, touchAction: 'none', cursor: 'crosshair', display: 'block' }}
+          onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end}
+          onTouchStart={start} onTouchMove={move} onTouchEnd={end}/>
+        {!hasSignature && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+            <p style={{ color: 'var(--gray-400)', fontSize: 13, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <PenLine size={16}/> Signez ici avec votre doigt ou la souris
+            </p>
+          </div>
+        )}
+      </div>
+      {hasSignature && (
+        <button type="button" onClick={clear} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: 12, color: 'var(--danger)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          <Trash2 size={13}/> Effacer la signature
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState('coords'); // 'coords' | 'contract' | 'payment'
   const [paying, setPaying] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [contractAccepted, setContractAccepted] = useState(false);
+  const [contractSignature, setContractSignature] = useState(null);
+  const [contractSigning, setContractSigning] = useState(false);
+  const [contractId, setContractId] = useState(null);
+  const [contractSignedAt, setContractSignedAt] = useState(null);
   const [deliveryMode, setDeliveryMode] = useState('delivery');
   const [deliveryTrips, setDeliveryTrips] = useState({ aller: true, retour: false });
   const [deliveryZone, setDeliveryZone] = useState(null); // null = pas encore calculé
@@ -99,7 +173,14 @@ export default function Checkout() {
   };
 
   const hasRentals = items.some(i => i.type === 'rent');
+  const rentalItems = items.filter(i => i.type === 'rent');
   const isPickup = deliveryMode === 'pickup';
+
+  const STEPS = hasRentals
+    ? [{ id: 'coords', label: 'Coordonnées' }, { id: 'contract', label: 'Contrat' }, { id: 'payment', label: 'Paiement' }]
+    : [{ id: 'coords', label: 'Coordonnées' }, { id: 'payment', label: 'Paiement' }];
+  const stepIndex = STEPS.findIndex(s => s.id === step);
+  const canContinueContract = contractAccepted && !!contractSignature;
 
   const currentZone = ZONES.find(z => z.id === deliveryZone);
   const tripCount = isPickup ? 0 : ((deliveryTrips.aller ? 1 : 0) + (deliveryTrips.retour ? 1 : 0));
@@ -183,7 +264,29 @@ export default function Checkout() {
     if (!isPickup && !deliveryTrips.aller && !deliveryTrips.retour) { toast.error('Sélectionnez au moins un trajet (aller ou retour)'); return; }
     if (rentalZoneError) { toast.error('La livraison des locations est limitée à 15 km'); return; }
     if (!cgvAccepted) { toast.error('Veuillez accepter les conditions générales de vente'); return; }
-    setStep(2);
+    setStep(hasRentals ? 'contract' : 'payment');
+  };
+
+  const handleValidateContract = async () => {
+    if (!contractAccepted) { toast.error('Veuillez accepter les conditions du contrat de location'); return; }
+    if (!contractSignature) { toast.error('Veuillez signer le contrat'); return; }
+    setContractSigning(true);
+    try {
+      const { data } = await axios.post('/api/tool-contracts', {
+        customer_name: form.name,
+        customer_email: form.email,
+        items: rentalItems.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price, caution: i.caution || 0, rentDates: i.rentDates })),
+        signature: contractSignature,
+      });
+      setContractId(data.id);
+      setContractSignedAt(data.signed_at);
+      toast.success('Contrat signé');
+      setStep('payment');
+    } catch (err) {
+      toast.error(err?.response?.data?.error || 'Erreur lors de la signature du contrat');
+    } finally {
+      setContractSigning(false);
+    }
   };
 
   const handlePay = async () => {
@@ -199,6 +302,7 @@ export default function Checkout() {
         discount,
         items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price, type: i.type, rentDates: i.rentDates || null, caution: i.caution || 0 })),
         total_price: finalTotal,
+        contract_id: contractId,
       });
       // Redirige vers la page de paiement Stripe
       window.location.href = data.url;
@@ -242,20 +346,20 @@ export default function Checkout() {
             <div>
               {/* Steps */}
               <div style={{ display: 'flex', gap: 0, marginBottom: 36 }}>
-                {[1, 2].map(s => (
-                  <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: s <= step ? 'var(--primary)' : 'var(--gray-200)', color: s <= step ? 'white' : 'var(--gray-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, flexShrink: 0 }}>
-                      {s < step ? '✓' : s}
+                {STEPS.map((s, i) => (
+                  <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: i <= stepIndex ? 'var(--primary)' : 'var(--gray-200)', color: i <= stepIndex ? 'white' : 'var(--gray-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, flexShrink: 0 }}>
+                      {i < stepIndex ? '✓' : i + 1}
                     </div>
-                    <span style={{ fontWeight: 600, fontSize: 14, color: s === step ? 'var(--primary)' : 'var(--gray-400)' }}>
-                      {s === 1 ? 'Coordonnées' : 'Paiement'}
+                    <span style={{ fontWeight: 600, fontSize: 14, color: i === stepIndex ? 'var(--primary)' : 'var(--gray-400)' }}>
+                      {s.label}
                     </span>
-                    {s < 2 && <div style={{ flex: 1, height: 2, background: step > s ? 'var(--primary)' : 'var(--gray-200)', marginLeft: 10 }}/>}
+                    {i < STEPS.length - 1 && <div style={{ flex: 1, height: 2, background: stepIndex > i ? 'var(--primary)' : 'var(--gray-200)', marginLeft: 10 }}/>}
                   </div>
                 ))}
               </div>
 
-              {step === 1 && (
+              {step === 'coords' && (
                 <div className="card" style={{ padding: 28 }}>
                   <h3 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 24 }}>Vos coordonnées</h3>
 
@@ -442,7 +546,69 @@ export default function Checkout() {
                 </div>
               )}
 
-              {step === 2 && (
+              {step === 'contract' && hasRentals && (
+                <div className="card" style={{ padding: 28 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                    <FileText size={18} color="var(--accent)"/>
+                    <h3 style={{ fontWeight: 800, color: 'var(--primary)', margin: 0 }}>Contrat de location</h3>
+                  </div>
+                  <p style={{ color: 'var(--gray-500)', fontSize: 13.5, marginBottom: 20 }}>
+                    Merci de lire et signer le contrat ci-dessous pour chaque outil en location. La signature est nécessaire pour accéder au paiement.
+                  </p>
+
+                  {rentalItems.map(item => {
+                    const start = item.rentDates?.startDate ? new Date(item.rentDates.startDate).toLocaleDateString('fr-FR') : '';
+                    const end = item.rentDates?.endDate ? new Date(item.rentDates.endDate).toLocaleDateString('fr-FR') : '';
+                    return (
+                      <div key={item.key} style={{ border: '1px solid var(--gray-200)', borderRadius: 10, padding: '14px 16px', marginBottom: 14, background: 'var(--light)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
+                          <strong style={{ fontSize: 14.5, color: 'var(--primary)' }}>{item.name}</strong>
+                          <span style={{ fontSize: 13, color: 'var(--gray-500)' }}>{start} → {end}</span>
+                        </div>
+                        <div style={{ fontSize: 13, color: 'var(--gray-700)', lineHeight: 1.6 }}>
+                          <p style={{ margin: '0 0 6px' }}>
+                            <strong>Art. 1 — Objet.</strong> Location du matériel « {item.name} » par PRESTO EQUIPEMENT (LVTools) au profit de {form.name || 'le Locataire'}, du {start} au {end}, moyennant le prix de {item.price.toFixed(2)} €.
+                          </p>
+                          <p style={{ margin: '0 0 6px' }}>
+                            <strong>Art. 5 — Dépôt de garantie.</strong> Une caution de {(item.caution || 0).toFixed(2)} € est retenue lors du paiement et restituée après contrôle de l'état du matériel au retour.
+                          </p>
+                          <p style={{ margin: 0 }}>
+                            <strong>Art. 6 — État des lieux photographique.</strong> L'état du matériel est constaté par photos à la remise puis au retour ; ces photos font foi entre les parties et sont consultables depuis votre espace client.
+                          </p>
+                        </div>
+                        <a href="/cgv" target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginTop: 8, fontSize: 12.5, fontWeight: 600, color: 'var(--accent)' }}>
+                          Lire le contrat complet
+                        </a>
+                      </div>
+                    );
+                  })}
+
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, margin: '16px 0 20px', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={contractAccepted} onChange={e => setContractAccepted(e.target.checked)}
+                      style={{ width: 16, height: 16, marginTop: 2, accentColor: 'var(--accent)', flexShrink: 0 }}/>
+                    <span style={{ fontSize: 13, color: 'var(--gray-700)', lineHeight: 1.5 }}>
+                      J'ai lu et j'accepte les conditions générales de location, y compris la clause de constat photographique et le dépôt de garantie.
+                    </span>
+                  </label>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <PenLine size={14}/> Votre signature *
+                    </label>
+                    <SignaturePad onSign={setContractSignature}/>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+                    <button className="btn btn-outline" onClick={() => setStep('coords')}>← Retour</button>
+                    <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', fontSize: 15, opacity: canContinueContract ? 1 : 0.5 }}
+                      onClick={handleValidateContract} disabled={!canContinueContract || contractSigning}>
+                      {contractSigning ? 'Enregistrement...' : 'Continuer vers le paiement →'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {step === 'payment' && (
                 <div className="card" style={{ padding: 28 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                     <h3 style={{ fontWeight: 800, color: 'var(--primary)' }}>Paiement sécurisé</h3>
@@ -491,7 +657,7 @@ export default function Checkout() {
                     <CreditCard size={18}/>
                     {paying ? 'Redirection vers Stripe...' : `Payer ${finalTotal.toFixed(2)} € →`}
                   </button>
-                  <button className="btn" onClick={() => setStep(1)}
+                  <button className="btn" onClick={() => setStep(hasRentals ? 'contract' : 'coords')}
                     style={{ width: '100%', justifyContent: 'center', marginTop: 10, background: 'var(--gray-100)', color: 'var(--gray-700)' }}>
                     <ArrowLeft size={14}/> Retour
                   </button>
@@ -550,6 +716,16 @@ export default function Checkout() {
                       <p style={{ fontWeight: 700, color: '#1e40af' }}>Caution</p>
                       <p style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>Prise lors de la remise de l'outil — restituée en fin de location</p>
                     </div>
+                  </div>
+                )}
+                {hasRentals && step !== 'coords' && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, padding: '10px 12px', borderRadius: 10, fontSize: 12.5, fontWeight: 600,
+                    background: contractSignedAt ? 'rgba(16,185,129,.08)' : 'rgba(255,51,51,.06)',
+                    color: contractSignedAt ? 'var(--success)' : 'var(--accent)',
+                  }}>
+                    {contractSignedAt ? <ShieldCheck size={15}/> : <FileText size={15}/>}
+                    {contractSignedAt ? 'Contrat signé' : 'Contrat en attente de signature'}
                   </div>
                 )}
               </div>
