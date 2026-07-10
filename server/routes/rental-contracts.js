@@ -94,61 +94,112 @@ router.get('/:id/pdf', authFlexible, (req, res) => {
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="contrat-location-outillage-${c.id}.pdf"`);
 
-  const doc = new PDFDocument({ size: 'A4', margin: 50 });
+  const MARGIN = 50;
+  const doc = new PDFDocument({ size: 'A4', margin: MARGIN });
+  const pageWidth = doc.page.width - MARGIN * 2;
   doc.pipe(res);
 
-  doc.fontSize(16).font('Helvetica-Bold').text(`Contrat de location d'outillage N°${c.id}`, { align: 'center' });
-  doc.fontSize(10).font('Helvetica').fillColor('#666').text('Auto Presto / LVTools', { align: 'center' });
-  doc.moveDown(1.2);
+  // Toujours ancrer le curseur à la marge gauche avant un bloc pleine largeur —
+  // sinon PDFKit hérite de la position/largeur du dernier texte positionné (colonnes du tableau).
+  const fullWidthText = (text, opts = {}) => doc.text(text, MARGIN, doc.y, { width: pageWidth, ...opts });
 
-  doc.fillColor('#111').fontSize(11).font('Helvetica-Bold').text('Client');
-  doc.font('Helvetica').fontSize(10)
-    .text(`Nom : ${c.customer_name}`)
-    .text(`Email : ${c.customer_email}`)
-    .text(`Téléphone : ${c.customer_phone || '—'}`)
-    .text(`Signé le : ${signedAt}    IP : ${c.ip || '—'}`);
-  doc.moveDown(1);
+  // En-tête
+  doc.font('Helvetica-Bold').fontSize(16).fillColor('#111').text(`Contrat de location d'outillage N°${c.id}`, MARGIN, MARGIN, { width: pageWidth, align: 'center' });
+  doc.font('Helvetica').fontSize(10).fillColor('#666').text('Auto Presto / LVTools', MARGIN, doc.y + 2, { width: pageWidth, align: 'center' });
+  doc.moveDown(1.5);
 
-  doc.font('Helvetica-Bold').fontSize(11).text('Articles loués');
+  // Bloc client
+  doc.font('Helvetica-Bold').fontSize(11).fillColor('#111');
+  fullWidthText('Client');
   doc.moveDown(0.3);
-  const colX = [50, 220, 340, 400, 470];
-  doc.fontSize(9).font('Helvetica-Bold');
-  doc.text('Outil', colX[0], doc.y, { width: 160 });
-  doc.text('Période', colX[1], doc.y - 10, { width: 110 });
-  doc.text('Qté', colX[2], doc.y - 10, { width: 50 });
-  doc.text('Prix', colX[3], doc.y - 10, { width: 60 });
-  doc.text('Caution', colX[4], doc.y - 10, { width: 80 });
-  doc.moveDown(0.5);
-  doc.font('Helvetica').fontSize(9);
-  items.forEach(i => {
-    const y = doc.y;
-    const periode = i.rentDates ? `${i.rentDates.startDate} au ${i.rentDates.endDate}` : '—';
-    doc.text(i.name || `Produit #${i.id}`, colX[0], y, { width: 160 });
-    doc.text(periode, colX[1], y, { width: 110 });
-    doc.text(String(i.quantity || 1), colX[2], y, { width: 50 });
-    doc.text(`${Number(i.price || 0).toFixed(2)} €`, colX[3], y, { width: 60 });
-    doc.text(i.caution ? `${Number(i.caution).toFixed(2)} €` : '—', colX[4], y, { width: 80 });
-    doc.moveDown(0.6);
-  });
+  doc.font('Helvetica').fontSize(10).fillColor('#333');
+  fullWidthText(`Nom : ${c.customer_name}`);
+  fullWidthText(`Email : ${c.customer_email}`);
+  fullWidthText(`Téléphone : ${c.customer_phone || '—'}`);
+  fullWidthText(`Signé le : ${signedAt}    IP : ${c.ip || '—'}`);
   doc.moveDown(1);
 
-  doc.font('Helvetica-Bold').fontSize(11).text('Conditions');
-  doc.font('Helvetica').fontSize(9).fillColor('#333').text(
-    'Le client reconnaît avoir lu et accepté le contrat de location d\'outillage ainsi que les conditions générales de vente du site (CGV, articles 6 à 8) préalablement à la signature ci-dessous. La caution indiquée, si applicable, est prise lors de la remise du matériel et restituée en fin de location si celui-ci est rendu complet et en bon état.',
+  // Tableau des articles loués
+  doc.font('Helvetica-Bold').fontSize(11).fillColor('#111');
+  fullWidthText('Articles loués');
+  doc.moveDown(0.4);
+
+  const cols = [
+    { label: 'Outil',    x: MARGIN,       width: 160 },
+    { label: 'Période',  x: MARGIN + 165, width: 120 },
+    { label: 'Qté',      x: MARGIN + 290, width: 35 },
+    { label: 'Prix',     x: MARGIN + 330, width: 65 },
+    { label: 'Caution',  x: MARGIN + 400, width: 95 },
+  ];
+  const headerHeight = 22;
+  const rowHeight = 34; // assez haut pour la période affichée sur 2 lignes
+  const tableTop = doc.y;
+
+  const drawRow = (y, cells, opts = {}) => {
+    cols.forEach((col, i) => doc.text(cells[i], col.x + 4, y + 8, { width: col.width - 8, ...opts }));
+  };
+
+  // En-tête du tableau
+  doc.rect(MARGIN, tableTop, pageWidth, headerHeight).fill('#f4f4f4');
+  doc.fillColor('#111').font('Helvetica-Bold').fontSize(9);
+  drawRow(tableTop, cols.map(c => c.label));
+
+  // Lignes
+  doc.font('Helvetica').fontSize(9).fillColor('#333');
+  let y = tableTop + headerHeight;
+  items.forEach(i => {
+    const periode = i.rentDates ? `${i.rentDates.startDate}\nau ${i.rentDates.endDate}` : '—';
+    drawRow(y, [
+      i.name || `Produit #${i.id}`,
+      periode,
+      String(i.quantity || 1),
+      `${Number(i.price || 0).toFixed(2)} €`,
+      i.caution ? `${Number(i.caution).toFixed(2)} €` : '—',
+    ]);
+    doc.moveTo(MARGIN, y).lineTo(MARGIN + pageWidth, y).strokeColor('#e0e0e0').stroke();
+    y += rowHeight;
+  });
+
+  const tableBottom = y;
+
+  // Grille : bordure extérieure + séparateurs de colonnes
+  doc.rect(MARGIN, tableTop, pageWidth, tableBottom - tableTop).strokeColor('#ccc').stroke();
+  cols.slice(1).forEach(col => {
+    doc.moveTo(col.x, tableTop).lineTo(col.x, tableBottom).strokeColor('#e0e0e0').stroke();
+  });
+  doc.moveTo(MARGIN, tableTop + headerHeight).lineTo(MARGIN + pageWidth, tableTop + headerHeight).strokeColor('#ccc').stroke();
+
+  doc.x = MARGIN;
+  doc.y = tableBottom + 20;
+
+  // Conditions
+  doc.font('Helvetica-Bold').fontSize(11).fillColor('#111');
+  fullWidthText('Conditions');
+  doc.moveDown(0.3);
+  doc.font('Helvetica').fontSize(9).fillColor('#333');
+  fullWidthText(
+    "Le client reconnaît avoir lu et accepté le contrat de location d'outillage ainsi que les conditions générales de vente du site (CGV, articles 6 à 8) préalablement à la signature ci-dessous. La caution indiquée, si applicable, est prise lors de la remise du matériel et restituée en fin de location si celui-ci est rendu complet et en bon état.",
     { align: 'justify' }
   );
-  doc.moveDown(1.2);
+  doc.moveDown(1.5);
 
-  doc.fillColor('#111').font('Helvetica-Bold').fontSize(10).text('Signature du client :');
-  doc.moveDown(0.3);
+  // Signature
+  doc.x = MARGIN;
+  doc.fillColor('#111').font('Helvetica-Bold').fontSize(10);
+  fullWidthText('Signature du client :');
+  doc.moveDown(0.4);
+  const sigBoxY = doc.y;
+  doc.rect(MARGIN, sigBoxY, 240, 100).stroke('#ccc');
   if (c.signature && c.signature.startsWith('data:image')) {
     try {
       const base64 = c.signature.split(',')[1];
       const imgBuffer = Buffer.from(base64, 'base64');
-      doc.image(imgBuffer, { fit: [220, 90] });
-    } catch { doc.font('Helvetica').fontSize(9).text('(signature illisible)'); }
+      doc.image(imgBuffer, MARGIN + 10, sigBoxY + 10, { fit: [220, 80] });
+    } catch {
+      doc.font('Helvetica').fontSize(9).text('(signature illisible)', MARGIN + 10, sigBoxY + 40);
+    }
   } else {
-    doc.font('Helvetica').fontSize(9).text('(aucune signature enregistrée)');
+    doc.font('Helvetica').fontSize(9).text('(aucune signature enregistrée)', MARGIN + 10, sigBoxY + 40);
   }
 
   doc.end();
