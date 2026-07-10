@@ -38,6 +38,7 @@ app.use('/api/upload', require('./routes/upload'));
 app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/car-reservations', require('./routes/car-reservations'));
 app.use('/api/cars', require('./routes/cars'));
+app.use('/api/rental-contracts', require('./routes/rental-contracts'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/admin', require('./routes/admin'));
 

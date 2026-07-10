@@ -13,8 +13,13 @@ router.post('/create-checkout-session', async (req, res) => {
   try {
     const {
       customer_name, customer_email, customer_phone, customer_address,
-      delivery_mode, delivery_fee, discount, items, total_price,
+      delivery_mode, delivery_fee, discount, items, total_price, contract_id,
     } = req.body;
+
+    const hasRentalItems = (items || []).some(i => i.type === 'rent');
+    if (hasRentalItems && !contract_id) {
+      return res.status(400).json({ error: 'Le contrat de location doit être signé avant le paiement' });
+    }
 
     const host = req.headers.host || '';
     const proto = host.includes('localhost') ? 'http' : 'https';
@@ -69,6 +74,7 @@ router.post('/create-checkout-session', async (req, res) => {
         total_price: String(total_price),
         caution_total: String(items.reduce((s, i) => s + (i.caution || 0) * (i.quantity || 1), 0)),
         items: itemsMeta.slice(0, 490),
+        contract_id: contract_id ? String(contract_id) : '',
       },
       payment_intent_data: {
         description: `LVTools - commande de ${(customer_name || '').slice(0, 100)}`,
@@ -157,6 +163,7 @@ async function createOrderFromSession(session) {
     customer_address: meta.customer_address || '',
     items: meta.items || '[]',
     total_price: parseFloat(meta.total_price || 0),
+    contract_id: meta.contract_id ? Number(meta.contract_id) : null,
     type: 'mixed',
     status: 'paid',
     stripe_session_id: session.id,
