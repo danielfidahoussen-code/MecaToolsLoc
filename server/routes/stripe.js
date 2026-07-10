@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Stripe = require('stripe');
-const { orders, products, reservations } = require('../database');
+const { orders, products, reservations, rental_contracts } = require('../database');
 const { notifyNewOrder, confirmCustomerOrder } = require('../notify');
 
 // Init tolérante : si la clé manque, le site reste en ligne (seul le paiement échoue proprement)
@@ -204,13 +204,15 @@ async function createOrderFromSession(session) {
     caution_total: meta.caution_total,
   }).catch(err => console.error('[NOTIFY] notifyNewOrder:', err.message));
 
-  // Email de confirmation au client
+  // Email de confirmation au client — joint le contrat de location signé s'il y en a un
+  const contract = meta.contract_id ? rental_contracts.getById(Number(meta.contract_id)) : null;
   confirmCustomerOrder({
     customer_name: meta.customer_name,
     customer_email: session.customer_email,
     customer_address: meta.customer_address,
     items: itemsWithNames,
     total_price: meta.total_price,
+    contract,
   }).catch(err => console.error('[NOTIFY] confirmCustomerOrder:', err.message));
 }
 

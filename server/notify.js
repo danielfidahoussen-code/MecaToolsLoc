@@ -51,21 +51,25 @@ if (!RESEND_API_KEY) {
 }
 
 // Envoi via l'API HTTP de Resend (lève une erreur en cas d'échec)
-async function sendViaResend(to, subject, html) {
+// attachments: [{ filename, content: Buffer }]
+async function sendViaResend(to, subject, html, attachments = []) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: FROM_HEADER, to, subject, html }),
+    body: JSON.stringify({
+      from: FROM_HEADER, to, subject, html,
+      ...(attachments.length ? { attachments: attachments.map(a => ({ filename: a.filename, content: a.content.toString('base64') })) } : {}),
+    }),
   });
   if (!res.ok) throw new Error(`Resend ${res.status}: ${await res.text()}`);
 }
 
-async function sendCustomerEmail(to, subject, html) {
+async function sendCustomerEmail(to, subject, html, attachments = []) {
   if (!to) return;
   if (!RESEND_API_KEY && !mailer) { console.warn('[NOTIFY] Email non configuré (RESEND_API_KEY ou SMTP) — ignoré'); return; }
   try {
-    if (RESEND_API_KEY) await sendViaResend(to, subject, html);
-    else await mailer.sendMail({ from: FROM_HEADER, to, subject, html });
+    if (RESEND_API_KEY) await sendViaResend(to, subject, html, attachments);
+    else await mailer.sendMail({ from: FROM_HEADER, to, subject, html, attachments });
   } catch (err) {
     console.error('[NOTIFY] Erreur email client:', err.message);
   }
@@ -134,7 +138,8 @@ async function notifyContactMessage({ name, email, phone, subject, message }) {
 }
 
 // Confirmation client — commande d'outils
-async function confirmCustomerOrder({ customer_name, customer_email, customer_address, items, total_price }) {
+// `contract` (optionnel) : enregistrement rental_contracts déjà signé -> joint en PDF à l'email.
+async function confirmCustomerOrder({ customer_name, customer_email, customer_address, items, total_price, contract }) {
   const lignes = (items || []).map(i => {
     const type = i.type === 'rent' ? 'Location' : 'Achat';
     const dates = (i.start || i.rentDates?.startDate) ? ` — du ${i.start || i.rentDates?.startDate} au ${i.end || i.rentDates?.endDate}` : '';
@@ -146,6 +151,17 @@ async function confirmCustomerOrder({ customer_name, customer_email, customer_ad
     : `<p><strong>Livraison prévue à :</strong> ${esc(customer_address)}. Nous vous contacterons pour convenir du créneau.</p>`;
   const aRent = (items || []).some(i => i.type === 'rent');
 
+  let attachments = [];
+  if (contract) {
+    try {
+      const { buildRentalContractPdf } = require('./pdf/rentalContract');
+      const buffer = await buildRentalContractPdf(contract);
+      attachments = [{ filename: `contrat-location-outillage-${contract.id}.pdf`, content: buffer }];
+    } catch (err) {
+      console.error('[NOTIFY] Génération PDF contrat (email client) échouée:', err.message);
+    }
+  }
+
   const html =
     `<p>Bonjour ${esc(customer_name) || ''},</p>` +
     `<p>Merci pour votre commande chez <strong>LVTools</strong> (Auto Presto). Voici le récapitulatif :</p>` +
@@ -153,10 +169,11 @@ async function confirmCustomerOrder({ customer_name, customer_email, customer_ad
     `<p><strong>Total payé : ${Number(total_price || 0).toFixed(2)} €</strong></p>` +
     recup +
     (aRent ? `<p><strong>Pour votre location :</strong> merci de vous munir d'une <strong>pièce d'identité</strong> et d'un <strong>moyen de caution</strong> (carte bancaire ou chèque). La caution est prise lors de la remise du matériel et n'est pas débitée si le matériel est rendu en bon état.</p>` : '') +
+    (attachments.length ? `<p>Vous trouverez en pièce jointe une copie de votre <strong>contrat de location signé</strong>.</p>` : '') +
     `<p>Une question ? Répondez à cet email ou appelez le 06 93 83 96 54.</p>` +
     `<p>À très vite,<br/>L'équipe Auto Presto — LVTools</p>`;
 
-  await sendCustomerEmail(customer_email, 'Confirmation de votre commande — LVTools', html);
+  await sendCustomerEmail(customer_email, 'Confirmation de votre commande — LVTools', html, attachments);
 }
 
 // Confirmation client — réservation véhicule
