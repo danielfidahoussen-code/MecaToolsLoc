@@ -582,7 +582,15 @@ export default function Admin() {
                         <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{o.total_price.toFixed(2)} €</span>
                         <span style={{ color: 'var(--gray-400)' }}>{new Date(o.created_at).toLocaleDateString('fr-FR')}</span>
                       </div>
-                      <button className="btn btn-sm btn-danger" onClick={() => deleteOrder(o.id)} style={{ marginTop: 10, width: '100%', justifyContent: 'center' }}><Trash2 size={13}/> Supprimer</button>
+                      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                        {o.contract_id && (
+                          <a href={`/api/rental-contracts/${o.contract_id}/pdf?token=${token}`} target="_blank" rel="noreferrer"
+                            className="btn btn-sm btn-outline" style={{ flex: 1, justifyContent: 'center' }}>
+                            <FileText size={13}/> Contrat PDF
+                          </a>
+                        )}
+                        <button className="btn btn-sm btn-danger" onClick={() => deleteOrder(o.id)} style={{ flex: 1, justifyContent: 'center' }}><Trash2 size={13}/> Supprimer</button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -611,7 +619,13 @@ export default function Admin() {
                           </td>
                           <td style={{ padding: '11px 14px', color: 'var(--gray-500)', fontSize: 12 }}>{new Date(o.created_at).toLocaleDateString('fr-FR')}</td>
                           <td style={{ padding: '11px 14px' }}>
-                            <button className="btn btn-sm btn-danger" onClick={() => deleteOrder(o.id)} title="Supprimer"><Trash2 size={13}/></button>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              {o.contract_id && (
+                                <a href={`/api/rental-contracts/${o.contract_id}/pdf?token=${token}`} target="_blank" rel="noreferrer" title="Contrat PDF"
+                                  className="btn btn-sm btn-outline"><FileText size={13}/></a>
+                              )}
+                              <button className="btn btn-sm btn-danger" onClick={() => deleteOrder(o.id)} title="Supprimer"><Trash2 size={13}/></button>
+                            </div>
                           </td>
                         </tr>
                       ))}
