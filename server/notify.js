@@ -77,6 +77,13 @@ async function sendCustomerEmail(to, subject, html, attachments = []) {
 
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+// En-tête wordmark LVTools pour les emails (texte stylé, pas de SVG — compatibilité email fiable)
+const LVTOOLS_EMAIL_HEADER = `<div style="margin-bottom:22px;">` +
+  `<span style="font-family:Arial,Helvetica,sans-serif;font-weight:900;font-size:22px;letter-spacing:1px;color:#1a0202;">LV</span>` +
+  `<span style="font-family:Arial,Helvetica,sans-serif;font-weight:900;font-size:22px;letter-spacing:1px;color:#ff3333;">Tools</span>` +
+  `<div style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:1.5px;color:#8a7a7a;text-transform:uppercase;margin-top:2px;">Location · Vente · Outillage</div>` +
+  `</div>`;
+
 // Commande d'outils
 async function notifyNewOrder({ customer_name, customer_email, customer_phone, customer_address, items, total_price, caution_total }) {
   const lignes = (items || []).map(i => {
@@ -163,6 +170,7 @@ async function confirmCustomerOrder({ customer_name, customer_email, customer_ad
   }
 
   const html =
+    LVTOOLS_EMAIL_HEADER +
     `<p>Bonjour ${esc(customer_name) || ''},</p>` +
     `<p>Merci pour votre commande chez <strong>LVTools</strong> (Auto Presto). Voici le récapitulatif :</p>` +
     `<ul>${lignes || '<li>—</li>'}</ul>` +

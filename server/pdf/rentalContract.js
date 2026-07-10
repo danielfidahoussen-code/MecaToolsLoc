@@ -1,5 +1,49 @@
 const PDFDocument = require('pdfkit');
 
+// Dessine le logo LVTools (icône + wordmark), identique au composant client Logo.jsx,
+// à la position (x, y) avec une hauteur d'icône ~ size (en points PDF).
+function drawLogo(doc, x, y, size = 32) {
+  const scale = size / 48; // le SVG source est en viewBox 0 0 48 48
+  const red = '#ff3333';
+
+  doc.save();
+  doc.translate(x, y);
+  doc.scale(scale, scale);
+
+  // Cercle pointillé extérieur
+  doc.circle(24, 24, 19).lineWidth(1.5).dash(4, { space: 3 }).strokeColor('#e5dcdc').stroke();
+  doc.undash();
+
+  // Anneau rouge
+  doc.circle(24, 24, 10).lineWidth(2.5).strokeColor(red).stroke();
+
+  // Point central rouge
+  doc.circle(24, 24, 4).fillColor(red).fill();
+
+  // 8 rayons
+  [0, 45, 90, 135, 180, 225, 270, 315].forEach(deg => {
+    const rad = (deg * Math.PI) / 180;
+    const x1 = 24 + 10 * Math.cos(rad), y1 = 24 + 10 * Math.sin(rad);
+    const x2 = 24 + 15 * Math.cos(rad), y2 = 24 + 15 * Math.sin(rad);
+    doc.moveTo(x1, y1).lineTo(x2, y2).lineWidth(3).lineCap('round').strokeColor(red).stroke();
+  });
+
+  // Clé (en bas à gauche de l'icône)
+  doc.path('M15 35 L11 39 M11 39 C9.5 40.5 7 40 7 38 C7 36 9.5 35.5 11 35.5 L15 31')
+    .lineWidth(1.8).lineCap('round').strokeColor('#4d3333').stroke();
+
+  doc.restore();
+
+  // Wordmark texte, à droite de l'icône
+  const textX = x + size + 8;
+  const lvFontSize = size * 0.42;
+  doc.font('Helvetica-Bold').fontSize(lvFontSize);
+  doc.fillColor('#1a0202').text('LV', textX, y + size * 0.08, { continued: true, lineBreak: false });
+  doc.fillColor(red).text('Tools', { lineBreak: false });
+  doc.font('Helvetica').fontSize(size * 0.17).fillColor('#8a7a7a')
+    .text('LOCATION · VENTE · OUTILLAGE', textX, y + size * 0.62, { lineBreak: false, characterSpacing: 0.5 });
+}
+
 // Construit le PDF du contrat de location d'outillage et le retourne en Buffer
 // (réutilisé à la fois pour le téléchargement admin et pour la pièce jointe email client).
 function buildRentalContractPdf(c) {
@@ -19,9 +63,11 @@ function buildRentalContractPdf(c) {
     // sinon PDFKit hérite de la position/largeur du dernier texte positionné (colonnes du tableau).
     const fullWidthText = (text, opts = {}) => doc.text(text, MARGIN, doc.y, { width: pageWidth, ...opts });
 
-    // En-tête
-    doc.font('Helvetica-Bold').fontSize(16).fillColor('#111').text(`Contrat de location d'outillage N°${c.id}`, MARGIN, MARGIN, { width: pageWidth, align: 'center' });
-    doc.font('Helvetica').fontSize(10).fillColor('#666').text('Auto Presto / LVTools', MARGIN, doc.y + 2, { width: pageWidth, align: 'center' });
+    // En-tête : logo LVTools + titre du contrat
+    drawLogo(doc, MARGIN, MARGIN, 32);
+    doc.font('Helvetica-Bold').fontSize(16).fillColor('#111')
+      .text(`Contrat de location d'outillage N°${c.id}`, MARGIN, MARGIN + 46, { width: pageWidth, align: 'center' });
+    doc.font('Helvetica').fontSize(10).fillColor('#666').text('Auto Presto', MARGIN, doc.y + 2, { width: pageWidth, align: 'center' });
     doc.moveDown(1.5);
 
     // Bloc client
