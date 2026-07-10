@@ -118,8 +118,9 @@ export default function ProductDetail() {
   const rangeAvailable = isRangeAvailable();
 
   const days = startDate && endDate ? Math.max(1, differenceInDays(endDate, startDate)) : 0;
+  const weeklyRate = product.price_week || product.price_day * 5;
   const rentPriceTTC = days >= 7
-    ? Math.ceil(days / 7) * (product.price_week || product.price_day * 5)
+    ? Math.floor(days / 7) * weeklyRate + (days % 7) * (product.price_day || 0)
     : days * (product.price_day || 0);
   const rentPrice = rentPriceTTC.toFixed(2);
 

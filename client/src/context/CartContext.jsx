@@ -28,7 +28,11 @@ export function CartProvider({ children }) {
 
   const calcRentPrice = (product, { startDate, endDate }) => {
     const days = Math.max(1, Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000));
-    if (days >= 7) return Math.ceil(days / 7) * product.price_week;
+    if (product.price_week && days >= 7) {
+      const weeks = Math.floor(days / 7);
+      const remainingDays = days % 7;
+      return weeks * product.price_week + remainingDays * product.price_day;
+    }
     return days * product.price_day;
   };
 
