@@ -4,7 +4,7 @@ import Logo from './Logo';
 import toast from 'react-hot-toast';
 
 const PHONE = '0693839654';
-const EMAIL = 'Locationautopresto@gmail.com';
+const EMAIL = 'contact@lvtools.re';
 
 function copyToClipboard(text, label) {
   navigator.clipboard.writeText(text).then(() => toast.success(`${label} copié !`)).catch(() => {});

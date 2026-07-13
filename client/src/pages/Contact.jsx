@@ -49,7 +49,7 @@ export default function Contact() {
 
               {[
                 { icon: <Phone size={22}/>, title: 'Téléphone', val: '06 93 83 96 54', sub: 'Du lundi au samedi, 8h–18h', href: 'tel:0693839654' },
-                { icon: <Mail size={22}/>, title: 'Email', val: 'Locationautopresto@gmail.com', sub: 'Réponse sous 24h', href: 'mailto:Locationautopresto@gmail.com' },
+                { icon: <Mail size={22}/>, title: 'Email', val: 'contact@lvtools.re', sub: 'Réponse sous 24h', href: 'mailto:contact@lvtools.re' },
                 { icon: <MapPin size={22}/>, title: 'Localisation', val: 'La Réunion', sub: 'Livraison sur toute l\'île', href: null },
                 { icon: <Clock size={22}/>, title: 'Horaires', val: 'Lun – Sam : 8h à 18h', sub: 'Dimanche : sur rendez-vous', href: null },
               ].map(({ icon, title, val, sub, href }) => (

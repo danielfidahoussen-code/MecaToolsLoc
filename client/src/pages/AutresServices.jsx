@@ -276,8 +276,8 @@ export default function AutresServices() {
             <a href="tel:+262693839654" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.15)', color: 'white', padding: '10px 18px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
               <Phone size={15}/> +262 693 83 96 54
             </a>
-            <a href="mailto:locationautopresto@gmail.com" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', color: 'rgba(255,255,255,.8)', padding: '10px 18px', borderRadius: 10, fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>
-              <Mail size={14}/> locationautopresto@gmail.com
+            <a href="mailto:contact@lvtools.re" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', color: 'rgba(255,255,255,.8)', padding: '10px 18px', borderRadius: 10, fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>
+              <Mail size={14}/> contact@lvtools.re
             </a>
           </div>
         </div>
@@ -317,8 +317,8 @@ export default function AutresServices() {
             <a href="tel:+262693839654" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'white', textDecoration: 'none', fontWeight: 700, fontSize: 15, marginBottom: 8 }}>
               <Phone size={15} color="rgba(255,255,255,.5)"/> +262 693 83 96 54
             </a>
-            <a href="mailto:locationautopresto@gmail.com" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,.6)', textDecoration: 'none', fontSize: 13 }}>
-              <Mail size={14} color="rgba(255,255,255,.4)"/> locationautopresto@gmail.com
+            <a href="mailto:contact@lvtools.re" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,.6)', textDecoration: 'none', fontSize: 13 }}>
+              <Mail size={14} color="rgba(255,255,255,.4)"/> contact@lvtools.re
             </a>
           </div>
           <div>

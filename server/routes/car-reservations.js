@@ -267,7 +267,7 @@ router.get('/:id/contract/print', (req, res, next) => {
     <div class="company">Auto Presto — PrestoLocation</div>
     <div>Fixe : (+262) 693 012 539 | Portable : 06 93 83 96 54</div>
     <div>3B, Rue de la Guadeloupe — 97490 Saint-Denis</div>
-    <div>locationautopresto@gmail.com | SIRET 851 826 537 00025</div>
+    <div>contact@lvtools.re | SIRET 851 826 537 00025</div>
   </div>
   <div style="text-align:right;">
     <div style="font-size:14px;font-weight:bold;">CONTRAT DE LOCATION N° ${r.id}</div>
@@ -357,8 +357,8 @@ router.get('/:id/contract/print', (req, res, next) => {
 <h3>14) Restitution – Retard – Prolongation</h3><p>Le Véhicule doit être rendu à la date/heure et au lieu convenus. Toute prolongation doit être validée avant l'échéance. En cas de retard non autorisé : facturation de jours supplémentaires + pénalités.</p>
 <h3>15) État des lieux retour – Dommages – Nettoyage</h3><p>Tout dommage non mentionné au départ est présumé survenu pendant la location. Si le véhicule est rendu anormalement sale, des frais de nettoyage peuvent être facturés.</p>
 <h3>16) Infractions – Amendes</h3><p>Le Locataire est responsable des infractions et frais associés. Le Loueur peut transmettre les coordonnées du Locataire aux autorités.</p>
-<h3>17) Données personnelles (RGPD)</h3><p>Les données sont utilisées pour gérer la réservation, le contrat, la facturation et le traitement des sinistres. Contact : locationautopresto@gmail.com</p>
-<h3>18) Réclamations</h3><p>Réclamation écrite préalable : locationautopresto@gmail.com — 3B, Rue de la Guadeloupe, 97490 Saint-Denis.</p>
+<h3>17) Données personnelles (RGPD)</h3><p>Les données sont utilisées pour gérer la réservation, le contrat, la facturation et le traitement des sinistres. Contact : contact@lvtools.re</p>
+<h3>18) Réclamations</h3><p>Réclamation écrite préalable : contact@lvtools.re — 3B, Rue de la Guadeloupe, 97490 Saint-Denis.</p>
 <h3>19) Médiation de la consommation</h3><p>En cas d'échec de la réclamation écrite, le Locataire peut saisir gratuitement un médiateur de la consommation dans les conditions légales.</p>
 <h3>20) Loi applicable</h3><p>Les présentes CGL sont soumises au droit français. À défaut d'accord amiable, le litige relève des juridictions compétentes.</p>
 </div>

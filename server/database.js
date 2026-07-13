@@ -36,9 +36,17 @@ if (faqs.count() === 0) {
     { question: 'Comment fonctionne la livraison ?',            answer: "Nous proposons la livraison sur La Réunion (zone Sud et Est principalement). Vous pouvez aussi venir récupérer votre matériel directement chez nous.", category: 'livraison', sort_order: 5 },
     { question: 'Que se passe-t-il si le matériel est endommagé ?', answer: "Une caution est demandée à la réservation. En cas de dommage, les frais de réparation ou remplacement seront déduits de la caution.", category: 'reservation', sort_order: 6 },
     { question: 'Puis-je annuler une réservation ?',            answer: "Oui, jusqu'à 48h avant la date de début de location sans frais. Au-delà, 50% du montant sera retenu.", category: 'reservation', sort_order: 7 },
-    { question: 'Comment contacter le service client ?',        answer: 'Vous pouvez nous joindre par téléphone au 06 93 83 96 54 ou par email à Locationautopresto@gmail.com. Nous répondons sous 24h.', category: 'contact', sort_order: 8 },
+    { question: 'Comment contacter le service client ?',        answer: 'Vous pouvez nous joindre par téléphone au 06 93 83 96 54 ou par email à contact@lvtools.re. Nous répondons sous 24h.', category: 'contact', sort_order: 8 },
   ].forEach(f => faqs.insert(f));
 }
+
+// Migration : corrige l'ancienne adresse email dans les FAQ déjà enregistrées
+// (le seed ci-dessus ne s'exécute qu'une fois, il ne met pas à jour une base existante)
+faqs.all().forEach(f => {
+  if (f.answer && f.answer.includes('Locationautopresto@gmail.com')) {
+    faqs.update(f.id, { answer: f.answer.replaceAll('Locationautopresto@gmail.com', 'contact@lvtools.re') });
+  }
+});
 
 const rental_contracts = db.table('rental_contracts');
 const car_reservations = db.table('car_reservations');

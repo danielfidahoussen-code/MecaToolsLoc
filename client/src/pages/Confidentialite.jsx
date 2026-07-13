@@ -17,7 +17,7 @@ export default function Confidentialite() {
               <li>3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis, La Réunion</li>
               <li>SIREN 851 826 537</li>
               <li>Téléphone : 06 93 83 96 54</li>
-              <li>Email : Locationautopresto@gmail.com</li>
+              <li>Email : contact@lvtools.re</li>
             </ul>
           </LegalSection>
 
@@ -84,7 +84,7 @@ export default function Confidentialite() {
               <li><strong>Droit d'opposition :</strong> vous opposer au traitement de vos données</li>
               <li><strong>Droit à la portabilité :</strong> recevoir vos données dans un format structuré</li>
             </ul>
-            <p>Pour exercer ces droits, contactez-nous à : <strong>Locationautopresto@gmail.com</strong></p>
+            <p>Pour exercer ces droits, contactez-nous à : <strong>contact@lvtools.re</strong></p>
             <p>Vous avez également le droit d'introduire une réclamation auprès de la <strong>CNIL</strong> (Commission Nationale de l'Informatique et des Libertés) — <em>cnil.fr</em>.</p>
           </LegalSection>
 

@@ -83,7 +83,7 @@ export default function CGV() {
 
           <LegalSection title="9. Droit de rétractation (Achat)">
             <p>Conformément aux articles L.221-18 et suivants du Code de la consommation, le Client consommateur dispose d'un délai de <strong>14 jours</strong> à compter de la réception du produit pour exercer son droit de rétractation, sans avoir à motiver sa décision.</p>
-            <p>Pour exercer ce droit, le Client informe le Vendeur de sa décision par une déclaration dénuée d'ambiguïté (courrier ou email à Locationautopresto@gmail.com), le cas échéant au moyen du formulaire type de rétractation. Le produit doit ensuite être renvoyé dans un délai de 14 jours.</p>
+            <p>Pour exercer ce droit, le Client informe le Vendeur de sa décision par une déclaration dénuée d'ambiguïté (courrier ou email à contact@lvtools.re), le cas échéant au moyen du formulaire type de rétractation. Le produit doit ensuite être renvoyé dans un délai de 14 jours.</p>
             <p>Le Client peut manipuler et essayer le produit comme il pourrait le faire en magasin ; sa responsabilité n'est engagée qu'à raison de la <strong>dépréciation</strong> résultant de manipulations excédant ce qui est nécessaire pour établir la nature et les caractéristiques du bien.</p>
             <p><strong>Les frais de retour sont à la charge du Client.</strong> Le Vendeur rembourse le Client de la totalité des sommes versées, y compris les frais de livraison initiaux (hors frais supplémentaires liés à un mode de livraison plus coûteux choisi par le Client), au plus tard dans les 14 jours suivant la récupération du produit ou la preuve de son expédition.</p>
             <p>Conformément à l'article L.221-28 du Code de la consommation, le droit de rétractation ne s'applique pas aux contrats de <strong>location</strong> pour une date ou une période déterminée.</p>
@@ -95,7 +95,7 @@ export default function CGV() {
               <li><strong>Garantie légale de conformité</strong> (art. L.217-3 et suivants du Code de la consommation) : le Client dispose d'un délai de <strong>2 ans</strong> à compter de la délivrance du bien pour agir ; il peut choisir entre la réparation ou le remplacement du bien, et bénéficie d'une présomption d'antériorité du défaut.</li>
               <li><strong>Garantie des vices cachés</strong> (art. 1641 et suivants du Code civil) : le Client peut obtenir la résolution de la vente ou une réduction du prix, dans un délai de 2 ans à compter de la découverte du vice.</li>
             </ul>
-            <p>Pour toute mise en œuvre de ces garanties, le Client peut contacter le Vendeur à Locationautopresto@gmail.com.</p>
+            <p>Pour toute mise en œuvre de ces garanties, le Client peut contacter le Vendeur à contact@lvtools.re.</p>
           </LegalSection>
 
           <LegalSection title="11. Responsabilité">
@@ -103,7 +103,7 @@ export default function CGV() {
           </LegalSection>
 
           <LegalSection title="12. Médiation et litiges">
-            <p>En cas de litige, le Client adresse au préalable une réclamation écrite au Vendeur (Locationautopresto@gmail.com). À défaut de résolution amiable, le Client consommateur peut recourir gratuitement à un médiateur de la consommation :</p>
+            <p>En cas de litige, le Client adresse au préalable une réclamation écrite au Vendeur (contact@lvtools.re). À défaut de résolution amiable, le Client consommateur peut recourir gratuitement à un médiateur de la consommation :</p>
             <ul>
               <li><strong>Médiateur désigné :</strong> [nom du médiateur à compléter] — [adresse / site du médiateur]</li>
               <li><strong>Plateforme européenne RLL :</strong> <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noreferrer">ec.europa.eu/consumers/odr</a></li>

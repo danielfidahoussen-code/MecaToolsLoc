@@ -30,7 +30,7 @@ Le matériel doit être restitué complet, propre et en bon état de fonctionnem
 En cas de manquement grave du Client à ses obligations (dégradation volontaire, non-restitution, usage dangereux), Auto Presto peut mettre fin à la location de plein droit, sans préjudice des sommes dues.
 
 8) Litiges
-Pour toute réclamation, le Client contacte au préalable Auto Presto (Locationautopresto@gmail.com). À défaut de résolution amiable, les dispositions prévues à l'article 12 des CGV (médiation, tribunaux compétents) s'appliquent.
+Pour toute réclamation, le Client contacte au préalable Auto Presto (contact@lvtools.re). À défaut de résolution amiable, les dispositions prévues à l'article 12 des CGV (médiation, tribunaux compétents) s'appliquent.
 
 En signant ci-dessous, le Client reconnaît avoir lu et accepté les présentes conditions ainsi que les CGV de LVTools dans leur intégralité.`;
 

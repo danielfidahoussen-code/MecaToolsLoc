@@ -22,7 +22,7 @@ export default function MentionsLegales() {
               <li><strong>Code APE / NAF :</strong> 4520A</li>
               <li><strong>N° TVA intracommunautaire :</strong> FR73 851 826 537</li>
               <li><strong>Téléphone :</strong> 06 93 83 96 54</li>
-              <li><strong>Email :</strong> Locationautopresto@gmail.com</li>
+              <li><strong>Email :</strong> contact@lvtools.re</li>
             </ul>
           </LegalSection>
 

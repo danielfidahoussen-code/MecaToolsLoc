@@ -66,10 +66,10 @@ L'état des lieux retour est réalisé au retour (photos possibles). Tout dommag
 Le Locataire est responsable des infractions (stationnement, vitesse, péages, etc.) et des frais associés. Le Loueur peut transmettre les coordonnées du Locataire aux autorités et facturer des frais de traitement/dossier selon la grille.
 
 17) Données personnelles (RGPD)
-Les données sont utilisées pour gérer la réservation, le contrat, le dépôt de garantie, la relation client, la facturation, et le traitement des sinistres/infractions. Le Locataire dispose de droits d'accès/rectification/effacement dans les limites légales ; contact : Locationautopresto@gmail.com
+Les données sont utilisées pour gérer la réservation, le contrat, le dépôt de garantie, la relation client, la facturation, et le traitement des sinistres/infractions. Le Locataire dispose de droits d'accès/rectification/effacement dans les limites légales ; contact : contact@lvtools.re
 
 18) Réclamations – Service client
-Réclamation écrite préalable obligatoire : Locationautopresto@gmail.com — 3 B, Rue de la Guadeloupe, 97490 Saint-Denis, en décrivant les faits, date, véhicule, n° contrat et pièces.
+Réclamation écrite préalable obligatoire : contact@lvtools.re — 3 B, Rue de la Guadeloupe, 97490 Saint-Denis, en décrivant les faits, date, véhicule, n° contrat et pièces.
 
 19) Médiation de la consommation (obligatoire pour les pros)
 En cas d'échec de la réclamation écrite, le Locataire (consommateur) peut saisir gratuitement un médiateur de la consommation dans les conditions légales (délai d'1 an après la réclamation écrite).
@@ -81,7 +81,7 @@ ANNEXES (remises ou affichées lors de la signature)
 A1) Grille tarifaire (retard, km supp, carburant, nettoyage, accessoires)
 A2) Tableau franchise / réduction franchise / franchise non rachetable
 A3) État des lieux départ/retour + photos
-A4) Politique RGPD simplifiée — Locationautopresto@gmail.com`;
+A4) Politique RGPD simplifiée — contact@lvtools.re`;
 
 function SignaturePad({ onSign }) {
   const canvasRef = useRef(null);
