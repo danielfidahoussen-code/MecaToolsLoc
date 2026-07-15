@@ -1,39 +1,19 @@
 const PDFDocument = require('pdfkit');
+const path = require('path');
 
-// Dessine le logo LVTools (engrenage + clé + wordmark), identique au composant client Logo.jsx,
+const ICON_PATH = path.join(__dirname, '../../client/public/logo-lvtools-icon.png');
+const ICON_ASPECT = 197 / 150; // largeur / hauteur du PNG source
+
+// Dessine le logo LVTools (vraie image du logo + wordmark),
 // à la position (x, y) avec une hauteur d'icône ~ size (en points PDF).
 function drawLogo(doc, x, y, size = 32) {
-  const scale = size / 48; // le SVG source est en viewBox 0 0 48 48
   const orange = '#f7941d';
   const dark = '#1a0202';
 
-  doc.save();
-  doc.translate(x, y);
-  doc.scale(scale, scale);
-
-  // Engrenage (symbole mécanique)
-  doc.path('M 24.00,5.00 L 29.74,10.14 L 37.44,10.56 L 37.86,18.26 L 43.00,24.00 L 37.86,29.74 L 37.44,37.44 L 29.74,37.86 L 24.00,43.00 L 18.26,37.86 L 10.56,37.44 L 10.14,29.74 L 5.00,24.00 L 10.14,18.26 L 10.56,10.56 L 18.26,10.14 Z M 13,24 A 11,11 0 1,0 35,24 A 11,11 0 1,0 13,24 Z')
-    .fillColor(dark).fill('even-odd');
-
-  // Lettres "Lv" au centre de l'engrenage
-  doc.font('Helvetica-Bold').fontSize(15).fillColor(dark)
-    .text('Lv', 0, 20, { width: 48, align: 'center', lineBreak: false });
-
-  // Clé qui traverse en diagonale (symbole outillage)
-  doc.save();
-  doc.translate(24, 24);
-  doc.rotate(-45);
-  doc.roundedRect(-9.5, -1.7, 19, 3.4, 1.7).fillColor(orange).fill();
-  doc.restore();
-  doc.path('M 10.00,32.50 L 14.76,35.25 L 14.76,40.75 L 10.00,43.50 L 5.24,40.75 L 5.24,35.25 Z M 7,38 A 3,3 0 1,0 13,38 A 3,3 0 1,0 7,38 Z')
-    .fillColor(orange).fill('even-odd');
-  doc.path('M 38.00,4.50 L 42.76,7.25 L 42.76,12.75 L 38.00,15.50 L 33.24,12.75 L 33.24,7.25 Z M 35,10 A 3,3 0 1,0 41,10 A 3,3 0 1,0 35,10 Z')
-    .fillColor(orange).fill('even-odd');
-
-  doc.restore();
+  doc.image(ICON_PATH, x, y, { height: size, width: size * ICON_ASPECT });
 
   // Wordmark texte, à droite de l'icône
-  const textX = x + size + 8;
+  const textX = x + size * ICON_ASPECT + 8;
   const lvFontSize = size * 0.42;
   doc.font('Helvetica-Bold').fontSize(lvFontSize);
   doc.fillColor(orange).text('LV', textX, y + size * 0.08, { continued: true, lineBreak: false });
