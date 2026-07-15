@@ -4,7 +4,7 @@ const PDFDocument = require('pdfkit');
 // à la position (x, y) avec une hauteur d'icône ~ size (en points PDF).
 function drawLogo(doc, x, y, size = 32) {
   const scale = size / 48; // le SVG source est en viewBox 0 0 48 48
-  const red = '#ff3333';
+  const orange = '#f7941d';
   const dark = '#1a0202';
 
   doc.save();
@@ -12,19 +12,23 @@ function drawLogo(doc, x, y, size = 32) {
   doc.scale(scale, scale);
 
   // Engrenage (symbole mécanique)
-  doc.path('M 24.00,7.00 L 28.97,11.99 L 36.02,11.98 L 36.01,19.03 L 41.00,24.00 L 36.01,28.97 L 36.02,36.02 L 28.97,36.01 L 24.00,41.00 L 19.03,36.01 L 11.98,36.02 L 11.99,28.97 L 7.00,24.00 L 11.99,19.03 L 11.98,11.98 L 19.03,11.99 Z M 17.5,24 A 6.5,6.5 0 1,0 30.5,24 A 6.5,6.5 0 1,0 17.5,24 Z')
+  doc.path('M 24.00,5.00 L 29.74,10.14 L 37.44,10.56 L 37.86,18.26 L 43.00,24.00 L 37.86,29.74 L 37.44,37.44 L 29.74,37.86 L 24.00,43.00 L 18.26,37.86 L 10.56,37.44 L 10.14,29.74 L 5.00,24.00 L 10.14,18.26 L 10.56,10.56 L 18.26,10.14 Z M 13,24 A 11,11 0 1,0 35,24 A 11,11 0 1,0 13,24 Z')
     .fillColor(dark).fill('even-odd');
+
+  // Lettres "Lv" au centre de l'engrenage
+  doc.font('Helvetica-Bold').fontSize(15).fillColor(dark)
+    .text('Lv', 0, 20, { width: 48, align: 'center', lineBreak: false });
 
   // Clé qui traverse en diagonale (symbole outillage)
   doc.save();
   doc.translate(24, 24);
   doc.rotate(-45);
-  doc.roundedRect(-9.5, -1.7, 19, 3.4, 1.7).fillColor(red).fill();
+  doc.roundedRect(-9.5, -1.7, 19, 3.4, 1.7).fillColor(orange).fill();
   doc.restore();
   doc.path('M 10.00,32.50 L 14.76,35.25 L 14.76,40.75 L 10.00,43.50 L 5.24,40.75 L 5.24,35.25 Z M 7,38 A 3,3 0 1,0 13,38 A 3,3 0 1,0 7,38 Z')
-    .fillColor(red).fill('even-odd');
+    .fillColor(orange).fill('even-odd');
   doc.path('M 38.00,4.50 L 42.76,7.25 L 42.76,12.75 L 38.00,15.50 L 33.24,12.75 L 33.24,7.25 Z M 35,10 A 3,3 0 1,0 41,10 A 3,3 0 1,0 35,10 Z')
-    .fillColor(red).fill('even-odd');
+    .fillColor(orange).fill('even-odd');
 
   doc.restore();
 
@@ -32,8 +36,8 @@ function drawLogo(doc, x, y, size = 32) {
   const textX = x + size + 8;
   const lvFontSize = size * 0.42;
   doc.font('Helvetica-Bold').fontSize(lvFontSize);
-  doc.fillColor('#1a0202').text('LV', textX, y + size * 0.08, { continued: true, lineBreak: false });
-  doc.fillColor(red).text('Tools', { lineBreak: false });
+  doc.fillColor(orange).text('LV', textX, y + size * 0.08, { continued: true, lineBreak: false });
+  doc.fillColor(dark).text('TOOLS', { lineBreak: false });
   doc.font('Helvetica').fontSize(size * 0.17).fillColor('#8a7a7a')
     .text('LOCATION · VENTE · OUTILLAGE', textX, y + size * 0.62, { lineBreak: false, characterSpacing: 0.5 });
 }
