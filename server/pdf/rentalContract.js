@@ -1,36 +1,30 @@
 const PDFDocument = require('pdfkit');
 
-// Dessine le logo LVTools (icône + wordmark), identique au composant client Logo.jsx,
+// Dessine le logo LVTools (engrenage + clé + wordmark), identique au composant client Logo.jsx,
 // à la position (x, y) avec une hauteur d'icône ~ size (en points PDF).
 function drawLogo(doc, x, y, size = 32) {
   const scale = size / 48; // le SVG source est en viewBox 0 0 48 48
   const red = '#ff3333';
+  const dark = '#1a0202';
 
   doc.save();
   doc.translate(x, y);
   doc.scale(scale, scale);
 
-  // Cercle pointillé extérieur
-  doc.circle(24, 24, 19).lineWidth(1.5).dash(4, { space: 3 }).strokeColor('#e5dcdc').stroke();
-  doc.undash();
+  // Engrenage (symbole mécanique)
+  doc.path('M 24.00,7.00 L 28.97,11.99 L 36.02,11.98 L 36.01,19.03 L 41.00,24.00 L 36.01,28.97 L 36.02,36.02 L 28.97,36.01 L 24.00,41.00 L 19.03,36.01 L 11.98,36.02 L 11.99,28.97 L 7.00,24.00 L 11.99,19.03 L 11.98,11.98 L 19.03,11.99 Z M 17.5,24 A 6.5,6.5 0 1,0 30.5,24 A 6.5,6.5 0 1,0 17.5,24 Z')
+    .fillColor(dark).fill('even-odd');
 
-  // Anneau rouge
-  doc.circle(24, 24, 10).lineWidth(2.5).strokeColor(red).stroke();
-
-  // Point central rouge
-  doc.circle(24, 24, 4).fillColor(red).fill();
-
-  // 8 rayons
-  [0, 45, 90, 135, 180, 225, 270, 315].forEach(deg => {
-    const rad = (deg * Math.PI) / 180;
-    const x1 = 24 + 10 * Math.cos(rad), y1 = 24 + 10 * Math.sin(rad);
-    const x2 = 24 + 15 * Math.cos(rad), y2 = 24 + 15 * Math.sin(rad);
-    doc.moveTo(x1, y1).lineTo(x2, y2).lineWidth(3).lineCap('round').strokeColor(red).stroke();
-  });
-
-  // Clé (en bas à gauche de l'icône)
-  doc.path('M15 35 L11 39 M11 39 C9.5 40.5 7 40 7 38 C7 36 9.5 35.5 11 35.5 L15 31')
-    .lineWidth(1.8).lineCap('round').strokeColor('#4d3333').stroke();
+  // Clé qui traverse en diagonale (symbole outillage)
+  doc.save();
+  doc.translate(24, 24);
+  doc.rotate(-45);
+  doc.roundedRect(-9.5, -1.7, 19, 3.4, 1.7).fillColor(red).fill();
+  doc.restore();
+  doc.path('M 10.00,32.50 L 14.76,35.25 L 14.76,40.75 L 10.00,43.50 L 5.24,40.75 L 5.24,35.25 Z M 7,38 A 3,3 0 1,0 13,38 A 3,3 0 1,0 7,38 Z')
+    .fillColor(red).fill('even-odd');
+  doc.path('M 38.00,4.50 L 42.76,7.25 L 42.76,12.75 L 38.00,15.50 L 33.24,12.75 L 33.24,7.25 Z M 35,10 A 3,3 0 1,0 41,10 A 3,3 0 1,0 35,10 Z')
+    .fillColor(red).fill('even-odd');
 
   doc.restore();
 

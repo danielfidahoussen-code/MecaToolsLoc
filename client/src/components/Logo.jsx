@@ -5,18 +5,17 @@ export default function Logo({ size = 44, light = false }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-        <circle cx="24" cy="24" r="19" stroke={light ? 'rgba(255,255,255,0.15)' : 'rgba(26,2,2,0.1)'} strokeWidth="1.5" fill="none" strokeDasharray="4 3"/>
-        <circle cx="24" cy="24" r="10" stroke={red} strokeWidth="2.5" fill="none"/>
-        <circle cx="24" cy="24" r="4" fill={red}/>
-        {[0,45,90,135,180,225,270,315].map((deg, i) => {
-          const rad = (deg * Math.PI) / 180;
-          const x1 = 24 + 10 * Math.cos(rad), y1 = 24 + 10 * Math.sin(rad);
-          const x2 = 24 + 15 * Math.cos(rad), y2 = 24 + 15 * Math.sin(rad);
-          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={red} strokeWidth="3" strokeLinecap="round"/>;
-        })}
-        {/* clé en bas à gauche, loin du texte */}
-        <path d="M15 35 L11 39 M11 39 C9.5 40.5 7 40 7 38 C7 36 9.5 35.5 11 35.5 L15 31"
-          stroke={light ? 'rgba(255,255,255,0.7)' : 'rgba(26,2,2,0.6)'} strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+        {/* Engrenage : symbole mécanique */}
+        <path d="M 24.00,7.00 L 28.97,11.99 L 36.02,11.98 L 36.01,19.03 L 41.00,24.00 L 36.01,28.97 L 36.02,36.02 L 28.97,36.01 L 24.00,41.00 L 19.03,36.01 L 11.98,36.02 L 11.99,28.97 L 7.00,24.00 L 11.99,19.03 L 11.98,11.98 L 19.03,11.99 Z M 17.5,24 A 6.5,6.5 0 1,0 30.5,24 A 6.5,6.5 0 1,0 17.5,24 Z"
+          fill={c} fillRule="evenodd"/>
+        {/* Clé qui traverse en diagonale : symbole outillage */}
+        <g>
+          <rect x="14.5" y="22.3" width="19" height="3.4" rx="1.7" fill={red} transform="rotate(-45 24 24)"/>
+          <path d="M 10.00,32.50 L 14.76,35.25 L 14.76,40.75 L 10.00,43.50 L 5.24,40.75 L 5.24,35.25 Z M 7,38 A 3,3 0 1,0 13,38 A 3,3 0 1,0 7,38 Z"
+            fill={red} fillRule="evenodd"/>
+          <path d="M 38.00,4.50 L 42.76,7.25 L 42.76,12.75 L 38.00,15.50 L 33.24,12.75 L 33.24,7.25 Z M 35,10 A 3,3 0 1,0 41,10 A 3,3 0 1,0 35,10 Z"
+            fill={red} fillRule="evenodd"/>
+        </g>
       </svg>
       <div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 0, lineHeight: 1 }}>
