@@ -79,7 +79,7 @@ const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').
 
 // En-tête wordmark LVTools pour les emails (texte stylé, pas de SVG — compatibilité email fiable)
 const LVTOOLS_EMAIL_HEADER = `<div style="margin-bottom:22px;">` +
-  `<span style="font-family:Arial,Helvetica,sans-serif;font-weight:900;font-size:22px;letter-spacing:1px;color:#f7941d;">LV</span>` +
+  `<span style="font-family:Arial,Helvetica,sans-serif;font-weight:900;font-size:22px;letter-spacing:1px;color:#ff3333;">LV</span>` +
   `<span style="font-family:Arial,Helvetica,sans-serif;font-weight:900;font-size:22px;letter-spacing:1px;color:#1a0202;">TOOLS</span>` +
   `<div style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:1.5px;color:#8a7a7a;text-transform:uppercase;margin-top:2px;">Location · Vente · Outillage</div>` +
   `</div>`;

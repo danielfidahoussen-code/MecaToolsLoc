@@ -7,7 +7,7 @@ const ICON_ASPECT = 197 / 150; // largeur / hauteur du PNG source
 // Dessine le logo LVTools (vraie image du logo + wordmark),
 // à la position (x, y) avec une hauteur d'icône ~ size (en points PDF).
 function drawLogo(doc, x, y, size = 32) {
-  const orange = '#f7941d';
+  const red = '#ff3333';
   const dark = '#1a0202';
 
   doc.image(ICON_PATH, x, y, { height: size, width: size * ICON_ASPECT });
@@ -16,7 +16,7 @@ function drawLogo(doc, x, y, size = 32) {
   const textX = x + size * ICON_ASPECT + 8;
   const lvFontSize = size * 0.42;
   doc.font('Helvetica-Bold').fontSize(lvFontSize);
-  doc.fillColor(orange).text('LV', textX, y + size * 0.08, { continued: true, lineBreak: false });
+  doc.fillColor(red).text('LV', textX, y + size * 0.08, { continued: true, lineBreak: false });
   doc.fillColor(dark).text('TOOLS', { lineBreak: false });
   doc.font('Helvetica').fontSize(size * 0.17).fillColor('#8a7a7a')
     .text('LOCATION · VENTE · OUTILLAGE', textX, y + size * 0.62, { lineBreak: false, characterSpacing: 0.5 });
