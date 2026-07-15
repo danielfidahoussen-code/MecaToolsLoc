@@ -11,9 +11,21 @@ const DELIVERY_FEE = 20;
 const BOOSTER_FEE_PER_DAY = 2;
 const BABY_SEAT_FEE_PER_DAY = 4;
 
+const hasTierPricing = (car) => car.price_1_3 != null;
+
+// Grille à 5 paliers (nouveaux véhicules)
+function tierRate(car, days) {
+  if (days >= 30) return car.price_30plus;
+  if (days >= 21) return car.price_21_29;
+  if (days >= 11) return car.price_11_20;
+  if (days >= 4) return car.price_4_10;
+  return car.price_1_3;
+}
+
 function calcPrice(car, days) {
   if (!days || days <= 0) return 0;
   if (car.min_days && days < car.min_days) return 0;
+  if (hasTierPricing(car)) return tierRate(car, days) * days;
   if (days >= 14) return car.price_2weeks * days;
   if (days >= 5 && car.price_5days) return car.price_5days * days;
   if (car.price_day) return car.price_day * days;
@@ -23,10 +35,33 @@ function calcPrice(car, days) {
 function getRateInfo(car, days) {
   if (!days || days <= 0) return null;
   if (car.min_days && days < car.min_days) return { label: `Minimum ${car.min_days} jours pour ce véhicule`, color: 'var(--danger)', invalid: true };
+  if (hasTierPricing(car)) {
+    const rate = tierRate(car, days);
+    const tierLabel = days >= 30 ? '+ de 30 jours' : days >= 21 ? '21 à 29 jours' : days >= 11 ? '11 à 20 jours' : days >= 4 ? '4 à 10 jours' : '1 à 3 jours';
+    return { label: `${tierLabel} — ${rate} €/j`, color: '#059669' };
+  }
   if (days >= 14) return { label: `Tarif 2 semaines — ${car.price_2weeks} €/j`, color: '#059669' };
   if (days >= 5 && car.price_5days) return { label: `-10% dès 5 jours — ${car.price_5days} €/j`, color: '#d97706' };
   if (car.price_day) return { label: `Tarif journalier — ${car.price_day} €/j`, color: 'var(--gray-500)' };
   return null;
+}
+
+// Liste des paliers à afficher (mini-tableau tarifaire sur la fiche)
+function getTiers(car) {
+  if (hasTierPricing(car)) {
+    return [
+      { key: '1-3', label: '1-3j', value: car.price_1_3 },
+      { key: '4-10', label: '4-10j', value: car.price_4_10 },
+      { key: '11-20', label: '11-20j', value: car.price_11_20 },
+      { key: '21-29', label: '21-29j', value: car.price_21_29 },
+      { key: '30+', label: '30j+', value: car.price_30plus },
+    ].filter(t => t.value > 0);
+  }
+  return [
+    { key: 'day', label: 'Journalier', value: car.price_day },
+    { key: '5days', label: '5 jours+', value: car.price_5days },
+    { key: '2weeks', label: '2 semaines', value: car.price_2weeks },
+  ].filter(t => t.value > 0);
 }
 
 function CarCard({ car }) {
@@ -35,13 +70,13 @@ function CarCard({ car }) {
   const [endDate, setEndDate] = useState(null);
   const [form, setForm] = useState({ name: '', phone: '', email: '' });
   const [deliveryOut, setDeliveryOut] = useState(false);
-  const [deliveryOutAddress, setDeliveryOutAddress] = useState('');
   const [deliveryIn, setDeliveryIn] = useState(false);
-  const [deliveryInAddress, setDeliveryInAddress] = useState('');
   const [booster, setBooster] = useState(false);
   const [babySeat, setBabySeat] = useState(false);
   const [open, setOpen] = useState(false);
   const [reserving, setReserving] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
+  const isRequestOnly = car.booking_mode === 'request';
 
   const days = startDate && endDate ? Math.max(1, differenceInDays(endDate, startDate)) : 0;
   const carTotal = calcPrice(car, days);
@@ -59,37 +94,42 @@ function CarCard({ car }) {
     if (!startDate || !endDate) { toast.error('Choisissez vos dates'); return; }
     if (car.min_days && days < car.min_days) { toast.error(`Ce véhicule est disponible à partir de ${car.min_days} jours`); return; }
     if (!form.name || !form.phone || !form.email) { toast.error('Nom, téléphone et email requis'); return; }
-    if (deliveryOut && !deliveryOutAddress.trim()) { toast.error('Adresse de livraison requise'); return; }
-    if (deliveryIn && !deliveryInAddress.trim()) { toast.error('Adresse de récupération requise'); return; }
     if (rateInfo?.invalid) { toast.error(rateInfo.label); return; }
     setReserving(true);
+    const payload = {
+      car_id: car.id,
+      car_name: car.name,
+      start_date: startDate.toLocaleDateString('fr-FR'),
+      end_date: endDate.toLocaleDateString('fr-FR'),
+      days,
+      car_total: carTotal,
+      total,
+      delivery_out: deliveryOut,
+      delivery_in: deliveryIn,
+      booster,
+      baby_seat: babySeat,
+      customer_name: form.name,
+      customer_email: form.email,
+      customer_phone: form.phone,
+    };
     try {
-      const { data } = await axios.post('/api/car-reservations/create', {
-        car_id: car.id,
-        car_name: car.name,
-        start_date: startDate.toLocaleDateString('fr-FR'),
-        end_date: endDate.toLocaleDateString('fr-FR'),
-        days,
-        car_total: carTotal,
-        total,
-        delivery_out: deliveryOut,
-        delivery_out_address: deliveryOut ? deliveryOutAddress.trim() : '',
-        delivery_in: deliveryIn,
-        delivery_in_address: deliveryIn ? deliveryInAddress.trim() : '',
-        booster,
-        baby_seat: babySeat,
-        customer_name: form.name,
-        customer_email: form.email,
-        customer_phone: form.phone,
-      });
-      navigate(`/autres-services/contrat/${data.id}`);
+      if (isRequestOnly) {
+        await axios.post('/api/car-reservations/request', payload);
+        setRequestSent(true);
+        toast.success('Demande envoyée !');
+      } else {
+        const { data } = await axios.post('/api/car-reservations/create', payload);
+        navigate(`/autres-services/contrat/${data.id}`);
+      }
     } catch (err) {
       toast.error(err?.response?.data?.error || 'Erreur lors de la réservation');
+    } finally {
       setReserving(false);
     }
   };
 
-  const startPrice = car.price_2weeks || car.price_5days || car.price_day;
+  const tiers = getTiers(car);
+  const startPrice = tiers.length > 0 ? tiers[tiers.length - 1].value : 0;
 
   return (
     <div className="card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -130,25 +170,17 @@ function CarCard({ car }) {
         )}
 
         {/* Tarifs */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-          {car.price_day > 0 && (
-            <div style={{ flex: 1, background: 'var(--gray-100)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: 2 }}>Journalier</p>
-              <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--primary)' }}>{car.price_day} €</p>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+          {tiers.map((t, i) => (
+            <div key={t.key} style={{
+              flex: '1 1 0', minWidth: 56, borderRadius: 8, padding: '8px 4px', textAlign: 'center',
+              background: i === tiers.length - 1 ? 'var(--primary)' : i === 0 ? 'var(--gray-100)' : 'rgba(245,197,24,.12)',
+              border: i > 0 && i < tiers.length - 1 ? '1px solid rgba(245,197,24,.3)' : 'none',
+            }}>
+              <p style={{ fontSize: 8, fontWeight: 700, textTransform: 'uppercase', color: i === tiers.length - 1 ? 'rgba(255,255,255,.6)' : 'var(--gray-500)', marginBottom: 2 }}>{t.label}</p>
+              <p style={{ fontSize: 14, fontWeight: 900, color: i === tiers.length - 1 ? 'white' : 'var(--primary)' }}>{t.value} €</p>
             </div>
-          )}
-          {car.price_5days > 0 && (
-            <div style={{ flex: 1, background: 'rgba(245,197,24,.12)', border: '1px solid rgba(245,197,24,.3)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: 2 }}>5 jours+</p>
-              <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--primary)' }}>{car.price_5days} €</p>
-            </div>
-          )}
-          {car.price_2weeks > 0 && (
-            <div style={{ flex: 1, background: 'var(--primary)', borderRadius: 8, padding: '8px', textAlign: 'center' }}>
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', color: 'rgba(255,255,255,.6)', marginBottom: 2 }}>2 semaines</p>
-              <p style={{ fontSize: 16, fontWeight: 900, color: 'white' }}>{car.price_2weeks} €</p>
-            </div>
-          )}
+          ))}
         </div>
 
         {car.caution > 0 && (
@@ -169,7 +201,7 @@ function CarCard({ car }) {
           {open ? 'Fermer' : 'Réserver ce véhicule'}
         </button>
 
-        {open && (
+        {open && !requestSent && (
           <div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
               <div className="form-group" style={{ marginBottom: 0 }}>
@@ -210,6 +242,7 @@ function CarCard({ car }) {
             </div>
 
             {/* Options : livraison, récupération, sièges enfant */}
+            <p style={{ fontSize: 11, color: 'var(--gray-400)', marginBottom: 6 }}>Pour la livraison / récupération, le lieu sera convenu avec vous par téléphone.</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
               {/* Livraison */}
               <div style={{ border: '1.5px solid var(--gray-200)', borderRadius: 10, padding: '12px 14px', background: deliveryOut ? 'rgba(34,197,94,.06)' : 'var(--gray-50)' }}>
@@ -219,15 +252,6 @@ function CarCard({ car }) {
                   <span>Livraison du véhicule</span>
                   <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>+{DELIVERY_FEE} €</span>
                 </label>
-                {deliveryOut && (
-                  <div style={{ marginTop: 10 }}>
-                    <input className="form-control" value={deliveryOutAddress}
-                      onChange={e => setDeliveryOutAddress(e.target.value)}
-                      placeholder="Adresse où recevoir le véhicule"
-                      style={{ fontSize: 13 }}/>
-                    <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>Nous vous contacterons pour confirmer l'heure</p>
-                  </div>
-                )}
               </div>
 
               {/* Récupération */}
@@ -238,15 +262,6 @@ function CarCard({ car }) {
                   <span>Récupération du véhicule</span>
                   <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>+{DELIVERY_FEE} €</span>
                 </label>
-                {deliveryIn && (
-                  <div style={{ marginTop: 10 }}>
-                    <input className="form-control" value={deliveryInAddress}
-                      onChange={e => setDeliveryInAddress(e.target.value)}
-                      placeholder="Adresse où récupérer le véhicule"
-                      style={{ fontSize: 13 }}/>
-                    <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>Endroit de votre choix — nous vous contacterons pour confirmer l'heure</p>
-                  </div>
-                )}
               </div>
 
               {/* Réhausseur */}
@@ -318,9 +333,19 @@ function CarCard({ car }) {
             </div>
 
             <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 15 }} onClick={handleReserve} disabled={reserving}>
-              {reserving ? 'Création de la réservation...' : `Réserver et signer le contrat →`}
+              {reserving
+                ? 'Envoi en cours...'
+                : isRequestOnly ? 'Envoyer la demande de réservation →' : 'Réserver et signer le contrat →'}
             </button>
-            <p style={{ fontSize: 11, color: 'var(--gray-400)', textAlign: 'center', marginTop: 6 }}>Vous signerez le contrat avant le paiement en ligne</p>
+            <p style={{ fontSize: 11, color: 'var(--gray-400)', textAlign: 'center', marginTop: 6 }}>
+              {isRequestOnly ? 'Nous vous contactons pour confirmer — paiement et contrat sur place' : 'Vous signerez le contrat avant le paiement en ligne'}
+            </p>
+          </div>
+        )}
+        {requestSent && (
+          <div style={{ background: '#d1fae5', border: '1.5px solid #86efac', borderRadius: 12, padding: '16px 18px', textAlign: 'center' }}>
+            <p style={{ fontWeight: 800, color: '#065f46', marginBottom: 4 }}>Demande envoyée !</p>
+            <p style={{ fontSize: 13, color: '#065f46' }}>Nous vous recontactons rapidement pour confirmer votre réservation. Le paiement et le contrat se feront sur place.</p>
           </div>
         )}
       </div>

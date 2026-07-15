@@ -773,10 +773,12 @@ export default function Admin() {
                           {[r.booster ? 'Réhausseur' : null, r.baby_seat ? 'Siège bébé' : null].filter(Boolean).join(' + ')}
                         </div>
                       )}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                        {r.contract_signed_at
-                          ? <span style={{ fontSize: 11, fontWeight: 700, background: '#d1fae5', color: '#065f46', padding: '2px 8px', borderRadius: 20 }}>Contrat signé</span>
-                          : <span style={{ fontSize: 11, fontWeight: 700, background: '#fee2e2', color: '#991b1b', padding: '2px 8px', borderRadius: 20 }}>Contrat non signé</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                        {r.booking_mode === 'request'
+                          ? <span style={{ fontSize: 11, fontWeight: 700, background: '#ede9fe', color: '#5b21b6', padding: '2px 8px', borderRadius: 20 }}>Demande — à traiter en personne</span>
+                          : r.contract_signed_at
+                            ? <span style={{ fontSize: 11, fontWeight: 700, background: '#d1fae5', color: '#065f46', padding: '2px 8px', borderRadius: 20 }}>Contrat signé</span>
+                            : <span style={{ fontSize: 11, fontWeight: 700, background: '#fee2e2', color: '#991b1b', padding: '2px 8px', borderRadius: 20 }}>Contrat non signé</span>
                         }
                         {r.contract_signed_at && (
                           <a href={`/api/car-reservations/${r.id}/contract/print?token=${token}`} target="_blank" rel="noreferrer"
@@ -839,7 +841,9 @@ export default function Admin() {
                             {[r.booster ? 'Réhausseur' : null, r.baby_seat ? 'Siège bébé' : null].filter(Boolean).join(', ') || <span style={{ color: 'var(--gray-400)' }}>—</span>}
                           </td>
                           <td style={{ padding: '11px 14px' }}>
-                            {r.contract_signed_at ? (
+                            {r.booking_mode === 'request' ? (
+                              <span style={{ fontSize: 11, fontWeight: 700, color: '#5b21b6', background: '#ede9fe', padding: '2px 6px', borderRadius: 4 }}>Demande</span>
+                            ) : r.contract_signed_at ? (
                               <a href={`/api/car-reservations/${r.id}/contract/print?token=${token}`} target="_blank" rel="noreferrer"
                                 style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#065f46', background: '#d1fae5', padding: '3px 8px', borderRadius: 6, textDecoration: 'none' }}>
                                 <FileText size={12}/> Voir

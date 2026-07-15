@@ -131,6 +131,43 @@ async function notifyNewCarReservation(r) {
   await sendTelegram(text);
 }
 
+// Nouvelle demande de réservation véhicule (pas de paiement en ligne, tout se fait en personne)
+async function notifyCarReservationRequest(r) {
+  if (!r) return;
+  const options = [
+    r.delivery_out ? 'Livraison souhaitée' : null,
+    r.delivery_in ? 'Récupération souhaitée' : null,
+    r.booster ? 'Réhausseur' : null,
+    r.baby_seat ? 'Siège bébé' : null,
+  ].filter(Boolean).join(', ');
+
+  const text =
+    `<b>Nouvelle demande de réservation véhicule</b>\n` +
+    `<i>(à traiter en personne — pas de paiement en ligne)</i>\n\n` +
+    `Véhicule : <b>${esc(r.car_name) || '—'}</b>\n` +
+    `Client : <b>${esc(r.customer_name) || '—'}</b>\n` +
+    `Email : ${esc(r.customer_email) || '—'}\n` +
+    `Téléphone : ${esc(r.customer_phone) || '—'}\n\n` +
+    `Période : ${esc(r.start_date)} au ${esc(r.end_date)} (${r.days} jour${r.days > 1 ? 's' : ''})\n` +
+    (options ? `Options : ${options}\n` : '') +
+    `\n<b>Total estimé : ${Number(r.total || 0).toFixed(2)} €</b>`;
+
+  await sendTelegram(text);
+}
+
+// Confirmation client — demande de réservation reçue
+async function confirmCustomerCarRequest(r) {
+  if (!r) return;
+  const html =
+    `<p>Bonjour ${esc(r.customer_name) || ''},</p>` +
+    `<p>Nous avons bien reçu votre demande de réservation pour <strong>${esc(r.car_name)}</strong>, du ${esc(r.start_date)} au ${esc(r.end_date)} (${r.days} jour${r.days > 1 ? 's' : ''}).</p>` +
+    `<p>Nous vous recontactons rapidement pour confirmer la disponibilité. Le paiement, le contrat et les modalités de livraison/récupération se règlent directement avec vous.</p>` +
+    `<p>Une question ? Répondez à cet email ou appelez le 06 93 83 96 54.</p>` +
+    `<p>À très vite,<br/>L'équipe Auto Presto — PrestoLocation</p>`;
+
+  await sendCustomerEmail(r.customer_email, 'Votre demande de réservation — PrestoLocation', html);
+}
+
 // Message de contact
 async function notifyContactMessage({ name, email, phone, subject, message }) {
   const text =
@@ -231,6 +268,7 @@ async function sendTelegramTest() {
 module.exports = {
   notifyNewOrder, notifyNewCarReservation, notifyContactMessage,
   confirmCustomerOrder, confirmCustomerCarReservation,
+  notifyCarReservationRequest, confirmCustomerCarRequest,
   telegramConfigured, sendTelegramTest,
   emailConfigured, sendEmailTest, emailDiagnostic,
 };

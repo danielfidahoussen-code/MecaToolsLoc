@@ -2,7 +2,7 @@ const router = require('express').Router();
 const Stripe = require('stripe');
 const { car_reservations } = require('../database');
 const { authMiddleware } = require('../middleware/auth');
-const { notifyNewCarReservation, confirmCustomerCarReservation } = require('../notify');
+const { notifyNewCarReservation, confirmCustomerCarReservation, notifyCarReservationRequest, confirmCustomerCarRequest } = require('../notify');
 
 const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
 if (!stripe) console.error('[STRIPE] STRIPE_SECRET_KEY manquante — paiements véhicules désactivés');
@@ -30,6 +30,38 @@ router.post('/create', (req, res) => {
       caution_amount: carRecord?.caution || null,
       status: 'pending',
     });
+    res.json({ id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Simple demande de réservation (pas de paiement en ligne, pas de contrat sur le site —
+// tout se règle en personne). Utilisée pour les véhicules avec booking_mode: 'request'.
+router.post('/request', (req, res) => {
+  try {
+    const { cars } = require('../database');
+    const {
+      car_id, car_name, start_date, end_date, days, car_total, total,
+      delivery_out, delivery_in, booster, baby_seat,
+      customer_name, customer_email, customer_phone,
+    } = req.body;
+    if (!car_name || !customer_name || !customer_email) return res.status(400).json({ error: 'Champs requis manquants' });
+    const carRecord = car_id ? cars.getById(Number(car_id)) : null;
+    const { lastInsertRowid: id } = car_reservations.insert({
+      car_id, car_name, start_date, end_date,
+      days: parseInt(days), car_total: parseFloat(car_total || total),
+      total: parseFloat(total),
+      delivery_out: !!delivery_out, delivery_in: !!delivery_in,
+      booster: !!booster, baby_seat: !!baby_seat,
+      customer_name, customer_email, customer_phone: customer_phone || '',
+      caution_amount: carRecord?.caution || null,
+      booking_mode: 'request',
+      status: 'pending',
+    });
+    const r = car_reservations.getById(id);
+    notifyCarReservationRequest(r).catch(err => console.error('[NOTIFY] notifyCarReservationRequest:', err.message));
+    confirmCustomerCarRequest(r).catch(err => console.error('[NOTIFY] confirmCustomerCarRequest:', err.message));
     res.json({ id });
   } catch (err) {
     res.status(500).json({ error: err.message });
