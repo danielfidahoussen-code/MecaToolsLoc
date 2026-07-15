@@ -757,10 +757,20 @@ export default function Admin() {
                       </div>
                       <p style={{ fontSize: 13, fontWeight: 600 }}>{r.customer_name}</p>
                       <p style={{ fontSize: 12, color: 'var(--gray-500)', marginBottom: 4 }}>{r.customer_email} · {r.customer_phone}</p>
-                      <p style={{ fontSize: 12, color: 'var(--gray-600)', marginBottom: r.delivery ? 4 : 8 }}>{r.start_date} → {r.end_date} ({r.days} j)</p>
-                      {r.delivery && (
-                        <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 700, color: '#92400e', marginBottom: 6 }}>
-                          Livraison à domicile{r.delivery_address ? ` — ${r.delivery_address}` : ''}
+                      <p style={{ fontSize: 12, color: 'var(--gray-600)', marginBottom: (r.delivery_out || r.delivery_in || r.booster || r.baby_seat) ? 4 : 8 }}>{r.start_date} → {r.end_date} ({r.days} j)</p>
+                      {r.delivery_out && (
+                        <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 700, color: '#92400e', marginBottom: 4 }}>
+                          Livraison{r.delivery_out_address ? ` — ${r.delivery_out_address}` : ''}
+                        </div>
+                      )}
+                      {r.delivery_in && (
+                        <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 700, color: '#92400e', marginBottom: 4 }}>
+                          Récupération{r.delivery_in_address ? ` — ${r.delivery_in_address}` : ''}
+                        </div>
+                      )}
+                      {(r.booster || r.baby_seat) && (
+                        <div style={{ background: '#e0f2fe', border: '1px solid #bae6fd', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 700, color: '#0369a1', marginBottom: 6 }}>
+                          {[r.booster ? 'Réhausseur' : null, r.baby_seat ? 'Siège bébé' : null].filter(Boolean).join(' + ')}
                         </div>
                       )}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -791,7 +801,7 @@ export default function Admin() {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <thead>
                       <tr style={{ background: 'var(--light)', borderBottom: '2px solid var(--gray-200)' }}>
-                        {['#', 'Véhicule', 'Client', 'Téléphone', 'Dates', 'Durée', 'Total', 'Livraison', 'Contrat', 'Statut', ''].map((h, hi) => (
+                        {['#', 'Véhicule', 'Client', 'Téléphone', 'Dates', 'Durée', 'Total', 'Livraison', 'Récupération', 'Sièges', 'Contrat', 'Statut', ''].map((h, hi) => (
                           <th key={hi} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
                         ))}
                       </tr>
@@ -810,12 +820,23 @@ export default function Admin() {
                           <td style={{ padding: '11px 14px', fontWeight: 600 }}>{r.days} j</td>
                           <td style={{ padding: '11px 14px', fontWeight: 800, color: 'var(--primary)' }}>{r.total} €</td>
                           <td style={{ padding: '11px 14px' }}>
-                            {r.delivery ? (
+                            {r.delivery_out ? (
                               <div>
-                                <span style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 4, padding: '2px 6px', fontSize: 11, fontWeight: 700, color: '#92400e', whiteSpace: 'nowrap' }}>Livraison</span>
-                                {r.delivery_address && <p style={{ fontSize: 11, color: 'var(--gray-500)', marginTop: 3, maxWidth: 180 }}>{r.delivery_address}</p>}
+                                <span style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 4, padding: '2px 6px', fontSize: 11, fontWeight: 700, color: '#92400e', whiteSpace: 'nowrap' }}>Oui</span>
+                                {r.delivery_out_address && <p style={{ fontSize: 11, color: 'var(--gray-500)', marginTop: 3, maxWidth: 180 }}>{r.delivery_out_address}</p>}
                               </div>
                             ) : <span style={{ color: 'var(--gray-400)', fontSize: 12 }}>—</span>}
+                          </td>
+                          <td style={{ padding: '11px 14px' }}>
+                            {r.delivery_in ? (
+                              <div>
+                                <span style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 4, padding: '2px 6px', fontSize: 11, fontWeight: 700, color: '#92400e', whiteSpace: 'nowrap' }}>Oui</span>
+                                {r.delivery_in_address && <p style={{ fontSize: 11, color: 'var(--gray-500)', marginTop: 3, maxWidth: 180 }}>{r.delivery_in_address}</p>}
+                              </div>
+                            ) : <span style={{ color: 'var(--gray-400)', fontSize: 12 }}>—</span>}
+                          </td>
+                          <td style={{ padding: '11px 14px', fontSize: 12 }}>
+                            {[r.booster ? 'Réhausseur' : null, r.baby_seat ? 'Siège bébé' : null].filter(Boolean).join(', ') || <span style={{ color: 'var(--gray-400)' }}>—</span>}
                           </td>
                           <td style={{ padding: '11px 14px' }}>
                             {r.contract_signed_at ? (

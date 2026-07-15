@@ -8,6 +8,8 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 
 const DELIVERY_FEE = 20;
+const BOOSTER_FEE_PER_DAY = 2;
+const BABY_SEAT_FEE_PER_DAY = 4;
 
 function calcPrice(car, days) {
   if (!days || days <= 0) return 0;
@@ -32,21 +34,33 @@ function CarCard({ car }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [form, setForm] = useState({ name: '', phone: '', email: '' });
-  const [delivery, setDelivery] = useState(false);
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliveryOut, setDeliveryOut] = useState(false);
+  const [deliveryOutAddress, setDeliveryOutAddress] = useState('');
+  const [deliveryIn, setDeliveryIn] = useState(false);
+  const [deliveryInAddress, setDeliveryInAddress] = useState('');
+  const [booster, setBooster] = useState(false);
+  const [babySeat, setBabySeat] = useState(false);
   const [open, setOpen] = useState(false);
   const [reserving, setReserving] = useState(false);
 
   const days = startDate && endDate ? Math.max(1, differenceInDays(endDate, startDate)) : 0;
   const carTotal = calcPrice(car, days);
-  const total = carTotal + (delivery ? DELIVERY_FEE : 0);
+  const boosterTotal = booster ? BOOSTER_FEE_PER_DAY * days : 0;
+  const babySeatTotal = babySeat ? BABY_SEAT_FEE_PER_DAY * days : 0;
+  const total = carTotal
+    + (deliveryOut ? DELIVERY_FEE : 0)
+    + (deliveryIn ? DELIVERY_FEE : 0)
+    + boosterTotal
+    + babySeatTotal;
+  const hasOptions = deliveryOut || deliveryIn || booster || babySeat;
   const rateInfo = getRateInfo(car, days);
 
   const handleReserve = async () => {
     if (!startDate || !endDate) { toast.error('Choisissez vos dates'); return; }
     if (car.min_days && days < car.min_days) { toast.error(`Ce véhicule est disponible à partir de ${car.min_days} jours`); return; }
     if (!form.name || !form.phone || !form.email) { toast.error('Nom, téléphone et email requis'); return; }
-    if (delivery && !deliveryAddress.trim()) { toast.error('Adresse de livraison requise'); return; }
+    if (deliveryOut && !deliveryOutAddress.trim()) { toast.error('Adresse de livraison requise'); return; }
+    if (deliveryIn && !deliveryInAddress.trim()) { toast.error('Adresse de récupération requise'); return; }
     if (rateInfo?.invalid) { toast.error(rateInfo.label); return; }
     setReserving(true);
     try {
@@ -58,8 +72,12 @@ function CarCard({ car }) {
         days,
         car_total: carTotal,
         total,
-        delivery,
-        delivery_address: delivery ? deliveryAddress.trim() : '',
+        delivery_out: deliveryOut,
+        delivery_out_address: deliveryOut ? deliveryOutAddress.trim() : '',
+        delivery_in: deliveryIn,
+        delivery_in_address: deliveryIn ? deliveryInAddress.trim() : '',
+        booster,
+        baby_seat: babySeat,
         customer_name: form.name,
         customer_email: form.email,
         customer_phone: form.phone,
@@ -191,39 +209,95 @@ function CarCard({ car }) {
               <input className="form-control" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="vous@exemple.fr"/>
             </div>
 
-            {/* Option livraison */}
-            <div style={{ border: '1.5px solid var(--gray-200)', borderRadius: 10, padding: '12px 14px', marginBottom: 12, background: delivery ? 'rgba(34,197,94,.06)' : 'var(--gray-50)' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontWeight: 700, fontSize: 14, color: 'var(--primary)' }}>
-                <input type="checkbox" checked={delivery} onChange={e => setDelivery(e.target.checked)}
+            {/* Options : livraison, récupération, sièges enfant */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+              {/* Livraison */}
+              <div style={{ border: '1.5px solid var(--gray-200)', borderRadius: 10, padding: '12px 14px', background: deliveryOut ? 'rgba(34,197,94,.06)' : 'var(--gray-50)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontWeight: 700, fontSize: 14, color: 'var(--primary)' }}>
+                  <input type="checkbox" checked={deliveryOut} onChange={e => setDeliveryOut(e.target.checked)}
+                    style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer' }}/>
+                  <span>Livraison du véhicule</span>
+                  <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>+{DELIVERY_FEE} €</span>
+                </label>
+                {deliveryOut && (
+                  <div style={{ marginTop: 10 }}>
+                    <input className="form-control" value={deliveryOutAddress}
+                      onChange={e => setDeliveryOutAddress(e.target.value)}
+                      placeholder="Adresse où recevoir le véhicule"
+                      style={{ fontSize: 13 }}/>
+                    <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>Nous vous contacterons pour confirmer l'heure</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Récupération */}
+              <div style={{ border: '1.5px solid var(--gray-200)', borderRadius: 10, padding: '12px 14px', background: deliveryIn ? 'rgba(34,197,94,.06)' : 'var(--gray-50)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontWeight: 700, fontSize: 14, color: 'var(--primary)' }}>
+                  <input type="checkbox" checked={deliveryIn} onChange={e => setDeliveryIn(e.target.checked)}
+                    style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer' }}/>
+                  <span>Récupération du véhicule</span>
+                  <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>+{DELIVERY_FEE} €</span>
+                </label>
+                {deliveryIn && (
+                  <div style={{ marginTop: 10 }}>
+                    <input className="form-control" value={deliveryInAddress}
+                      onChange={e => setDeliveryInAddress(e.target.value)}
+                      placeholder="Adresse où récupérer le véhicule"
+                      style={{ fontSize: 13 }}/>
+                    <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>Endroit de votre choix — nous vous contacterons pour confirmer l'heure</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Réhausseur */}
+              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontWeight: 700, fontSize: 14, color: 'var(--primary)', border: '1.5px solid var(--gray-200)', borderRadius: 10, padding: '12px 14px', background: booster ? 'rgba(34,197,94,.06)' : 'var(--gray-50)' }}>
+                <input type="checkbox" checked={booster} onChange={e => setBooster(e.target.checked)}
                   style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer' }}/>
-                <span>Livraison / récupération à domicile</span>
-                <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>+{DELIVERY_FEE} €</span>
+                <span>Réhausseur enfant</span>
+                <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>+{BOOSTER_FEE_PER_DAY} €/j</span>
               </label>
-              {delivery && (
-                <div style={{ marginTop: 10 }}>
-                  <input className="form-control" value={deliveryAddress}
-                    onChange={e => setDeliveryAddress(e.target.value)}
-                    placeholder="Adresse complète de livraison / récupération"
-                    style={{ fontSize: 13 }}/>
-                  <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 4 }}>Nous vous contacterons pour confirmer l'heure</p>
-                </div>
-              )}
+
+              {/* Siège bébé */}
+              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontWeight: 700, fontSize: 14, color: 'var(--primary)', border: '1.5px solid var(--gray-200)', borderRadius: 10, padding: '12px 14px', background: babySeat ? 'rgba(34,197,94,.06)' : 'var(--gray-50)' }}>
+                <input type="checkbox" checked={babySeat} onChange={e => setBabySeat(e.target.checked)}
+                  style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer' }}/>
+                <span>Siège bébé</span>
+                <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: 20, fontSize: 12, fontWeight: 800 }}>+{BABY_SEAT_FEE_PER_DAY} €/j</span>
+              </label>
             </div>
 
             {/* Récap total */}
             {days > 0 && !rateInfo?.invalid && (
               <div style={{ background: 'var(--light)', borderRadius: 8, padding: '10px 12px', marginBottom: 12, fontSize: 13 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)', marginBottom: delivery ? 4 : 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)', marginBottom: hasOptions ? 4 : 0 }}>
                   <span>Location ({days}j)</span>
                   <span>{carTotal} €</span>
                 </div>
-                {delivery && (
+                {deliveryOut && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)', marginBottom: 4 }}>
-                    <span>Livraison / récupération</span>
+                    <span>Livraison</span>
                     <span>{DELIVERY_FEE} €</span>
                   </div>
                 )}
-                {delivery && (
+                {deliveryIn && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)', marginBottom: 4 }}>
+                    <span>Récupération</span>
+                    <span>{DELIVERY_FEE} €</span>
+                  </div>
+                )}
+                {booster && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)', marginBottom: 4 }}>
+                    <span>Réhausseur ({days}j)</span>
+                    <span>{boosterTotal} €</span>
+                  </div>
+                )}
+                {babySeat && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gray-600)', marginBottom: 4 }}>
+                    <span>Siège bébé ({days}j)</span>
+                    <span>{babySeatTotal} €</span>
+                  </div>
+                )}
+                {hasOptions && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, color: 'var(--primary)', borderTop: '1px solid var(--gray-200)', paddingTop: 6, marginTop: 4 }}>
                     <span>Total</span>
                     <span>{total} €</span>
@@ -292,7 +366,7 @@ export default function AutresServices() {
           <span style={{ color: 'var(--gray-300)' }}>|</span>
           <span>Saint-Denis &amp; Saint-Pierre</span>
           <span style={{ color: 'var(--gray-300)' }}>|</span>
-          <span style={{ color: '#059669', fontWeight: 700 }}>Livraison / récupération +20 €</span>
+          <span style={{ color: '#059669', fontWeight: 700 }}>Livraison 20 € / Récupération 20 €</span>
           <span style={{ color: 'var(--gray-300)' }}>|</span>
           <span style={{ color: '#d97706', fontWeight: 700 }}>-10% dès 5 jours</span>
         </div>

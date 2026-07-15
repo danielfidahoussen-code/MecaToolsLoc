@@ -11,14 +11,21 @@ if (!stripe) console.error('[STRIPE] STRIPE_SECRET_KEY manquante — paiements v
 router.post('/create', (req, res) => {
   try {
     const { cars } = require('../database');
-    const { car_id, car_name, start_date, end_date, days, car_total, total, delivery, delivery_address, customer_name, customer_email, customer_phone } = req.body;
+    const {
+      car_id, car_name, start_date, end_date, days, car_total, total,
+      delivery_out, delivery_out_address, delivery_in, delivery_in_address,
+      booster, baby_seat,
+      customer_name, customer_email, customer_phone,
+    } = req.body;
     if (!car_name || !customer_name || !customer_email) return res.status(400).json({ error: 'Champs requis manquants' });
     const carRecord = car_id ? cars.getById(Number(car_id)) : null;
     const { lastInsertRowid: id } = car_reservations.insert({
       car_id, car_name, start_date, end_date,
       days: parseInt(days), car_total: parseFloat(car_total || total),
-      total: parseFloat(total), delivery: !!delivery,
-      delivery_address: delivery_address || '',
+      total: parseFloat(total),
+      delivery_out: !!delivery_out, delivery_out_address: delivery_out_address || '',
+      delivery_in: !!delivery_in, delivery_in_address: delivery_in_address || '',
+      booster: !!booster, baby_seat: !!baby_seat,
       customer_name, customer_email, customer_phone: customer_phone || '',
       caution_amount: carRecord?.caution || null,
       status: 'pending',
@@ -53,14 +60,44 @@ router.post('/:id/checkout', async (req, res) => {
       quantity: 1,
     }];
 
-    if (r.delivery) {
+    if (r.delivery_out) {
       lineItems.push({
         price_data: {
           currency: 'eur',
-          product_data: { name: `Livraison / récupération${r.delivery_address ? ` — ${r.delivery_address.slice(0, 80)}` : ''}` },
+          product_data: { name: `Livraison du véhicule${r.delivery_out_address ? ` — ${r.delivery_out_address.slice(0, 80)}` : ''}` },
           unit_amount: 2000,
         },
         quantity: 1,
+      });
+    }
+    if (r.delivery_in) {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: { name: `Récupération du véhicule${r.delivery_in_address ? ` — ${r.delivery_in_address.slice(0, 80)}` : ''}` },
+          unit_amount: 2000,
+        },
+        quantity: 1,
+      });
+    }
+    if (r.booster) {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: { name: `Réhausseur enfant (${days} jour${days > 1 ? 's' : ''})` },
+          unit_amount: 200,
+        },
+        quantity: days,
+      });
+    }
+    if (r.baby_seat) {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: { name: `Siège bébé (${days} jour${days > 1 ? 's' : ''})` },
+          unit_amount: 400,
+        },
+        quantity: days,
       });
     }
 
@@ -199,7 +236,10 @@ router.get('/public/:id', (req, res) => {
     id: r.id, car_name: r.car_name, car_id: r.car_id,
     start_date: r.start_date, end_date: r.end_date, days: r.days,
     total: r.total, car_total: r.car_total, customer_name: r.customer_name, customer_email: r.customer_email,
-    customer_phone: r.customer_phone, delivery: r.delivery, delivery_address: r.delivery_address,
+    customer_phone: r.customer_phone,
+    delivery_out: r.delivery_out, delivery_out_address: r.delivery_out_address,
+    delivery_in: r.delivery_in, delivery_in_address: r.delivery_in_address,
+    booster: r.booster, baby_seat: r.baby_seat,
     caution_amount: r.caution_amount || null,
     contract_signed: !!r.contract_signed_at,
   });
@@ -284,9 +324,11 @@ router.get('/:id/contract/print', (req, res, next) => {
     <div><div class="label">Date de début</div><div class="field">${r.start_date}</div></div>
     <div><div class="label">Date de fin</div><div class="field">${r.end_date}</div></div>
     <div><div class="label">Durée</div><div class="field">${r.days} jour${r.days > 1 ? 's' : ''}</div></div>
-    <div><div class="label">Prix total</div><div class="field" style="font-weight:bold;">${r.total} €${r.delivery ? ' (dont livraison 20 €)' : ''}</div></div>
-    <div><div class="label">Livraison</div><div class="field">${r.delivery ? 'Oui — ' + (r.delivery_address || '') : 'Non'}</div></div>
-    <div><div class="label">Options</div><div class="field">${vehicle.options || '—'}</div></div>
+    <div><div class="label">Prix total</div><div class="field" style="font-weight:bold;">${r.total} €</div></div>
+    <div><div class="label">Livraison</div><div class="field">${r.delivery_out ? 'Oui — ' + (r.delivery_out_address || '') : 'Non'}</div></div>
+    <div><div class="label">Récupération</div><div class="field">${r.delivery_in ? 'Oui — ' + (r.delivery_in_address || '') : 'Non'}</div></div>
+    <div><div class="label">Réhausseur / Siège bébé</div><div class="field">${[r.booster ? 'Réhausseur' : null, r.baby_seat ? 'Siège bébé' : null].filter(Boolean).join(', ') || '—'}</div></div>
+    <div><div class="label">Options véhicule</div><div class="field">${vehicle.options || '—'}</div></div>
   </div>
 </div>
 

@@ -239,10 +239,28 @@ export default function CarContract() {
             <span style={{ color: 'var(--gray-600)' }}>Location {reservation.days} jour{reservation.days > 1 ? 's' : ''}</span>
             <span style={{ fontWeight: 700 }}>{reservation.car_total || reservation.total} €</span>
           </div>
-          {reservation.delivery && (
+          {reservation.delivery_out && (
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ color: 'var(--gray-600)' }}>Livraison / récupération</span>
+              <span style={{ color: 'var(--gray-600)' }}>Livraison</span>
               <span style={{ fontWeight: 700 }}>20 €</span>
+            </div>
+          )}
+          {reservation.delivery_in && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ color: 'var(--gray-600)' }}>Récupération</span>
+              <span style={{ fontWeight: 700 }}>20 €</span>
+            </div>
+          )}
+          {reservation.booster && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ color: 'var(--gray-600)' }}>Réhausseur enfant ({reservation.days}j)</span>
+              <span style={{ fontWeight: 700 }}>{2 * reservation.days} €</span>
+            </div>
+          )}
+          {reservation.baby_seat && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ color: 'var(--gray-600)' }}>Siège bébé ({reservation.days}j)</span>
+              <span style={{ fontWeight: 700 }}>{4 * reservation.days} €</span>
             </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--gray-200)', paddingTop: 8, marginTop: 4, fontWeight: 900, fontSize: 15 }}>
