@@ -882,11 +882,28 @@ export default function Admin() {
                         </div>
                         {car.active === 0 && <span style={{ fontSize: 10, fontWeight: 800, background: 'var(--gray-200)', color: 'var(--gray-500)', padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase' }}>Masqué</span>}
                       </div>
-                      <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--gray-600)', marginBottom: 12 }}>
-                        <span>{car.price_day} €/j</span>
-                        {car.price_5days > 0 && <span>· 5j: {car.price_5days} €</span>}
-                        {car.price_2weeks > 0 && <span>· 2sem: {car.price_2weeks} €</span>}
+                      <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--gray-600)', marginBottom: 8, flexWrap: 'wrap' }}>
+                        {car.price_1_3 != null ? (
+                          <>
+                            <span>1-3j: {car.price_1_3}€</span>
+                            <span>· 4-10j: {car.price_4_10}€</span>
+                            <span>· 11-20j: {car.price_11_20}€</span>
+                            <span>· 21-29j: {car.price_21_29}€</span>
+                            <span>· 30j+: {car.price_30plus}€</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>{car.price_day} €/j</span>
+                            {car.price_5days > 0 && <span>· 5j: {car.price_5days} €</span>}
+                            {car.price_2weeks > 0 && <span>· 2sem: {car.price_2weeks} €</span>}
+                          </>
+                        )}
                       </div>
+                      {car.booking_mode === 'request' && (
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#5b21b6', background: '#ede9fe', display: 'inline-block', padding: '2px 8px', borderRadius: 20, marginBottom: 12 }}>
+                          Demande uniquement (pas de paiement en ligne)
+                        </div>
+                      )}
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button className="btn btn-sm btn-outline" style={{ flex: 1, justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 4 }}
                           onClick={() => { setEditCar(car); setShowCarForm(true); }}>
@@ -925,7 +942,10 @@ export default function Admin() {
 /* ─── CAR FORM MODAL ─────────────────────────────────────────────────────── */
 function CarForm({ car, token, onSave, onClose }) {
   const isMobile = useIsMobile();
-  const empty = { name: '', category: '', description: '', price_day: '', price_5days: '', price_2weeks: '', min_days: '', caution: '', image: '', active: true,
+  const empty = { name: '', category: '', description: '',
+    price_day: '', price_5days: '', price_2weeks: '',
+    price_1_3: '', price_4_10: '', price_11_20: '', price_21_29: '', price_30plus: '',
+    min_days: '', caution: '', image: '', active: true, booking_mode: 'online',
     specs: [['Carburant',''],['Boîte',''],['Places',''],['Portes',''],['Climatisation',''],['Kilométrage','']] };
   const [form, setForm] = useState(car ? { ...car, active: car.active !== 0 } : empty);
   const [saving, setSaving] = useState(false);
@@ -992,17 +1012,30 @@ function CarForm({ car, token, onSave, onClose }) {
             <label className="form-label">Description</label>
             <textarea className="form-control" rows={3} value={form.description} onChange={e => set('description', e.target.value)}/>
           </div>
-          <div className="form-group">
-            <label className="form-label">Prix journalier (€)</label>
-            <input className="form-control" type="number" value={form.price_day} onChange={e => set('price_day', e.target.value)}/>
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <label className="form-label">Prix classique (jour / 5j / 2 semaines)</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+              <input className="form-control" type="number" placeholder="Journalier €" value={form.price_day} onChange={e => set('price_day', e.target.value)}/>
+              <input className="form-control" type="number" placeholder="5 jours+ €/j" value={form.price_5days} onChange={e => set('price_5days', e.target.value)}/>
+              <input className="form-control" type="number" placeholder="2 semaines €/j" value={form.price_2weeks} onChange={e => set('price_2weeks', e.target.value)}/>
+            </div>
+          </div>
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <label className="form-label">Ou grille à 5 paliers (laisser vide si tarif classique)</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+              <input className="form-control" type="number" placeholder="1-3j" value={form.price_1_3} onChange={e => set('price_1_3', e.target.value)}/>
+              <input className="form-control" type="number" placeholder="4-10j" value={form.price_4_10} onChange={e => set('price_4_10', e.target.value)}/>
+              <input className="form-control" type="number" placeholder="11-20j" value={form.price_11_20} onChange={e => set('price_11_20', e.target.value)}/>
+              <input className="form-control" type="number" placeholder="21-29j" value={form.price_21_29} onChange={e => set('price_21_29', e.target.value)}/>
+              <input className="form-control" type="number" placeholder="30j+" value={form.price_30plus} onChange={e => set('price_30plus', e.target.value)}/>
+            </div>
           </div>
           <div className="form-group">
-            <label className="form-label">Prix 5 jours+ (€/j)</label>
-            <input className="form-control" type="number" value={form.price_5days} onChange={e => set('price_5days', e.target.value)}/>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Prix 2 semaines (€/j)</label>
-            <input className="form-control" type="number" value={form.price_2weeks} onChange={e => set('price_2weeks', e.target.value)}/>
+            <label className="form-label">Mode de réservation</label>
+            <select className="form-control" value={form.booking_mode || 'online'} onChange={e => set('booking_mode', e.target.value)}>
+              <option value="online">Paiement en ligne + contrat sur le site</option>
+              <option value="request">Demande uniquement (paiement et contrat en personne)</option>
+            </select>
           </div>
           <div className="form-group">
             <label className="form-label">Durée minimum (jours)</label>
