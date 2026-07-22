@@ -4,15 +4,44 @@ import { Car } from 'lucide-react';
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
 
+function startPriceOf(car) {
+  const tiers = [car.price_1_3, car.price_4_10, car.price_11_20, car.price_21_29, car.price_30plus,
+    car.price_day, car.price_5days, car.price_2weeks].filter(v => v > 0);
+  return tiers.length ? Math.min(...tiers) : null;
+}
+
+function CarPreviewCard({ car }) {
+  const price = startPriceOf(car);
+  return (
+    <Link to="/autres-services" style={{ textDecoration: 'none', flexShrink: 0, width: 220 }}>
+      <div className="card" style={{ overflow: 'hidden' }}>
+        <div style={{ height: 130, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid var(--gray-100)', overflow: 'hidden' }}>
+          {car.image
+            ? <img src={car.image} alt={car.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+            : <p style={{ color: 'var(--gray-400)', fontSize: 12, fontWeight: 600 }}>Photo à venir</p>}
+        </div>
+        <div style={{ padding: '12px 14px' }}>
+          <p style={{ fontWeight: 800, fontSize: 14, color: 'var(--primary)', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{car.name}</p>
+          {price != null && (
+            <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>À partir de <strong style={{ color: 'var(--accent)' }}>{price} €/j</strong></p>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState('');
   const [activeType, setActiveType] = useState('');
   const [loading, setLoading] = useState(true);
+  const [cars, setCars] = useState([]);
 
   useEffect(() => {
     axios.get('/api/products/categories').then(r => setCategories(r.data));
+    axios.get('/api/cars').then(r => setCars(r.data.slice(0, 6))).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -75,6 +104,21 @@ export default function Home() {
           </div>
         </div>
       </Link>
+
+      {/* Aperçu véhicules disponibles */}
+      {cars.length > 0 && (
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--primary)' }}>Véhicules à louer</h2>
+            <Link to="/autres-services" style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none' }}>Voir tout →</Link>
+          </div>
+          <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4 }}>
+            {cars.map(car => <CarPreviewCard key={car.id} car={car}/>)}
+          </div>
+        </div>
+      )}
+
+      <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--primary)', marginBottom: 12 }}>Outillage</h2>
 
       {/* Filtres */}
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 20, paddingBottom: 4 }}>
