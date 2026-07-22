@@ -44,7 +44,7 @@ export default function Footer() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, marginBottom: 48 }}>
             {/* Brand */}
             <div>
-              <Logo size={26} light/>
+              <Logo size={22} light/>
               <p style={{ color: 'rgba(255,255,255,.6)', fontSize: 14, marginTop: 16, lineHeight: 1.7 }}>
                 PrestoLocation — Location et vente de matériel d'outillage professionnel à La Réunion.
               </p>

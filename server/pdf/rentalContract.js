@@ -2,7 +2,7 @@ const PDFDocument = require('pdfkit');
 const path = require('path');
 
 const LOGO_PATH = path.join(__dirname, '../../client/public/logo-prestolocation.png');
-const LOGO_ASPECT = 1169 / 80; // largeur / hauteur du PNG source (wordmark)
+const LOGO_ASPECT = 1184 / 91; // largeur / hauteur du PNG source (wordmark)
 
 // Dessine le logo PrestoLocation (image du wordmark), à la position (x, y)
 // avec une hauteur ~ size (en points PDF).
