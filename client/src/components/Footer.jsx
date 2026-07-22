@@ -20,6 +20,13 @@ export default function Footer() {
     { name: 'Équipement de sécurité', slug: 'securite' },
   ];
 
+  const vehicleCategories = [
+    { name: 'Citadine', to: '/autres-services' },
+    { name: 'Compacte', to: '/autres-services' },
+    { name: 'Hybride', to: '/autres-services' },
+    { name: 'SUV', to: '/autres-services' },
+  ];
+
   return (
     <footer>
       {/* CTA Banner */}
@@ -46,7 +53,7 @@ export default function Footer() {
             <div>
               <Logo size={38} light/>
               <p style={{ color: 'rgba(255,255,255,.6)', fontSize: 14, marginTop: 16, lineHeight: 1.7 }}>
-                LVTools — Location et vente de matériel d'outillage professionnel à La Réunion.
+                LVTools — Location et vente de matériel d'outillage professionnel et location de véhicules à La Réunion.
               </p>
               <p style={{ color: 'var(--accent)', fontStyle: 'italic', fontSize: 13, marginTop: 10, fontWeight: 600 }}>
                 "Par un mécanicien, pour les mécaniciens"
@@ -90,6 +97,18 @@ export default function Footer() {
               <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Catégories</h4>
               {categories.map(({ name, slug }) => (
                 <Link key={slug} to={`/catalogue?category=${slug}`}
+                  style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '5px 0', transition: 'var(--transition)' }}
+                  onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
+                  onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,.65)'}
+                >{name}</Link>
+              ))}
+            </div>
+
+            {/* Vehicle categories */}
+            <div>
+              <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Véhicules</h4>
+              {vehicleCategories.map(({ name, to }) => (
+                <Link key={name} to={to}
                   style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '5px 0', transition: 'var(--transition)' }}
                   onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
                   onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,.65)'}
