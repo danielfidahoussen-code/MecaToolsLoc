@@ -21,10 +21,10 @@ export default function Footer() {
   ];
 
   const vehicleCategories = [
-    { name: 'Citadine', to: '/autres-services' },
-    { name: 'Compacte', to: '/autres-services' },
-    { name: 'Hybride', to: '/autres-services' },
-    { name: 'SUV', to: '/autres-services' },
+    { name: 'Citadine', to: '/vehicules' },
+    { name: 'Compacte', to: '/vehicules' },
+    { name: 'Hybride', to: '/vehicules' },
+    { name: 'SUV', to: '/vehicules' },
   ];
 
   return (

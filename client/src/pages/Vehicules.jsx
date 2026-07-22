@@ -64,7 +64,7 @@ function CarCard({ car }) {
         customer_email: form.email,
         customer_phone: form.phone,
       });
-      navigate(`/autres-services/contrat/${data.id}`);
+      navigate(`/vehicules/contrat/${data.id}`);
     } catch (err) {
       toast.error(err?.response?.data?.error || 'Erreur lors de la réservation');
       setReserving(false);
@@ -254,7 +254,7 @@ function CarCard({ car }) {
   );
 }
 
-export default function AutresServices() {
+export default function Vehicules() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
 

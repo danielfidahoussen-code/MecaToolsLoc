@@ -35,7 +35,7 @@ export default function CarReservationSuccess() {
       <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 26, marginBottom: 12 }}>Paiement non confirmé</h2>
       <p style={{ color: 'var(--gray-600)', marginBottom: 32 }}>Le paiement n'a pas pu être vérifié. Si vous avez été débité, contactez-nous.</p>
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-        <Link to="/autres-services" className="btn btn-primary">Réessayer</Link>
+        <Link to="/vehicules" className="btn btn-primary">Réessayer</Link>
         <Link to="/contact" className="btn btn-outline">Nous contacter</Link>
       </div>
     </div>

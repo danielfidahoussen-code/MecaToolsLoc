@@ -36,7 +36,7 @@ export default function Home() {
     <div className="container" style={{ paddingTop: 24, paddingBottom: 48 }}>
 
       {/* Bannière Location de véhicules */}
-      <Link to="/autres-services" style={{ textDecoration: 'none', display: 'block', marginBottom: 24 }}>
+      <Link to="/vehicules" style={{ textDecoration: 'none', display: 'block', marginBottom: 24 }}>
         <div style={{
           background: 'linear-gradient(135deg, var(--primary) 0%, #3a0808 100%)',
           borderRadius: 16,

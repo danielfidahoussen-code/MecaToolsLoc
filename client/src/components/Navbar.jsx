@@ -28,7 +28,7 @@ export default function Navbar() {
   const navLinks = [
     { to: '/', label: 'Accueil' },
     { to: '/catalogue', label: 'Catalogue' },
-    { to: '/autres-services', label: 'Location de véhicules' },
+    { to: '/vehicules', label: 'Location de véhicules' },
     { to: '/a-propos', label: 'À propos' },
     { to: '/faq', label: 'FAQ' },
     { to: '/contact', label: 'Contact' },
