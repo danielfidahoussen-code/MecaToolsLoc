@@ -5,7 +5,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const CGC_TEXT = `CONDITIONS GÉNÉRALES DE LOCATION (CGL) – LOCATION DE VÉHICULE SANS CHAUFFEUR
-PRESTOLOC (ou "le Loueur") — Date : 22/01/2026
+PrestoLocation, société en cours de formation, siège social 3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis (ci-après "PrestoLoc" ou "le Loueur") — Date : 22/01/2026
 
 1) Objet – Champ d'application
 Les présentes Conditions Générales de Location ("CGL") encadrent toute location de véhicule sans chauffeur conclue entre le Loueur et le client ("Locataire"). En signant le contrat de location/état des lieux, le Locataire reconnaît avoir pris connaissance des CGL et les accepter.
