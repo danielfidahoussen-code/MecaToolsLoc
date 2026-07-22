@@ -69,7 +69,7 @@ router.get('/:id/print', authFlexible, (req, res) => {
 <div class="no-print" style="text-align:center;margin-bottom:16px;">
   <button onclick="window.print()" style="padding:8px 20px;font-weight:bold;background:#c0392b;color:white;border:none;border-radius:6px;cursor:pointer;">Imprimer / Enregistrer en PDF</button>
 </div>
-<h1>Contrat de location d'outillage N°${c.id} — Auto Presto / PrestoLocation</h1>
+<h1>Contrat de location d'outillage N°${c.id} — PrestoLocation</h1>
 <p><strong>Client :</strong> ${c.customer_name} — ${c.customer_email} — ${c.customer_phone || ''}</p>
 <p><strong>Signé le :</strong> ${signedAt} — <strong>IP :</strong> ${c.ip || '—'}</p>
 <table>

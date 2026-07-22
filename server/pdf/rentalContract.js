@@ -33,7 +33,7 @@ function buildRentalContractPdf(c) {
     drawLogo(doc, MARGIN, MARGIN, 18);
     doc.font('Helvetica-Bold').fontSize(16).fillColor('#111')
       .text(`Contrat de location d'outillage N°${c.id}`, MARGIN, MARGIN + 46, { width: pageWidth, align: 'center' });
-    doc.font('Helvetica').fontSize(10).fillColor('#666').text('Auto Presto', MARGIN, doc.y + 2, { width: pageWidth, align: 'center' });
+    doc.font('Helvetica').fontSize(10).fillColor('#666').text('PrestoLocation', MARGIN, doc.y + 2, { width: pageWidth, align: 'center' });
     doc.moveDown(1.5);
 
     // Bloc client
