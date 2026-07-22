@@ -37,13 +37,13 @@ export default function Footer() {
       </div>
 
       {/* Main footer */}
-      <div style={{ background: 'var(--dark)', color: 'white', padding: '60px 0 30px' }}>
+      <div style={{ background: 'var(--dark)', color: 'white', padding: '52px 0 28px' }}>
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, marginBottom: 48 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 32, marginBottom: 36 }}>
             {/* Brand */}
             <div>
               <Logo size={22} light/>
-              <p style={{ color: 'rgba(255,255,255,.6)', fontSize: 14, marginTop: 16, lineHeight: 1.7 }}>
+              <p style={{ color: 'rgba(255,255,255,.6)', fontSize: 14, marginTop: 14, lineHeight: 1.55 }}>
                 PrestoLocation — Location et vente de matériel d'outillage professionnel et location de véhicules à La Réunion.
               </p>
               <p style={{ color: 'var(--accent)', fontStyle: 'italic', fontSize: 13, marginTop: 10, fontWeight: 600 }}>
@@ -68,7 +68,7 @@ export default function Footer() {
 
             {/* Navigation */}
             <div>
-              <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Navigation</h4>
+              <h4 style={{ fontWeight: 700, marginBottom: 14, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Navigation</h4>
               {[
                 { to: '/', l: 'Accueil' },
                 { to: '/outillage', l: 'Outillage' },
@@ -77,7 +77,7 @@ export default function Footer() {
                 { to: '/faq', l: 'FAQ' },
                 { to: '/contact', l: 'Contact' },
               ].map(({ to, l }) => (
-                <Link key={to} to={to} style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '5px 0', transition: 'var(--transition)' }}
+                <Link key={to} to={to} style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '4px 0', transition: 'var(--transition)' }}
                   onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
                   onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,.65)'}
                 >{l}</Link>
@@ -86,10 +86,10 @@ export default function Footer() {
 
             {/* Vehicle categories */}
             <div>
-              <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Véhicules</h4>
+              <h4 style={{ fontWeight: 700, marginBottom: 14, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Véhicules</h4>
               {vehicleCategories.map(({ name }) => (
                 <Link key={name} to={`/vehicules?category=${encodeURIComponent(name)}`}
-                  style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '5px 0', transition: 'var(--transition)' }}
+                  style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '4px 0', transition: 'var(--transition)' }}
                   onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
                   onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,.65)'}
                 >{name}</Link>
@@ -98,7 +98,7 @@ export default function Footer() {
 
             {/* Contact */}
             <div>
-              <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Contact</h4>
+              <h4 style={{ fontWeight: 700, marginBottom: 14, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Contact</h4>
 
               {/* Phone — opens dialer on mobile, copies on desktop */}
               <a href={`tel:+262${PHONE.slice(1)}`}
