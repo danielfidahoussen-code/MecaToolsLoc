@@ -4,19 +4,19 @@ export default function CGV() {
       <div className="page-header">
         <div className="container">
           <h1>Conditions Générales de Vente</h1>
-          <p>CGV applicables aux locations et ventes LVTools</p>
+          <p>CGV applicables aux locations et ventes PrestoLocation</p>
         </div>
       </div>
       <div className="page">
         <div className="container" style={{ maxWidth: 800 }}>
 
           <LegalSection title="1. Objet">
-            <p>Les présentes Conditions Générales de Vente (CGV) régissent l'ensemble des transactions conclues entre la société <strong>PRESTO EQUIPEMENT</strong> (SAS, SIREN 851 826 537, siège 3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis), exploitant l'activité d'outillage sous l'enseigne <strong>LVTools</strong> (ci-après « le Vendeur »), et tout client (ci-après « le Client ») pour la location et la vente d'outillage.</p>
+            <p>Les présentes Conditions Générales de Vente (CGV) régissent l'ensemble des transactions conclues entre la société <strong>PrestoLocation</strong> (SAS, société en cours de formation, siège 3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis) (ci-après « le Vendeur »), et tout client (ci-après « le Client ») pour la location et la vente d'outillage.</p>
             <p>Toute commande passée sur le site implique l'acceptation pleine et entière des présentes CGV.</p>
           </LegalSection>
 
           <LegalSection title="2. Produits et services">
-            <p>LVTools propose :</p>
+            <p>PrestoLocation propose :</p>
             <ul>
               <li><strong>La location de matériel :</strong> mise à disposition temporaire d'outillage pour une durée définie.</li>
               <li><strong>La vente de matériel :</strong> cession définitive d'outillage.</li>
@@ -45,7 +45,7 @@ export default function CGV() {
 
           <LegalSection title="5. Commande et paiement">
             <p>Toute commande est ferme et définitive après confirmation du paiement. Le paiement s'effectue en ligne par carte bancaire (Visa, Mastercard, CB) via un système sécurisé SSL.</p>
-            <p>LVTools ne stocke aucune donnée bancaire. Les transactions sont traitées par un prestataire de paiement certifié PCI-DSS.</p>
+            <p>PrestoLocation ne stocke aucune donnée bancaire. Les transactions sont traitées par un prestataire de paiement certifié PCI-DSS.</p>
           </LegalSection>
 
           <LegalSection title="6. Caution (Location)">

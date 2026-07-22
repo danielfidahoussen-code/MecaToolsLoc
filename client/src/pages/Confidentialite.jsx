@@ -13,9 +13,9 @@ export default function Confidentialite() {
           <LegalSection title="1. Responsable du traitement">
             <p>Le responsable du traitement des données personnelles collectées via ce site est :</p>
             <ul>
-              <li><strong>PRESTO EQUIPEMENT</strong> (SAS), exploitant les enseignes LVTools et PrestoLoc</li>
+              <li><strong>PrestoLocation</strong> (SAS, société en cours de formation)</li>
               <li>3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis, La Réunion</li>
-              <li>SIREN 851 826 537</li>
+              <li>SIREN : [à compléter dès l'immatriculation]</li>
               <li>Téléphone : 06 93 83 96 54</li>
               <li>Email : contact@lvtools.re</li>
             </ul>
@@ -63,7 +63,7 @@ export default function Confidentialite() {
           </LegalSection>
 
           <LegalSection title="6. Destinataires et sous-traitants">
-            <p>Vos données ne sont ni vendues ni cédées à des tiers à des fins commerciales. Elles sont traitées par PRESTO EQUIPEMENT et par les sous-traitants techniques strictement nécessaires au fonctionnement du service :</p>
+            <p>Vos données ne sont ni vendues ni cédées à des tiers à des fins commerciales. Elles sont traitées par PrestoLocation et par les sous-traitants techniques strictement nécessaires au fonctionnement du service :</p>
             <ul>
               <li><strong>Stripe</strong> — traitement des paiements (certifié PCI-DSS)</li>
               <li><strong>Railway</strong> — hébergement du site et de la base de données</li>
@@ -93,7 +93,7 @@ export default function Confidentialite() {
           </LegalSection>
 
           <LegalSection title="9. Sécurité">
-            <p>LVTools met en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données contre tout accès non autorisé, perte ou divulgation. Les données transmises lors du paiement sont chiffrées via le protocole SSL.</p>
+            <p>PrestoLocation met en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données contre tout accès non autorisé, perte ou divulgation. Les données transmises lors du paiement sont chiffrées via le protocole SSL.</p>
           </LegalSection>
 
           <LegalSection title="10. Modifications">

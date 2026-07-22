@@ -1,25 +1,13 @@
 const PDFDocument = require('pdfkit');
 const path = require('path');
 
-const ICON_PATH = path.join(__dirname, '../../client/public/logo-lvtools-icon.png');
-const ICON_ASPECT = 197 / 150; // largeur / hauteur du PNG source
+const LOGO_PATH = path.join(__dirname, '../../client/public/logo-prestolocation.png');
+const LOGO_ASPECT = 1169 / 80; // largeur / hauteur du PNG source (wordmark)
 
-// Dessine le logo LVTools (vraie image du logo + wordmark),
-// à la position (x, y) avec une hauteur d'icône ~ size (en points PDF).
-function drawLogo(doc, x, y, size = 32) {
-  const red = '#ff3333';
-  const dark = '#1a0202';
-
-  doc.image(ICON_PATH, x, y, { height: size, width: size * ICON_ASPECT });
-
-  // Wordmark texte, à droite de l'icône
-  const textX = x + size * ICON_ASPECT + 8;
-  const lvFontSize = size * 0.42;
-  doc.font('Helvetica-Bold').fontSize(lvFontSize);
-  doc.fillColor(red).text('LV', textX, y + size * 0.08, { continued: true, lineBreak: false });
-  doc.fillColor(dark).text('TOOLS', { lineBreak: false });
-  doc.font('Helvetica').fontSize(size * 0.17).fillColor('#8a7a7a')
-    .text('LOCATION · VENTE · OUTILLAGE', textX, y + size * 0.62, { lineBreak: false, characterSpacing: 0.5 });
+// Dessine le logo PrestoLocation (image du wordmark), à la position (x, y)
+// avec une hauteur ~ size (en points PDF).
+function drawLogo(doc, x, y, size = 18) {
+  doc.image(LOGO_PATH, x, y, { height: size, width: size * LOGO_ASPECT });
 }
 
 // Construit le PDF du contrat de location d'outillage et le retourne en Buffer
@@ -41,8 +29,8 @@ function buildRentalContractPdf(c) {
     // sinon PDFKit hérite de la position/largeur du dernier texte positionné (colonnes du tableau).
     const fullWidthText = (text, opts = {}) => doc.text(text, MARGIN, doc.y, { width: pageWidth, ...opts });
 
-    // En-tête : logo LVTools + titre du contrat
-    drawLogo(doc, MARGIN, MARGIN, 32);
+    // En-tête : logo PrestoLocation + titre du contrat
+    drawLogo(doc, MARGIN, MARGIN, 18);
     doc.font('Helvetica-Bold').fontSize(16).fillColor('#111')
       .text(`Contrat de location d'outillage N°${c.id}`, MARGIN, MARGIN + 46, { width: pageWidth, align: 'center' });
     doc.font('Helvetica').fontSize(10).fillColor('#666').text('Auto Presto', MARGIN, doc.y + 2, { width: pageWidth, align: 'center' });

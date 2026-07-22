@@ -1,7 +1,7 @@
 {
   "name": "lvtools",
   "version": "1.0.0",
-  "description": "LVTools - Location et vente d'outillage",
+  "description": "PrestoLocation - Location et vente d'outillage",
   "engines": {
     "node": ">=20.19.0"
   },

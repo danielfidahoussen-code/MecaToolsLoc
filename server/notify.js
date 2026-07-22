@@ -39,7 +39,7 @@ const SMTP_PASS = process.env.SMTP_PASS;
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = process.env.SMTP_PORT;
 const MAIL_FROM = process.env.MAIL_FROM || (RESEND_API_KEY ? 'onboarding@resend.dev' : SMTP_USER);
-const FROM_HEADER = `Auto Presto - LVTools <${MAIL_FROM}>`;
+const FROM_HEADER = `Auto Presto - PrestoLocation <${MAIL_FROM}>`;
 
 let mailer = null;
 if (!RESEND_API_KEY) {
@@ -77,11 +77,10 @@ async function sendCustomerEmail(to, subject, html, attachments = []) {
 
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-// En-tête wordmark LVTools pour les emails (texte stylé, pas de SVG — compatibilité email fiable)
+// En-tête wordmark PrestoLocation pour les emails (texte stylé, pas de SVG — compatibilité email fiable)
 const LVTOOLS_EMAIL_HEADER = `<div style="margin-bottom:22px;">` +
-  `<span style="font-family:Arial,Helvetica,sans-serif;font-weight:900;font-size:22px;letter-spacing:1px;color:#ff3333;">LV</span>` +
-  `<span style="font-family:Arial,Helvetica,sans-serif;font-weight:900;font-size:22px;letter-spacing:1px;color:#1a0202;">TOOLS</span>` +
-  `<div style="font-family:Arial,Helvetica,sans-serif;font-size:10px;letter-spacing:1.5px;color:#8a7a7a;text-transform:uppercase;margin-top:2px;">Location · Vente · Outillage</div>` +
+  `<span style="font-family:Arial,Helvetica,sans-serif;font-weight:900;font-style:italic;font-size:22px;letter-spacing:0.5px;color:#1a0202;">PRESTO</span>` +
+  `<span style="font-family:Arial,Helvetica,sans-serif;font-weight:900;font-style:italic;font-size:22px;letter-spacing:0.5px;color:#ff3333;">LOCATION</span>` +
   `</div>`;
 
 // Commande d'outils
@@ -100,7 +99,7 @@ async function notifyNewOrder({ customer_name, customer_email, customer_phone, c
     : 'Retrait sur place';
 
   const text =
-    `<b>Nouvelle commande LVTools</b>\n\n` +
+    `<b>Nouvelle commande PrestoLocation</b>\n\n` +
     `Client : <b>${esc(customer_name) || '—'}</b>\n` +
     `Email : ${esc(customer_email) || '—'}\n` +
     `Téléphone : ${esc(customer_phone) || '—'}\n` +
@@ -209,16 +208,16 @@ async function confirmCustomerOrder({ customer_name, customer_email, customer_ad
   const html =
     LVTOOLS_EMAIL_HEADER +
     `<p>Bonjour ${esc(customer_name) || ''},</p>` +
-    `<p>Merci pour votre commande chez <strong>LVTools</strong> (Auto Presto). Voici le récapitulatif :</p>` +
+    `<p>Merci pour votre commande chez <strong>PrestoLocation</strong> (Auto Presto). Voici le récapitulatif :</p>` +
     `<ul>${lignes || '<li>—</li>'}</ul>` +
     `<p><strong>Total payé : ${Number(total_price || 0).toFixed(2)} €</strong></p>` +
     recup +
     (aRent ? `<p><strong>Pour votre location :</strong> merci de vous munir d'une <strong>pièce d'identité</strong> et d'un <strong>moyen de caution</strong> (carte bancaire ou chèque). La caution est prise lors de la remise du matériel et n'est pas débitée si le matériel est rendu en bon état.</p>` : '') +
     (attachments.length ? `<p>Vous trouverez en pièce jointe une copie de votre <strong>contrat de location signé</strong>.</p>` : '') +
     `<p>Une question ? Répondez à cet email ou appelez le 06 93 83 96 54.</p>` +
-    `<p>À très vite,<br/>L'équipe Auto Presto — LVTools</p>`;
+    `<p>À très vite,<br/>L'équipe Auto Presto — PrestoLocation</p>`;
 
-  await sendCustomerEmail(customer_email, 'Confirmation de votre commande — LVTools', html, attachments);
+  await sendCustomerEmail(customer_email, 'Confirmation de votre commande — PrestoLocation', html, attachments);
 }
 
 // Confirmation client — réservation véhicule
@@ -243,7 +242,7 @@ async function confirmCustomerCarReservation(r) {
 
 const emailConfigured = () => !!(RESEND_API_KEY || mailer);
 async function sendEmailTest(to) {
-  await sendCustomerEmail(to, 'Test email — Auto Presto / LVTools',
+  await sendCustomerEmail(to, 'Test email — Auto Presto / PrestoLocation',
     '<p>Si vous recevez cet email, l\'envoi des confirmations de commande par email fonctionne correctement.</p>');
 }
 // Diagnostic : tente un envoi RÉEL en remontant l'erreur exacte
@@ -252,8 +251,8 @@ async function emailDiagnostic(to) {
   if (!provider) return { configured: false, error: 'Ni RESEND_API_KEY ni SMTP configurés sur Railway' };
   if (!to) return { configured: true, provider, sent: false, message: 'Configuré. Ajoute ?email=... pour tester un envoi réel.' };
   try {
-    if (RESEND_API_KEY) await sendViaResend(to, 'Test email — Auto Presto / LVTools', '<p>Si vous recevez cet email, l\'envoi fonctionne correctement.</p>');
-    else await mailer.sendMail({ from: FROM_HEADER, to, subject: 'Test email — Auto Presto / LVTools', html: '<p>Test.</p>' });
+    if (RESEND_API_KEY) await sendViaResend(to, 'Test email — Auto Presto / PrestoLocation', '<p>Si vous recevez cet email, l\'envoi fonctionne correctement.</p>');
+    else await mailer.sendMail({ from: FROM_HEADER, to, subject: 'Test email — Auto Presto / PrestoLocation', html: '<p>Test.</p>' });
     return { configured: true, provider, sent: true, from: MAIL_FROM, message: `Email réellement envoyé à ${to}.` };
   } catch (err) {
     return { configured: true, provider, sent: false, from: MAIL_FROM, error: err.message };
@@ -262,7 +261,7 @@ async function emailDiagnostic(to) {
 
 const telegramConfigured = () => !!(BOT_TOKEN && CHAT_ID);
 async function sendTelegramTest() {
-  await sendTelegram('Test LVTools : si tu vois ce message, les notifications Telegram fonctionnent (commandes, réservations et contact).');
+  await sendTelegram('Test PrestoLocation : si tu vois ce message, les notifications Telegram fonctionnent (commandes, réservations et contact).');
 }
 
 module.exports = {

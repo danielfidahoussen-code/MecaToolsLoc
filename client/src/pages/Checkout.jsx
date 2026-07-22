@@ -6,10 +6,10 @@ import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
 // Contrat de location d'outillage — résumé des conditions (voir CGV articles 6 à 8 pour le détail complet)
-const TOOL_RENTAL_CONTRACT_TEXT = `CONTRAT DE LOCATION D'OUTILLAGE — AUTO PRESTO / LVTOOLS
+const TOOL_RENTAL_CONTRACT_TEXT = `CONTRAT DE LOCATION D'OUTILLAGE — AUTO PRESTO / PRESTOLOCATION
 
 1) Objet
-Le présent contrat a pour objet la location du ou des outils listés ci-dessus, pour la période indiquée, aux conditions ci-après. Il complète les Conditions Générales de Vente (CGV) de LVTools, notamment leurs articles 6 à 8 relatifs à la caution, au contrat de location et aux obligations du locataire.
+Le présent contrat a pour objet la location du ou des outils listés ci-dessus, pour la période indiquée, aux conditions ci-après. Il complète les Conditions Générales de Vente (CGV) de PrestoLocation, notamment leurs articles 6 à 8 relatifs à la caution, au contrat de location et aux obligations du locataire.
 
 2) Durée
 La location débute et se termine aux dates indiquées pour chaque outil. Toute prolongation doit être demandée et validée avant l'échéance ; à défaut, des frais de retard pourront être appliqués.
@@ -32,7 +32,7 @@ En cas de manquement grave du Client à ses obligations (dégradation volontaire
 8) Litiges
 Pour toute réclamation, le Client contacte au préalable Auto Presto (contact@lvtools.re). À défaut de résolution amiable, les dispositions prévues à l'article 12 des CGV (médiation, tribunaux compétents) s'appliquent.
 
-En signant ci-dessous, le Client reconnaît avoir lu et accepté les présentes conditions ainsi que les CGV de LVTools dans leur intégralité.`;
+En signant ci-dessous, le Client reconnaît avoir lu et accepté les présentes conditions ainsi que les CGV de PrestoLocation dans leur intégralité.`;
 
 function SignaturePad({ onSign }) {
   const canvasRef = useRef(null);

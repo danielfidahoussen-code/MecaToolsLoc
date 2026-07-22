@@ -12,7 +12,7 @@ export default function LogoPreview() {
   return (
     <div style={{ minHeight: '100vh', background: '#0f0f0f', padding: '32px 24px' }}>
       <h1 style={{ color: '#fff', fontFamily: 'Inter,Arial,sans-serif', marginBottom: 4, fontSize: 20, fontWeight: 700 }}>
-        Propositions de logo LVTools
+        Propositions de logo PrestoLocation
       </h1>
       <p style={{ color: '#666', fontFamily: 'Inter,Arial,sans-serif', marginBottom: 32, fontSize: 13 }}>
         Chaque option est affichée sans tagline (navbar) · avec tagline · fond clair · grand format

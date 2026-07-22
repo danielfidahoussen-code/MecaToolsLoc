@@ -54,7 +54,7 @@ export default function Navbar() {
         transition: 'var(--transition)',
       }}>
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
-          <Link to="/" onClick={() => setMenuOpen(false)}><Logo size={34}/></Link>
+          <Link to="/" onClick={() => setMenuOpen(false)}><Logo size={22}/></Link>
 
           {/* Desktop links */}
           <div style={{ display: 'flex', gap: 2, alignItems: 'center' }} className="desktop-nav">

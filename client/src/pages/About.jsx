@@ -6,7 +6,7 @@ export default function About() {
     <div>
       <div className="page-header">
         <div className="container">
-          <h1>À propos de LVTools</h1>
+          <h1>À propos de PrestoLocation</h1>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 12 }}>
             <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 15 }}>"Par un mécanicien, pour les mécaniciens"</p>
             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>—</span>
@@ -28,7 +28,7 @@ export default function About() {
                 Né de la passion<br/>de la mécanique
               </h2>
               <p style={{ color: 'var(--gray-600)', lineHeight: 1.8, marginBottom: 16 }}>
-                LVTools est née d'un constat simple : le matériel d'outillage professionnel coûte cher à l'achat,
+                PrestoLocation est née d'un constat simple : le matériel d'outillage professionnel coûte cher à l'achat,
                 et de nombreux mécaniciens — qu'ils soient indépendants ou amateurs passionnés — n'ont pas toujours
                 besoin d'un outil pour longtemps.
               </p>

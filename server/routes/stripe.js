@@ -77,7 +77,7 @@ router.post('/create-checkout-session', async (req, res) => {
         contract_id: contract_id ? String(contract_id) : '',
       },
       payment_intent_data: {
-        description: `LVTools - commande de ${(customer_name || '').slice(0, 100)}`,
+        description: `PrestoLocation - commande de ${(customer_name || '').slice(0, 100)}`,
       },
     });
 

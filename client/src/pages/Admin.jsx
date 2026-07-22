@@ -367,7 +367,7 @@ export default function Admin() {
       <div style={{ background: 'var(--primary)', color: 'white', padding: isMobile ? '16px 0 0' : '20px 0 0' }}>
         <div className="container">
           <div style={{ marginBottom: 14 }}>
-            <h1 style={{ fontWeight: 800, fontSize: isMobile ? 20 : 24 }}>Administration LVTools</h1>
+            <h1 style={{ fontWeight: 800, fontSize: isMobile ? 20 : 24 }}>Administration PrestoLocation</h1>
             <p style={{ opacity: 0.7, fontSize: 12, marginTop: 2 }}>Gestion du catalogue et des commandes</p>
           </div>
           {/* Tabs — toujours avec labels, scrollable sur mobile */}
