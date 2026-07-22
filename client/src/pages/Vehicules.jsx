@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { differenceInDays } from 'date-fns';
@@ -353,13 +353,36 @@ function CarCard({ car }) {
   );
 }
 
+// Catégorie principale d'un véhicule (avant le "—", ex. "Citadine — Phase 1" -> "Citadine")
+const mainCategory = (car) => (car.category || '').split('—')[0].trim();
+
 export default function Vehicules() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const category = searchParams.get('category') || '';
 
   useEffect(() => {
     axios.get('/api/cars').then(({ data }) => setCars(data)).finally(() => setLoading(false));
   }, []);
+
+  // Remonte en haut quand on change de catégorie (les liens du footer ne changent que le ?category=)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [category]);
+
+  // Catégories disponibles, dans l'ordre d'apparition
+  const availableCategories = [...new Set(cars.map(mainCategory).filter(Boolean))];
+
+  const visibleCars = category
+    ? cars.filter(c => mainCategory(c).toLowerCase() === category.toLowerCase())
+    : cars;
+
+  const setCategory = (val) => {
+    const np = new URLSearchParams(searchParams);
+    if (val) np.set('category', val); else np.delete('category');
+    setSearchParams(np);
+  };
 
   return (
     <div>
@@ -399,13 +422,34 @@ export default function Vehicules() {
 
       {/* Grille véhicules */}
       <div className="container" style={{ paddingTop: 36, paddingBottom: 60 }}>
+        {/* Filtres par catégorie */}
+        {!loading && availableCategories.length > 0 && (
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 28 }}>
+            <button onClick={() => setCategory('')}
+              style={{ padding: '8px 16px', borderRadius: 999, fontWeight: 700, fontSize: 14, border: '1px solid var(--gray-200)',
+                background: category === '' ? 'var(--primary)' : 'white', color: category === '' ? 'white' : 'var(--gray-700)', cursor: 'pointer', transition: 'var(--transition)' }}>
+              Tous
+            </button>
+            {availableCategories.map(cat => (
+              <button key={cat} onClick={() => setCategory(cat)}
+                style={{ padding: '8px 16px', borderRadius: 999, fontWeight: 700, fontSize: 14, border: '1px solid var(--gray-200)',
+                  background: category.toLowerCase() === cat.toLowerCase() ? 'var(--primary)' : 'white',
+                  color: category.toLowerCase() === cat.toLowerCase() ? 'white' : 'var(--gray-700)', cursor: 'pointer', transition: 'var(--transition)' }}>
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
+
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--gray-400)' }}>Chargement...</div>
-        ) : cars.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--gray-400)' }}>Aucun véhicule disponible pour le moment.</div>
+        ) : visibleCars.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--gray-400)' }}>
+            {category ? `Aucun véhicule dans la catégorie « ${category} ».` : 'Aucun véhicule disponible pour le moment.'}
+          </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24, marginBottom: 48 }}>
-            {cars.map(car => <CarCard key={car.id} car={car}/>)}
+            {visibleCars.map(car => <CarCard key={car.id} car={car}/>)}
           </div>
         )}
 

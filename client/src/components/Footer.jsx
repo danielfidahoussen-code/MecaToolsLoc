@@ -21,10 +21,10 @@ export default function Footer() {
   ];
 
   const vehicleCategories = [
-    { name: 'Citadine', to: '/vehicules' },
-    { name: 'Compacte', to: '/vehicules' },
-    { name: 'Hybride', to: '/vehicules' },
-    { name: 'SUV', to: '/vehicules' },
+    { name: 'Citadine' },
+    { name: 'Compacte' },
+    { name: 'Hybride' },
+    { name: 'SUV' },
   ];
 
   return (
@@ -108,8 +108,8 @@ export default function Footer() {
             {/* Vehicle categories */}
             <div>
               <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Véhicules</h4>
-              {vehicleCategories.map(({ name, to }) => (
-                <Link key={name} to={to}
+              {vehicleCategories.map(({ name }) => (
+                <Link key={name} to={`/vehicules?category=${encodeURIComponent(name)}`}
                   style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '5px 0', transition: 'var(--transition)' }}
                   onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
                   onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,.65)'}
