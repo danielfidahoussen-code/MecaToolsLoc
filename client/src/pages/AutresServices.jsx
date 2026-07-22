@@ -366,7 +366,7 @@ export default function AutresServices() {
       {/* Header */}
       <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #380808 100%)', color: 'white', padding: '48px 0 40px' }}>
         <div className="container">
-          <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,.5)', marginBottom: 6 }}>PrestoLocation — Groupe AutoPresto</p>
+          <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,.5)', marginBottom: 6 }}>PrestoLocation</p>
           <h1 style={{ fontSize: 'clamp(26px,4vw,42px)', fontWeight: 900, marginBottom: 10 }}>Location de véhicules</h1>
           <p style={{ color: 'rgba(255,255,255,.7)', fontSize: 15, maxWidth: 540, marginBottom: 20 }}>
             Large gamme de véhicules disponibles à Saint-Denis et Saint-Pierre. Jeunes conducteurs acceptés. Tarifs dégressifs dès 5 jours.

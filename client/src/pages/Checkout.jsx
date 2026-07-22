@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
 // Contrat de location d'outillage — résumé des conditions (voir CGV articles 6 à 8 pour le détail complet)
-const TOOL_RENTAL_CONTRACT_TEXT = `CONTRAT DE LOCATION D'OUTILLAGE — AUTO PRESTO / PRESTOLOCATION
+const TOOL_RENTAL_CONTRACT_TEXT = `CONTRAT DE LOCATION D'OUTILLAGE — PRESTOLOCATION
 
 1) Objet
 Le présent contrat a pour objet la location du ou des outils listés ci-dessus, pour la période indiquée, aux conditions ci-après. Il complète les Conditions Générales de Vente (CGV) de PrestoLocation, notamment leurs articles 6 à 8 relatifs à la caution, au contrat de location et aux obligations du locataire.
@@ -15,7 +15,7 @@ Le présent contrat a pour objet la location du ou des outils listés ci-dessus,
 La location débute et se termine aux dates indiquées pour chaque outil. Toute prolongation doit être demandée et validée avant l'échéance ; à défaut, des frais de retard pourront être appliqués.
 
 3) État des lieux
-Un état de l'outil (fonctionnement, accessoires, aspect général) est vérifié à la remise et à la restitution. Le Client est réputé accepter l'état du matériel remis, sauf réserve signalée immédiatement à Auto Presto.
+Un état de l'outil (fonctionnement, accessoires, aspect général) est vérifié à la remise et à la restitution. Le Client est réputé accepter l'état du matériel remis, sauf réserve signalée immédiatement à PrestoLocation.
 
 4) Caution
 La caution indiquée pour chaque outil est prise lors de la remise du matériel (carte bancaire, chèque ou tout autre moyen convenu). Elle ne bloque pas les fonds et n'est débitée qu'en cas de dommage, de perte ou de non-restitution, à hauteur du préjudice réellement constaté. Elle est restituée à la fin de la location si le matériel est rendu complet et en bon état.
@@ -27,10 +27,10 @@ Le Client s'engage à utiliser le matériel conformément à sa destination, dan
 Le matériel doit être restitué complet, propre et en bon état de fonctionnement à la date convenue, au lieu convenu (retrait sur place ou livraison selon le mode choisi).
 
 7) Résiliation
-En cas de manquement grave du Client à ses obligations (dégradation volontaire, non-restitution, usage dangereux), Auto Presto peut mettre fin à la location de plein droit, sans préjudice des sommes dues.
+En cas de manquement grave du Client à ses obligations (dégradation volontaire, non-restitution, usage dangereux), PrestoLocation peut mettre fin à la location de plein droit, sans préjudice des sommes dues.
 
 8) Litiges
-Pour toute réclamation, le Client contacte au préalable Auto Presto (contact@lvtools.re). À défaut de résolution amiable, les dispositions prévues à l'article 12 des CGV (médiation, tribunaux compétents) s'appliquent.
+Pour toute réclamation, le Client contacte au préalable PrestoLocation (contact@lvtools.re). À défaut de résolution amiable, les dispositions prévues à l'article 12 des CGV (médiation, tribunaux compétents) s'appliquent.
 
 En signant ci-dessous, le Client reconnaît avoir lu et accepté les présentes conditions ainsi que les CGV de PrestoLocation dans leur intégralité.`;
 
@@ -111,7 +111,7 @@ const ZONES = [
   { id: '50+',   label: '50 km et +',  fee: 49.99 },
 ];
 
-// Coordonnées de l'adresse du magasin (Auto Presto, Moufia)
+// Coordonnées de l'adresse du magasin (PrestoLocation, Moufia)
 const SHOP_LAT = -20.9048811;
 const SHOP_LNG = 55.4930903;
 
