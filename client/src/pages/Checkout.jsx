@@ -346,7 +346,7 @@ export default function Checkout() {
       <ShoppingBag size={60} style={{ color: 'var(--gray-300)', marginBottom: 16 }}/>
       <h2 style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: 12 }}>Panier vide</h2>
       <p style={{ color: 'var(--gray-600)', marginBottom: 24 }}>Vous n'avez aucun article dans votre panier</p>
-      <Link to="/catalogue" className="btn btn-primary btn-lg">Voir le catalogue</Link>
+      <Link to="/outillage" className="btn btn-primary btn-lg">Voir l'outillage</Link>
     </div>
   );
 

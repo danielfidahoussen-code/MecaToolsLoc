@@ -12,7 +12,7 @@ function startPriceOf(car) {
 function CarPreviewCard({ car }) {
   const price = startPriceOf(car);
   return (
-    <Link to="/autres-services" style={{ textDecoration: 'none', flexShrink: 0, width: 220 }}>
+    <Link to="/vehicules" style={{ textDecoration: 'none', flexShrink: 0, width: 220 }}>
       <div className="card" style={{ overflow: 'hidden' }}>
         <div style={{ height: 130, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid var(--gray-100)', overflow: 'hidden' }}>
           {car.image
@@ -68,7 +68,7 @@ export default function Home() {
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
             <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--primary)' }}>Véhicules à louer</h2>
-            <Link to="/autres-services" style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none' }}>Voir tout →</Link>
+            <Link to="/vehicules" style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none' }}>Voir tout →</Link>
           </div>
           <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4 }}>
             {cars.map(car => <CarPreviewCard key={car.id} car={car}/>)}

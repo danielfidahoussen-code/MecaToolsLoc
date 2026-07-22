@@ -39,11 +39,11 @@ export default function About() {
               </p>
               <p style={{ color: 'var(--gray-600)', lineHeight: 1.8, marginBottom: 28 }}>
                 Nous croyons que chaque mécanicien mérite d'avoir accès aux bons outils, sans se ruiner. C'est pourquoi
-                nous sélectionnons rigoureusement chaque référence de notre catalogue et entretenons notre matériel
+                nous sélectionnons rigoureusement chaque référence de notre outillage et entretenons notre matériel
                 avec le même soin que si c'était le nôtre.
               </p>
-              <Link to="/catalogue" className="btn btn-primary btn-lg">
-                Découvrir notre catalogue <Wrench size={18}/>
+              <Link to="/outillage" className="btn btn-primary btn-lg">
+                Découvrir notre outillage <Wrench size={18}/>
               </Link>
             </div>
             <div style={{ position: 'relative' }}>

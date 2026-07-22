@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 
-export default function Catalogue() {
+export default function Outillage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -46,7 +46,7 @@ export default function Catalogue() {
     <div>
       <div className="page-header">
         <div className="container">
-          <h1>Notre Catalogue</h1>
+          <h1>Notre Outillage</h1>
           <p>Outillage professionnel à louer et à acheter</p>
         </div>
       </div>

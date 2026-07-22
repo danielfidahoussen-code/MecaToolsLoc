@@ -79,7 +79,7 @@ export default function ProductDetail() {
   }, [id]);
 
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
-  if (!product) return <div style={{ padding: '80px 20px', textAlign: 'center' }}><p>Produit non trouvé</p><Link to="/catalogue" className="btn btn-primary" style={{ marginTop: 16 }}>Retour au catalogue</Link></div>;
+  if (!product) return <div style={{ padding: '80px 20px', textAlign: 'center' }}><p>Produit non trouvé</p><Link to="/outillage" className="btn btn-primary" style={{ marginTop: 16 }}>Retour à l'outillage</Link></div>;
 
   // Build a map: date string -> number of overlapping reservations
   const reservationCountByDate = {};
@@ -154,7 +154,7 @@ export default function ProductDetail() {
         <div className="container">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--gray-600)' }}>
             <Link to="/" style={{ color: 'var(--gray-600)' }}>Accueil</Link> /
-            <Link to="/catalogue" style={{ color: 'var(--gray-600)' }}>Catalogue</Link> /
+            <Link to="/outillage" style={{ color: 'var(--gray-600)' }}>Outillage</Link> /
             <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{product.name}</span>
           </div>
         </div>

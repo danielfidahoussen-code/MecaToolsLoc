@@ -138,8 +138,8 @@ router.post('/:id/checkout', async (req, res) => {
       line_items: lineItems,
       mode: 'payment',
       customer_email: r.customer_email,
-      success_url: `${origin}/autres-services/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/autres-services/contrat/${r.id}`,
+      success_url: `${origin}/vehicules/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/vehicules/contrat/${r.id}`,
       metadata: { reservation_id: String(r.id) },
       payment_intent_data: {
         description: `PrestoLocation — ${r.car_name} du ${r.start_date} au ${r.end_date}`,
@@ -188,8 +188,8 @@ router.post('/checkout', async (req, res) => {
       line_items: lineItems,
       mode: 'payment',
       customer_email,
-      success_url: `${origin}/autres-services/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/autres-services`,
+      success_url: `${origin}/vehicules/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/vehicules`,
       metadata: {
         type: 'car_rental',
         car_id: String(car_id),

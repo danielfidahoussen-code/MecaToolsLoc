@@ -45,9 +45,9 @@ export default function CartDrawer() {
             <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--gray-400)' }}>
               <ShoppingBag size={48} style={{ marginBottom: 16, opacity: 0.4 }}/>
               <p style={{ fontWeight: 600 }}>Votre panier est vide</p>
-              <p style={{ fontSize: 13, marginTop: 6 }}>Parcourez notre catalogue pour ajouter des articles</p>
-              <Link to="/catalogue" className="btn btn-primary btn-sm" style={{ marginTop: 20 }} onClick={() => setIsOpen(false)}>
-                Voir le catalogue
+              <p style={{ fontSize: 13, marginTop: 6 }}>Parcourez notre outillage pour ajouter des articles</p>
+              <Link to="/outillage" className="btn btn-primary btn-sm" style={{ marginTop: 20 }} onClick={() => setIsOpen(false)}>
+                Voir l'outillage
               </Link>
             </div>
           ) : items.map(item => (

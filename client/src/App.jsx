@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
@@ -7,7 +7,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
-import Catalogue from './pages/Catalogue';
+import Outillage from './pages/Outillage';
 import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
 import About from './pages/About';
@@ -19,7 +19,7 @@ import CGV from './pages/CGV';
 import Confidentialite from './pages/Confidentialite';
 import LogoPreview from './pages/LogoPreview';
 import CheckoutSuccess from './pages/CheckoutSuccess';
-import AutresServices from './pages/AutresServices';
+import Vehicules from './pages/Vehicules';
 import CarReservationSuccess from './pages/CarReservationSuccess';
 import CarContract from './pages/CarContract';
 
@@ -38,7 +38,8 @@ export default function App() {
                 <Navbar/>
                 <Routes>
                   <Route path="/" element={<Home/>}/>
-                  <Route path="/catalogue" element={<Catalogue/>}/>
+                  <Route path="/outillage" element={<Outillage/>}/>
+                  <Route path="/catalogue" element={<Navigate to="/outillage" replace/>}/>
                   <Route path="/produit/:id" element={<ProductDetail/>}/>
                   <Route path="/checkout" element={<Checkout/>}/>
                   <Route path="/checkout/success" element={<CheckoutSuccess/>}/>
@@ -49,9 +50,13 @@ export default function App() {
                   <Route path="/cgv" element={<CGV/>}/>
                   <Route path="/confidentialite" element={<Confidentialite/>}/>
                   <Route path="/logo-preview" element={<LogoPreview/>}/>
-                  <Route path="/autres-services" element={<AutresServices/>}/>
-                  <Route path="/autres-services/success" element={<CarReservationSuccess/>}/>
-                  <Route path="/autres-services/contrat/:id" element={<CarContract/>}/>
+                  <Route path="/vehicules" element={<Vehicules/>}/>
+                  <Route path="/vehicules/success" element={<CarReservationSuccess/>}/>
+                  <Route path="/vehicules/contrat/:id" element={<CarContract/>}/>
+                  {/* Redirections depuis les anciennes URLs */}
+                  <Route path="/autres-services" element={<Navigate to="/vehicules" replace/>}/>
+                  <Route path="/autres-services/success" element={<Navigate to="/vehicules/success" replace/>}/>
+                  <Route path="/autres-services/contrat/:id" element={<Navigate to="/vehicules" replace/>}/>
                 </Routes>
                 <Footer/>
               </>

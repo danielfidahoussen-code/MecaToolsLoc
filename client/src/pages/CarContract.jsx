@@ -217,7 +217,7 @@ export default function CarContract() {
   if (pageStatus === 'error') return (
     <div style={{ textAlign: 'center', padding: '100px 20px' }}>
       <p style={{ color: 'var(--danger)', fontWeight: 700 }}>Réservation introuvable.</p>
-      <Link to="/autres-services" className="btn btn-primary" style={{ marginTop: 16, display: 'inline-flex' }}>Retour</Link>
+      <Link to="/vehicules" className="btn btn-primary" style={{ marginTop: 16, display: 'inline-flex' }}>Retour</Link>
     </div>
   );
 

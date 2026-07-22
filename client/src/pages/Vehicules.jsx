@@ -119,7 +119,7 @@ function CarCard({ car }) {
         toast.success('Demande envoyée !');
       } else {
         const { data } = await axios.post('/api/car-reservations/create', payload);
-        navigate(`/autres-services/contrat/${data.id}`);
+        navigate(`/vehicules/contrat/${data.id}`);
       }
     } catch (err) {
       toast.error(err?.response?.data?.error || 'Erreur lors de la réservation');
@@ -353,7 +353,7 @@ function CarCard({ car }) {
   );
 }
 
-export default function AutresServices() {
+export default function Vehicules() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
 

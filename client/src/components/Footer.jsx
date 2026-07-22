@@ -20,6 +20,13 @@ export default function Footer() {
     { name: 'Équipement de sécurité', slug: 'securite' },
   ];
 
+  const vehicleCategories = [
+    { name: 'Citadine', to: '/vehicules' },
+    { name: 'Compacte', to: '/vehicules' },
+    { name: 'Hybride', to: '/vehicules' },
+    { name: 'SUV', to: '/vehicules' },
+  ];
+
   return (
     <footer>
       {/* CTA Banner */}
@@ -29,10 +36,10 @@ export default function Footer() {
             Besoin d'un outil ? On a ce qu'il vous faut.
           </h2>
           <p style={{ color: 'rgba(255,255,255,.7)', fontSize: 16, marginBottom: 28 }}>
-            Consultez notre catalogue ou contactez-nous directement
+            Consultez notre outillage, nos véhicules ou contactez-nous directement
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/catalogue" className="btn btn-primary btn-lg">Voir le catalogue</Link>
+            <Link to="/outillage" className="btn btn-primary btn-lg">Voir l'outillage</Link>
             <Link to="/contact" className="btn btn-outline-light btn-lg">Nous contacter</Link>
           </div>
         </div>
@@ -46,7 +53,7 @@ export default function Footer() {
             <div>
               <Logo size={22} light/>
               <p style={{ color: 'rgba(255,255,255,.6)', fontSize: 14, marginTop: 16, lineHeight: 1.7 }}>
-                PrestoLocation — Location et vente de matériel d'outillage professionnel à La Réunion.
+                PrestoLocation — Location et vente de matériel d'outillage professionnel et location de véhicules à La Réunion.
               </p>
               <p style={{ color: 'var(--accent)', fontStyle: 'italic', fontSize: 13, marginTop: 10, fontWeight: 600 }}>
                 "Par un mécanicien, pour les mécaniciens"
@@ -73,7 +80,8 @@ export default function Footer() {
               <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Navigation</h4>
               {[
                 { to: '/', l: 'Accueil' },
-                { to: '/catalogue', l: 'Catalogue' },
+                { to: '/outillage', l: 'Outillage' },
+                { to: '/vehicules', l: 'Véhicules' },
                 { to: '/a-propos', l: 'À propos' },
                 { to: '/faq', l: 'FAQ' },
                 { to: '/contact', l: 'Contact' },
@@ -89,7 +97,19 @@ export default function Footer() {
             <div>
               <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Catégories</h4>
               {categories.map(({ name, slug }) => (
-                <Link key={slug} to={`/catalogue?category=${slug}`}
+                <Link key={slug} to={`/outillage?category=${slug}`}
+                  style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '5px 0', transition: 'var(--transition)' }}
+                  onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
+                  onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,.65)'}
+                >{name}</Link>
+              ))}
+            </div>
+
+            {/* Vehicle categories */}
+            <div>
+              <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Véhicules</h4>
+              {vehicleCategories.map(({ name, to }) => (
+                <Link key={name} to={to}
                   style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '5px 0', transition: 'var(--transition)' }}
                   onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
                   onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,.65)'}
