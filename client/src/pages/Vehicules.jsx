@@ -392,7 +392,7 @@ export default function Vehicules() {
           <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,.5)', marginBottom: 6 }}>PrestoLocation</p>
           <h1 style={{ fontSize: 'clamp(26px,4vw,42px)', fontWeight: 900, marginBottom: 10 }}>Location de véhicules</h1>
           <p style={{ color: 'rgba(255,255,255,.7)', fontSize: 15, maxWidth: 540, marginBottom: 20 }}>
-            Large gamme de véhicules disponibles à Saint-Denis et Saint-Pierre. Jeunes conducteurs acceptés. Tarifs dégressifs dès 5 jours.
+            Large gamme de véhicules. Retrait à Saint-Denis ou livraison sur toute l'île. Jeunes conducteurs acceptés. Tarifs dégressifs dès 5 jours.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a href="tel:+262693839654" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.15)', color: 'white', padding: '10px 18px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
@@ -412,7 +412,7 @@ export default function Vehicules() {
           <span style={{ color: 'var(--gray-300)' }}>|</span>
           <span>Kilométrage illimité</span>
           <span style={{ color: 'var(--gray-300)' }}>|</span>
-          <span>Saint-Denis &amp; Saint-Pierre</span>
+          <span>Retrait à Saint-Denis · Livraison toute l'île</span>
           <span style={{ color: 'var(--gray-300)' }}>|</span>
           <span style={{ color: '#059669', fontWeight: 700 }}>Livraison 20 € / Récupération 20 €</span>
           <span style={{ color: 'var(--gray-300)' }}>|</span>
@@ -465,15 +465,15 @@ export default function Vehicules() {
             </a>
           </div>
           <div>
-            <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: 'rgba(255,255,255,.4)', marginBottom: 10, letterSpacing: 1 }}>Points de retrait</p>
+            <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: 'rgba(255,255,255,.4)', marginBottom: 10, letterSpacing: 1 }}>Retrait &amp; livraison</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, color: 'rgba(255,255,255,.7)' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                 <MapPin size={14} color="rgba(255,255,255,.4)" style={{ flexShrink: 0, marginTop: 2 }}/>
-                <span>3b, Rue de la Guadeloupe 97490 — <strong style={{ color: 'white' }}>Saint-Denis</strong></span>
+                <span>Retrait : 3b, Rue de la Guadeloupe 97490 — <strong style={{ color: 'white' }}>Saint-Denis</strong></span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <MapPin size={14} color="rgba(255,255,255,.4)"/>
-                <strong style={{ color: 'white' }}>Saint-Pierre</strong>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                <MapPin size={14} color="rgba(255,255,255,.4)" style={{ flexShrink: 0, marginTop: 2 }}/>
+                <span>Livraison possible sur <strong style={{ color: 'white' }}>toute l'île</strong></span>
               </div>
             </div>
           </div>
