@@ -11,15 +11,6 @@ function copyToClipboard(text, label) {
 }
 
 export default function Footer() {
-  const categories = [
-    { name: 'Outillage à main', slug: 'outillage-main' },
-    { name: 'Outillage électroportatif', slug: 'outillage-electro' },
-    { name: 'Équipement de levage', slug: 'levage' },
-    { name: 'Diagnostic auto', slug: 'diagnostic' },
-    { name: 'Compresseurs & pneumatique', slug: 'compresseurs' },
-    { name: 'Équipement de sécurité', slug: 'securite' },
-  ];
-
   const vehicleCategories = [
     { name: 'Citadine' },
     { name: 'Compacte' },
@@ -90,18 +81,6 @@ export default function Footer() {
                   onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
                   onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,.65)'}
                 >{l}</Link>
-              ))}
-            </div>
-
-            {/* Categories */}
-            <div>
-              <h4 style={{ fontWeight: 700, marginBottom: 20, color: 'var(--accent)', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase' }}>Catégories</h4>
-              {categories.map(({ name, slug }) => (
-                <Link key={slug} to={`/outillage?category=${slug}`}
-                  style={{ display: 'block', color: 'rgba(255,255,255,.65)', fontSize: 14, padding: '5px 0', transition: 'var(--transition)' }}
-                  onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
-                  onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,.65)'}
-                >{name}</Link>
               ))}
             </div>
 

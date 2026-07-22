@@ -7,13 +7,11 @@ import ProductCard from '../components/ProductCard';
 export default function Outillage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
   const type = searchParams.get('type') || '';
-  const category = searchParams.get('category') || '';
   const search = searchParams.get('search') || '';
   const page = parseInt(searchParams.get('page') || '1');
 
@@ -27,18 +25,14 @@ export default function Outillage() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setLoading(true);
-    const params = { type, category, search, page, limit: 12 };
+    const params = { type, search, page, limit: 12 };
     axios.get('/api/products', { params }).then(r => {
       setProducts(r.data.products);
       setTotal(r.data.total);
       setPages(r.data.pages);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, [type, category, search, page]);
-
-  useEffect(() => {
-    axios.get('/api/products/categories').then(r => setCategories(r.data));
-  }, []);
+  }, [type, search, page]);
 
   const typeLabels = { '': 'Tout', 'rent': 'Location', 'sale': 'Achat' };
 
@@ -71,14 +65,8 @@ export default function Outillage() {
               ))}
             </div>
 
-            {/* Category */}
-            <select className="form-control" value={category} onChange={e => setParam('category', e.target.value)} style={{ flex: '0 0 200px' }}>
-              <option value="">Toutes catégories</option>
-              {categories.map(c => <option key={c.id} value={c.slug}>{c.name}</option>)}
-            </select>
-
             {/* Clear */}
-            {(type || category || search) && (
+            {(type || search) && (
               <button className="btn btn-sm" style={{ background: 'var(--gray-200)', color: 'var(--gray-700)' }}
                 onClick={() => setSearchParams({})}>
                 <X size={14}/> Effacer
