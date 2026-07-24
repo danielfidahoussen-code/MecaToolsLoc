@@ -20,7 +20,7 @@ export default function MentionsLegales() {
               <li><strong>RCS :</strong> [à compléter dès l'immatriculation] — Saint-Denis de La Réunion</li>
               <li><strong>N° TVA intracommunautaire :</strong> [à compléter dès l'immatriculation]</li>
               <li><strong>Téléphone :</strong> 06 93 83 96 54</li>
-              <li><strong>Email :</strong> contact@lvtools.re</li>
+              <li><strong>Email :</strong> contact@prestolocation.re</li>
             </ul>
           </LegalSection>
 

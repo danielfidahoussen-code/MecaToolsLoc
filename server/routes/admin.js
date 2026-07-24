@@ -20,7 +20,7 @@ router.get('/backup', authFlexible, (req, res) => {
   const stamp = (req.query.stamp || 'manual').toString().replace(/[^0-9a-zA-Z_-]/g, '');
   db.makeBackup(stamp);
   res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Content-Disposition', `attachment; filename="sauvegarde-lvtools-${stamp}.json"`);
+  res.setHeader('Content-Disposition', `attachment; filename="sauvegarde-prestolocation-${stamp}.json"`);
   fs.createReadStream(dbPath).pipe(res);
 });
 

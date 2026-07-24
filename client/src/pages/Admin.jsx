@@ -18,7 +18,7 @@ function useIsMobile(bp = 1024) {
 
 /* ─── LOGIN ─────────────────────────────────────────────────────────────── */
 function LoginForm({ onLogin }) {
-  const [email, setEmail] = useState('admin@lvtools.re');
+  const [email, setEmail] = useState('admin@prestolocation.re');
   const [pass, setPass] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();

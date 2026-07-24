@@ -78,7 +78,7 @@ async function sendCustomerEmail(to, subject, html, attachments = []) {
 const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 // En-tête wordmark PrestoLocation pour les emails (texte stylé, pas de SVG — compatibilité email fiable)
-const LVTOOLS_EMAIL_HEADER = `<div style="margin-bottom:22px;">` +
+const PRESTOLOCATION_EMAIL_HEADER = `<div style="margin-bottom:22px;">` +
   `<span style="font-family:Arial,Helvetica,sans-serif;font-weight:900;font-style:italic;font-size:22px;letter-spacing:0.5px;color:#1a0202;">PRESTO</span>` +
   `<span style="font-family:Arial,Helvetica,sans-serif;font-weight:900;font-style:italic;font-size:22px;letter-spacing:0.5px;color:#ff3333;">LOCATION</span>` +
   `</div>`;
@@ -206,7 +206,7 @@ async function confirmCustomerOrder({ customer_name, customer_email, customer_ad
   }
 
   const html =
-    LVTOOLS_EMAIL_HEADER +
+    PRESTOLOCATION_EMAIL_HEADER +
     `<p>Bonjour ${esc(customer_name) || ''},</p>` +
     `<p>Merci pour votre commande chez <strong>PrestoLocation</strong> (Auto Presto). Voici le récapitulatif :</p>` +
     `<ul>${lignes || '<li>—</li>'}</ul>` +
