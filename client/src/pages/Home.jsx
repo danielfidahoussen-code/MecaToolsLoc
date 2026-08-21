@@ -61,13 +61,35 @@ export default function Home() {
   ];
 
   return (
-    <div className="container" style={{ paddingTop: 24, paddingBottom: 48 }}>
+    <div>
+      {/* Hero */}
+      <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #3a0808 100%)', color: 'white', padding: '52px 0 44px' }}>
+        <div className="container">
+          <p style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,.55)', marginBottom: 10 }}>La Réunion</p>
+          <h1 style={{ fontSize: 'clamp(26px,4.2vw,40px)', fontWeight: 900, lineHeight: 1.15, marginBottom: 14, maxWidth: 640 }}>
+            Outillage professionnel et véhicules, à la location comme à l'achat.
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,.7)', fontSize: 15, maxWidth: 520, marginBottom: 26, lineHeight: 1.6 }}>
+            Par un mécanicien, pour les mécaniciens. Matériel pro dispo tout de suite, jeunes conducteurs acceptés.
+          </p>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <Link to="/outillage" className="btn btn-primary btn-lg">Voir l'outillage</Link>
+            <Link to="/vehicules" style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              padding: '13px 26px', borderRadius: 10, fontWeight: 700, fontSize: 15,
+              background: 'rgba(255,255,255,.12)', color: 'white', border: '1.5px solid rgba(255,255,255,.3)', textDecoration: 'none',
+            }}>Voir les véhicules</Link>
+          </div>
+        </div>
+      </div>
+
+    <div className="container" style={{ paddingTop: 32, paddingBottom: 48 }}>
 
       {/* Aperçu véhicules disponibles */}
       {cars.length > 0 && (
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--primary)' }}>Véhicules à louer</h2>
+        <div style={{ marginBottom: 36 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--primary)' }}>Véhicules à louer</h2>
             <Link to="/vehicules" style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none' }}>Voir tout →</Link>
           </div>
           <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4 }}>
@@ -76,7 +98,7 @@ export default function Home() {
         </div>
       )}
 
-      <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--primary)', marginBottom: 12 }}>Outillage</h2>
+      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--primary)', marginBottom: 14 }}>Outillage</h2>
 
       {/* Filtres */}
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 20, paddingBottom: 4 }}>
@@ -106,6 +128,7 @@ export default function Home() {
           ? <p style={{ textAlign: 'center', color: 'var(--gray-500)', padding: 60 }}>Aucun produit trouvé</p>
           : <div className="grid-4">{products.map(p => <ProductCard key={p.id} product={p}/>)}</div>
       }
+    </div>
     </div>
   );
 }

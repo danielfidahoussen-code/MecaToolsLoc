@@ -12,18 +12,15 @@ app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Placeholder image generator
+// Placeholder image generator (produit/véhicule sans photo)
 app.get('/api/placeholder/:w/:h', (req, res) => {
   const { w, h } = req.params;
-  const text = req.query.text || 'Image';
-  const colors = ['#1a2340', '#2d3a5a', '#344060', '#243050'];
-  const bg = colors[Math.floor(Math.random() * colors.length)];
+  const text = decodeURIComponent(req.query.text || 'Image');
   const svg = `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
-    <rect width="${w}" height="${h}" fill="${bg}"/>
-    <rect x="20" y="20" width="${w-40}" height="${h-40}" fill="none" stroke="#f5c518" stroke-width="2" stroke-dasharray="8,4" opacity="0.5"/>
-    <text x="50%" y="45%" font-family="Arial,sans-serif" font-size="18" fill="#f5c518" text-anchor="middle" dy=".3em" font-weight="bold">${decodeURIComponent(text)}</text>
-    <text x="50%" y="62%" font-family="Arial,sans-serif" font-size="12" fill="#ffffff" text-anchor="middle" dy=".3em" opacity="0.7">${w}×${h}</text>
-    <text x="50%" y="75%" font-family="Arial,sans-serif" font-size="24" fill="#f5c518" text-anchor="middle" dy=".3em">🔧</text>
+    <rect width="${w}" height="${h}" fill="#ffffff"/>
+    <rect x="0.5" y="0.5" width="${w-1}" height="${h-1}" fill="none" stroke="#e8d8d8" stroke-width="1"/>
+    <text x="50%" y="46%" font-family="Arial,sans-serif" font-size="13" fill="#9a8080" text-anchor="middle" dy=".3em" font-weight="700" letter-spacing="0.3">${text}</text>
+    <text x="50%" y="58%" font-family="Arial,sans-serif" font-size="11" fill="#c9b6b6" text-anchor="middle" dy=".3em" font-weight="600">Photo à venir</text>
   </svg>`;
   res.setHeader('Content-Type', 'image/svg+xml');
   res.send(svg);
