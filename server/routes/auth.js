@@ -2,7 +2,7 @@ const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { users } = require('../database');
-const { JWT_SECRET } = require('../middleware/auth');
+const { JWT_SECRET, authMiddleware } = require('../middleware/auth');
 
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
@@ -12,6 +12,19 @@ router.post('/login', (req, res) => {
   }
   const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
   res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
+});
+
+router.post('/change-password', authMiddleware, (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!newPassword || newPassword.length < 8) {
+    return res.status(400).json({ error: 'Le nouveau mot de passe doit contenir au moins 8 caractères' });
+  }
+  const user = users.getById(req.user.id);
+  if (!user || !bcrypt.compareSync(currentPassword || '', user.password)) {
+    return res.status(401).json({ error: 'Mot de passe actuel incorrect' });
+  }
+  users.update(user.id, { password: bcrypt.hashSync(newPassword, 10) });
+  res.json({ ok: true });
 });
 
 module.exports = router;

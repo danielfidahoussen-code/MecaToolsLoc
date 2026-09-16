@@ -241,6 +241,40 @@ function ProductCard({ p, onEdit, onDelete }) {
 }
 
 /* ─── MAIN ADMIN ─────────────────────────────────────────────────────────── */
+/* ─── CHANGER LE MOT DE PASSE ───────────────────────────────────────────── */
+function ChangePasswordForm({ token }) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (newPassword !== confirm) { toast.error('Les deux mots de passe ne correspondent pas'); return; }
+    setLoading(true);
+    try {
+      await axios.post('/api/auth/change-password', { currentPassword, newPassword }, API(token));
+      toast.success('Mot de passe changé !');
+      setCurrentPassword(''); setNewPassword(''); setConfirm('');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Erreur lors du changement');
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <form onSubmit={submit} className="card" style={{ padding: 18, marginBottom: 24 }}>
+      <p style={{ fontWeight: 700, color: 'var(--primary)', fontSize: 14, marginBottom: 4 }}>Changer le mot de passe admin</p>
+      <p style={{ fontSize: 12, color: 'var(--gray-500)', marginBottom: 14 }}>Au moins 8 caractères.</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginBottom: 12 }}>
+        <input type="password" className="form-control" placeholder="Mot de passe actuel" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required/>
+        <input type="password" className="form-control" placeholder="Nouveau mot de passe" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={8}/>
+        <input type="password" className="form-control" placeholder="Confirmer" value={confirm} onChange={e => setConfirm(e.target.value)} required minLength={8}/>
+      </div>
+      <button type="submit" className="btn btn-primary btn-sm" disabled={loading}>{loading ? 'En cours...' : 'Changer le mot de passe'}</button>
+    </form>
+  );
+}
+
 export default function Admin() {
   const { isAdmin, token } = useAuth();
   const [loggedIn, setLoggedIn] = useState(isAdmin);
@@ -396,6 +430,9 @@ export default function Admin() {
           {/* ── Stats ── */}
           {tab === 'stats' && (
             <div>
+              {/* Changer le mot de passe */}
+              <ChangePasswordForm token={token}/>
+
               {/* Sauvegarde des données */}
               <div className="card" style={{ padding: 18, marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', background: 'var(--light)' }}>
                 <div>
