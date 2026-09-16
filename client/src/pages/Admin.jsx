@@ -275,8 +275,41 @@ function ChangePasswordForm({ token }) {
   );
 }
 
+/* ─── CHANGER L'EMAIL DE CONNEXION ──────────────────────────────────────── */
+function ChangeEmailForm({ token, currentEmail }) {
+  const { login } = useAuth();
+  const [password, setPassword] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const r = await axios.post('/api/auth/change-email', { password, newEmail }, API(token));
+      login(r.data.user, r.data.token);
+      toast.success('Email de connexion changé !');
+      setPassword(''); setNewEmail('');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Erreur lors du changement');
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <form onSubmit={submit} className="card" style={{ padding: 18, marginBottom: 24 }}>
+      <p style={{ fontWeight: 700, color: 'var(--primary)', fontSize: 14, marginBottom: 4 }}>Changer l'email de connexion admin</p>
+      <p style={{ fontSize: 12, color: 'var(--gray-500)', marginBottom: 14 }}>Email actuel : <strong>{currentEmail}</strong></p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginBottom: 12 }}>
+        <input type="email" className="form-control" placeholder="Nouvel email" value={newEmail} onChange={e => setNewEmail(e.target.value)} required/>
+        <input type="password" className="form-control" placeholder="Mot de passe actuel" value={password} onChange={e => setPassword(e.target.value)} required/>
+      </div>
+      <button type="submit" className="btn btn-primary btn-sm" disabled={loading}>{loading ? 'En cours...' : "Changer l'email"}</button>
+    </form>
+  );
+}
+
 export default function Admin() {
-  const { isAdmin, token } = useAuth();
+  const { isAdmin, token, user } = useAuth();
   const [loggedIn, setLoggedIn] = useState(isAdmin);
   const [tab, setTab] = useState('products');
   const [products, setProducts] = useState([]);
@@ -431,6 +464,7 @@ export default function Admin() {
           {tab === 'stats' && (
             <div>
               {/* Changer le mot de passe */}
+              <ChangeEmailForm token={token} currentEmail={user?.email}/>
               <ChangePasswordForm token={token}/>
 
               {/* Sauvegarde des données */}

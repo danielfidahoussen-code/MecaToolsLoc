@@ -27,4 +27,21 @@ router.post('/change-password', authMiddleware, (req, res) => {
   res.json({ ok: true });
 });
 
+router.post('/change-email', authMiddleware, (req, res) => {
+  const { password, newEmail } = req.body;
+  if (!newEmail || !/^\S+@\S+\.\S+$/.test(newEmail)) {
+    return res.status(400).json({ error: 'Adresse email invalide' });
+  }
+  const user = users.getById(req.user.id);
+  if (!user || !bcrypt.compareSync(password || '', user.password)) {
+    return res.status(401).json({ error: 'Mot de passe incorrect' });
+  }
+  if (users.all(u => u.email === newEmail && u.id !== user.id).length > 0) {
+    return res.status(409).json({ error: 'Cette adresse email est déjà utilisée' });
+  }
+  users.update(user.id, { email: newEmail });
+  const token = jwt.sign({ id: user.id, email: newEmail, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+  res.json({ ok: true, token, user: { id: user.id, email: newEmail, role: user.role } });
+});
+
 module.exports = router;
