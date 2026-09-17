@@ -11,7 +11,7 @@ export default function CGV() {
         <div className="container" style={{ maxWidth: 800 }}>
 
           <LegalSection title="1. Objet">
-            <p>Les présentes Conditions Générales de Vente (CGV) régissent l'ensemble des transactions conclues entre la société <strong>PrestoLocation</strong> (SAS, société en cours de formation, siège 3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis) (ci-après « le Vendeur »), et tout client (ci-après « le Client ») pour la location et la vente d'outillage.</p>
+            <p>Les présentes Conditions Générales de Vente (CGV) régissent l'ensemble des transactions conclues entre la société <strong>PrestoLocation</strong> (SARL au capital de 1 €, SIREN 109 850 941, RCS Saint-Denis de La Réunion, siège 3 rue de la Guadeloupe, Sainte-Clotilde, 97490 Saint-Denis) (ci-après « le Vendeur »), et tout client (ci-après « le Client ») pour la location et la vente d'outillage.</p>
             <p>Toute commande passée sur le site implique l'acceptation pleine et entière des présentes CGV.</p>
           </LegalSection>
 

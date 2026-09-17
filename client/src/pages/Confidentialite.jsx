@@ -13,9 +13,9 @@ export default function Confidentialite() {
           <LegalSection title="1. Responsable du traitement">
             <p>Le responsable du traitement des données personnelles collectées via ce site est :</p>
             <ul>
-              <li><strong>PrestoLocation</strong> (SAS, société en cours de formation)</li>
-              <li>3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis, La Réunion</li>
-              <li>SIREN : [à compléter dès l'immatriculation]</li>
+              <li><strong>PrestoLocation</strong> (SARL au capital de 1 €)</li>
+              <li>3 rue de la Guadeloupe, Sainte-Clotilde, 97490 Saint-Denis, La Réunion</li>
+              <li>SIREN : 109 850 941 — SIRET : 109 850 941 00013</li>
               <li>Téléphone : 06 93 83 96 54</li>
               <li>Email : contact@prestolocation.re</li>
             </ul>

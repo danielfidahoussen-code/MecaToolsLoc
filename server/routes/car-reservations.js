@@ -336,10 +336,10 @@ router.get('/:id/contract/print', (req, res, next) => {
 
 <div class="header-block">
   <div>
-    <div class="company">PrestoLocation (société en cours de formation)</div>
+    <div class="company">PrestoLocation (SARL au capital de 1 €)</div>
     <div>Fixe : (+262) 693 012 539 | Portable : 06 93 83 96 54</div>
-    <div>3B, Rue de la Guadeloupe, Moufia — 97490 Saint-Denis</div>
-    <div>contact@prestolocation.re | SIRET : en cours d'immatriculation</div>
+    <div>3 Rue de la Guadeloupe, Sainte-Clotilde — 97490 Saint-Denis</div>
+    <div>contact@prestolocation.re | SIRET : 109 850 941 00013</div>
   </div>
   <div style="text-align:right;">
     <div style="font-size:14px;font-weight:bold;">CONTRAT DE LOCATION N° ${r.id}</div>

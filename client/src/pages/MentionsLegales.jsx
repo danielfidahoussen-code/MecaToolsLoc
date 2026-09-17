@@ -13,19 +13,20 @@ export default function MentionsLegales() {
             <p>Le présent site est édité par :</p>
             <ul>
               <li><strong>Raison sociale :</strong> PrestoLocation</li>
-              <li><strong>Forme juridique :</strong> Société par actions simplifiée (SAS), <strong>société en cours de formation</strong> — immatriculation au RCS en cours</li>
-              <li><strong>Capital social :</strong> [à compléter dès l'immatriculation]</li>
-              <li><strong>Siège social :</strong> 3B rue de la Guadeloupe, Moufia, Sainte-Clotilde, 97490 Saint-Denis, La Réunion</li>
-              <li><strong>SIREN / SIRET :</strong> [à compléter dès l'immatriculation]</li>
-              <li><strong>RCS :</strong> [à compléter dès l'immatriculation] — Saint-Denis de La Réunion</li>
-              <li><strong>N° TVA intracommunautaire :</strong> [à compléter dès l'immatriculation]</li>
+              <li><strong>Forme juridique :</strong> Société à responsabilité limitée (SARL)</li>
+              <li><strong>Capital social :</strong> 1 €</li>
+              <li><strong>Siège social :</strong> 3 rue de la Guadeloupe, Sainte-Clotilde, 97490 Saint-Denis, La Réunion</li>
+              <li><strong>SIREN :</strong> 109 850 941</li>
+              <li><strong>SIRET :</strong> 109 850 941 00013</li>
+              <li><strong>RCS :</strong> 109 850 941 — Saint-Denis de La Réunion</li>
+              <li><strong>N° TVA intracommunautaire :</strong> Non applicable — TVA non applicable, article 293 B du Code général des impôts (franchise en base de TVA)</li>
               <li><strong>Téléphone :</strong> 06 93 83 96 54</li>
               <li><strong>Email :</strong> contact@prestolocation.re</li>
             </ul>
           </LegalSection>
 
           <LegalSection title="2. Directeur de la publication">
-            <p>Le directeur de la publication est le Président de la société PrestoLocation.</p>
+            <p>Le directeur de la publication est le Gérant de la société PrestoLocation.</p>
           </LegalSection>
 
           <LegalSection title="3. Hébergement">
