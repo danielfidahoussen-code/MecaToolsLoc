@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, FileText, Download } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, FileText, Download, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -316,6 +316,7 @@ export default function Admin() {
   const [orders, setOrders] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [carReservations, setCarReservations] = useState([]);
+  const [contactMessages, setContactMessages] = useState([]);
   const [carsDb, setCarsDb] = useState([]);
   const [categories, setCategories] = useState([]);
   const [editProduct, setEditProduct] = useState(null);
@@ -332,13 +333,14 @@ export default function Admin() {
     if (!loggedIn || !token) return;
     setLoading(true);
     try {
-      const [p, o, r, c, cr, cars] = await Promise.all([
+      const [p, o, r, c, cr, cars, msgs] = await Promise.all([
         axios.get('/api/products?limit=100'),
         axios.get('/api/orders', API(token)),
         axios.get('/api/reservations', API(token)),
         axios.get('/api/products/categories'),
         axios.get('/api/car-reservations', API(token)),
         axios.get('/api/cars/all', API(token)),
+        axios.get('/api/contact', API(token)),
       ]);
       setProducts(p.data.products);
       setOrders(o.data);
@@ -346,6 +348,7 @@ export default function Admin() {
       setCategories(c.data);
       setCarReservations(cr.data);
       setCarsDb(cars.data);
+      setContactMessages(msgs.data);
     } catch {}
     setLoading(false);
   };
@@ -418,11 +421,25 @@ export default function Admin() {
     loadData();
   };
 
+  const deleteContactMessage = async (id) => {
+    if (!confirm('Supprimer ce message ?')) return;
+    await axios.delete(`/api/contact/${id}`, API(token));
+    toast.success('Message supprimé');
+    loadData();
+  };
+  const clearContactMessages = async () => {
+    if (!confirm('Supprimer TOUS les messages de contact ? Cette action est irréversible.')) return;
+    await axios.delete('/api/contact/all', API(token));
+    toast.success('Messages vidés');
+    loadData();
+  };
+
   const tabs = [
     { id: 'products',        label: 'Produits',        icon: <Package size={15}/> },
     { id: 'orders',          label: 'Commandes',        icon: <ShoppingBag size={15}/> },
     { id: 'reservations',    label: 'Réservations',     icon: <Calendar size={15}/> },
     { id: 'car_reservations',label: 'Location voitures',icon: <Calendar size={15}/> },
+    { id: 'messages',        label: 'Messages',         icon: <Mail size={15}/> },
     { id: 'stats',           label: 'Tableau de bord',  icon: <BarChart3 size={15}/> },
   ];
 
@@ -782,6 +799,39 @@ export default function Admin() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'messages' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}>
+                <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: isMobile ? 17 : 22 }}>Messages ({contactMessages.length})</h2>
+                {contactMessages.length > 0 && (
+                  <button className="btn btn-sm btn-danger" onClick={clearContactMessages}><Trash2 size={13}/> Tout supprimer</button>
+                )}
+              </div>
+              {contactMessages.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucun message pour le moment</p> : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {contactMessages.map(m => (
+                    <div key={m.id} className="card" style={{ padding: 16 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
+                        <div style={{ minWidth: 0 }}>
+                          <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--primary)' }}>{m.name} {m.subject && <span style={{ color: 'var(--gray-500)', fontWeight: 500 }}>— {m.subject}</span>}</p>
+                          <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{m.email}{m.phone ? ` · ${m.phone}` : ''}</p>
+                        </div>
+                        <p style={{ fontSize: 11, color: 'var(--gray-400)', flexShrink: 0 }}>{new Date(m.created_at).toLocaleString('fr-FR')}</p>
+                      </div>
+                      <p style={{ fontSize: 13, color: 'var(--gray-700)', whiteSpace: 'pre-wrap', marginBottom: 12 }}>{m.message}</p>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <a className="btn btn-sm btn-primary" href={`mailto:${m.email}?subject=${encodeURIComponent('Re: ' + (m.subject || 'Votre message'))}`}>
+                          <Mail size={13}/> Répondre
+                        </a>
+                        <button className="btn btn-sm btn-danger" onClick={() => deleteContactMessage(m.id)}><Trash2 size={13}/> Supprimer</button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

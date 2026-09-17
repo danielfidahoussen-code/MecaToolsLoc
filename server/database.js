@@ -7,6 +7,7 @@ const reservations = db.table('reservations');
 const orders     = db.table('orders');
 const users      = db.table('users');
 const faqs       = db.table('faqs');
+const contacts   = db.table('contacts');
 
 // Seed categories
 if (categories.count() === 0) {
@@ -323,4 +324,4 @@ if (!cars.all().some(c => c.price_1_3 != null)) {
   ].forEach(c => cars.insert(c));
 }
 
-module.exports = { categories, products, reservations, orders, users, faqs, rental_contracts, car_reservations, cars };
+module.exports = { categories, products, reservations, orders, users, faqs, contacts, rental_contracts, car_reservations, cars };

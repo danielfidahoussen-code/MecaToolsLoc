@@ -52,24 +52,25 @@ if (!RESEND_API_KEY) {
 
 // Envoi via l'API HTTP de Resend (lève une erreur en cas d'échec)
 // attachments: [{ filename, content: Buffer }]
-async function sendViaResend(to, subject, html, attachments = []) {
+async function sendViaResend(to, subject, html, attachments = [], replyTo) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: FROM_HEADER, to, subject, html,
+      ...(replyTo ? { reply_to: replyTo } : {}),
       ...(attachments.length ? { attachments: attachments.map(a => ({ filename: a.filename, content: a.content.toString('base64') })) } : {}),
     }),
   });
   if (!res.ok) throw new Error(`Resend ${res.status}: ${await res.text()}`);
 }
 
-async function sendCustomerEmail(to, subject, html, attachments = []) {
+async function sendCustomerEmail(to, subject, html, attachments = [], replyTo) {
   if (!to) return;
   if (!RESEND_API_KEY && !mailer) { console.warn('[NOTIFY] Email non configuré (RESEND_API_KEY ou SMTP) — ignoré'); return; }
   try {
-    if (RESEND_API_KEY) await sendViaResend(to, subject, html, attachments);
-    else await mailer.sendMail({ from: FROM_HEADER, to, subject, html, attachments });
+    if (RESEND_API_KEY) await sendViaResend(to, subject, html, attachments, replyTo);
+    else await mailer.sendMail({ from: FROM_HEADER, to, subject, html, attachments, ...(replyTo ? { replyTo } : {}) });
   } catch (err) {
     console.error('[NOTIFY] Erreur email client:', err.message);
   }
@@ -168,6 +169,7 @@ async function confirmCustomerCarRequest(r) {
 }
 
 // Message de contact
+const CONTACT_RECIPIENT = process.env.CONTACT_EMAIL || 'contact@prestolocation.re';
 async function notifyContactMessage({ name, email, phone, subject, message }) {
   const text =
     `<b>Nouveau message de contact</b>\n\n` +
@@ -178,6 +180,17 @@ async function notifyContactMessage({ name, email, phone, subject, message }) {
     `Message :\n${esc(message) || '—'}`;
 
   await sendTelegram(text);
+
+  // Copie par email — Reply-To = le client, pour pouvoir répondre en un clic
+  const html =
+    `<p><strong>Nouveau message via le formulaire de contact du site.</strong></p>` +
+    `<p>Nom : <strong>${esc(name) || '—'}</strong><br/>` +
+    `Email : ${esc(email) || '—'}<br/>` +
+    `Téléphone : ${esc(phone) || '—'}<br/>` +
+    `Sujet : ${esc(subject) || '—'}</p>` +
+    `<p>Message :<br/>${esc(message).replace(/\n/g, '<br/>') || '—'}</p>` +
+    `<p style="color:#888;font-size:12px;">Répondez directement à cet email pour contacter le client.</p>`;
+  await sendCustomerEmail(CONTACT_RECIPIENT, `Contact site — ${esc(subject) || esc(name) || 'Nouveau message'}`, html, [], email);
 }
 
 // Confirmation client — commande d'outils

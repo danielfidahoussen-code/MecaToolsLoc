@@ -1,4 +1,6 @@
 const router = require('express').Router();
+const { contacts } = require('../database');
+const { authMiddleware } = require('../middleware/auth');
 const { sendTelegramTest, telegramConfigured, notifyContactMessage, notifyNewOrder, notifyNewCarReservation, emailDiagnostic } = require('../notify');
 
 // Envoi d'un message via le formulaire de contact
@@ -8,12 +10,30 @@ router.post('/', async (req, res) => {
     if (!name || !email || !message) {
       return res.status(400).json({ error: 'Champs requis manquants' });
     }
+    contacts.insert({ name, email, phone: phone || '', subject: subject || '', message });
     await notifyContactMessage({ name, email, phone, subject, message });
     res.json({ success: true });
   } catch (err) {
     console.error('Contact error:', err.message);
     res.status(500).json({ error: err.message });
   }
+});
+
+// Admin — liste des messages de contact
+router.get('/', authMiddleware, (req, res) => {
+  res.json(contacts.all().sort((a, b) => b.created_at.localeCompare(a.created_at)));
+});
+
+// Admin — supprime tous les messages
+router.delete('/all', authMiddleware, (req, res) => {
+  contacts.all().forEach(c => contacts.delete(c.id));
+  res.json({ success: true });
+});
+
+// Admin — supprime un message
+router.delete('/:id', authMiddleware, (req, res) => {
+  contacts.delete(Number(req.params.id));
+  res.json({ success: true });
 });
 
 // Route de test — vérifie les notifications Telegram ET l'email client.
