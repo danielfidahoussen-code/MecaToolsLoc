@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, FileText, Download, Mail } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, FileText, Download, Mail, CheckCircle, Circle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -433,6 +433,10 @@ export default function Admin() {
     toast.success('Messages vidés');
     loadData();
   };
+  const toggleContactReplied = async (m) => {
+    await axios.put(`/api/contact/${m.id}/replied`, { replied: !m.replied }, API(token));
+    loadData();
+  };
 
   const tabs = [
     { id: 'products',        label: 'Produits',        icon: <Package size={15}/> },
@@ -815,10 +819,13 @@ export default function Admin() {
               {contactMessages.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucun message pour le moment</p> : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {contactMessages.map(m => (
-                    <div key={m.id} className="card" style={{ padding: 16 }}>
+                    <div key={m.id} className="card" style={{ padding: 16, borderLeft: m.replied ? '4px solid var(--success)' : '4px solid transparent', opacity: m.replied ? 0.75 : 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
                         <div style={{ minWidth: 0 }}>
-                          <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--primary)' }}>{m.name} {m.subject && <span style={{ color: 'var(--gray-500)', fontWeight: 500 }}>— {m.subject}</span>}</p>
+                          <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--primary)' }}>
+                            {m.name} {m.subject && <span style={{ color: 'var(--gray-500)', fontWeight: 500 }}>— {m.subject}</span>}
+                            {m.replied && <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, color: 'var(--success)' }}>✓ Répondu</span>}
+                          </p>
                           <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{m.email}{m.phone ? ` · ${m.phone}` : ''}</p>
                         </div>
                         <p style={{ fontSize: 11, color: 'var(--gray-400)', flexShrink: 0 }}>{new Date(m.created_at).toLocaleString('fr-FR')}</p>
@@ -828,6 +835,9 @@ export default function Admin() {
                         <a className="btn btn-sm btn-primary" href={`mailto:${m.email}?subject=${encodeURIComponent('Re: ' + (m.subject || 'Votre message'))}`}>
                           <Mail size={13}/> Répondre
                         </a>
+                        <button className="btn btn-sm btn-outline" onClick={() => toggleContactReplied(m)}>
+                          {m.replied ? <><CheckCircle size={13}/> Répondu</> : <><Circle size={13}/> Marquer comme répondu</>}
+                        </button>
                         <button className="btn btn-sm btn-danger" onClick={() => deleteContactMessage(m.id)}><Trash2 size={13}/> Supprimer</button>
                       </div>
                     </div>

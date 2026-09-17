@@ -24,6 +24,12 @@ router.get('/', authMiddleware, (req, res) => {
   res.json(contacts.all().sort((a, b) => b.created_at.localeCompare(a.created_at)));
 });
 
+// Admin — marque un message comme répondu (ou non)
+router.put('/:id/replied', authMiddleware, (req, res) => {
+  contacts.update(Number(req.params.id), { replied: !!req.body.replied });
+  res.json({ success: true });
+});
+
 // Admin — supprime tous les messages
 router.delete('/all', authMiddleware, (req, res) => {
   contacts.all().forEach(c => contacts.delete(c.id));
