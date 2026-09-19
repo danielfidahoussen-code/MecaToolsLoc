@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const crypto = require('crypto');
 const Stripe = require('stripe');
 const { car_reservations } = require('../database');
 const { authMiddleware } = require('../middleware/auth');
@@ -6,6 +7,16 @@ const { notifyNewCarReservation, confirmCustomerCarReservation, notifyCarReserva
 
 const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
 if (!stripe) console.error('[STRIPE] STRIPE_SECRET_KEY manquante — paiements véhicules désactivés');
+
+const DEPOSIT_RATE = 0.20; // Acompte de 20% à la réservation, solde réglé en personne à la remise
+const FREE_CANCEL_DAYS = 2; // Annulation gratuite jusqu'à 2 jours avant le début de la location
+
+// Nombre de jours pleins avant la date de début (arrondi au jour)
+function daysUntil(dateStr) {
+  const start = new Date(dateStr + 'T00:00:00');
+  const now = new Date();
+  return Math.ceil((start - now) / (1000 * 60 * 60 * 24));
+}
 
 // Crée une réservation en attente (avant contrat + paiement)
 router.post('/create', (req, res) => {
@@ -28,6 +39,7 @@ router.post('/create', (req, res) => {
       booster: !!booster, baby_seat: !!baby_seat,
       customer_name, customer_email, customer_phone: customer_phone || '',
       caution_amount: carRecord?.caution || null,
+      cancel_token: crypto.randomBytes(16).toString('hex'),
       status: 'pending',
     });
     res.json({ id });
@@ -56,6 +68,7 @@ router.post('/request', (req, res) => {
       booster: !!booster, baby_seat: !!baby_seat,
       customer_name, customer_email, customer_phone: customer_phone || '',
       caution_amount: carRecord?.caution || null,
+      cancel_token: crypto.randomBytes(16).toString('hex'),
       booking_mode: 'request',
       status: 'pending',
     });
@@ -83,55 +96,30 @@ router.post('/:id/checkout', async (req, res) => {
     const days = r.days;
     const carTotal = r.car_total || r.total;
 
+    // Total du panier (location + options) — sert de base au calcul de l'acompte de 20%
+    let totalCents = Math.round(carTotal * 100);
+    if (r.delivery_out) totalCents += 2000;
+    if (r.delivery_in) totalCents += 2000;
+    if (r.booster) totalCents += 200 * days;
+    if (r.baby_seat) totalCents += 400 * days;
+
+    const depositCents = Math.round(totalCents * DEPOSIT_RATE);
+    const depositAmount = depositCents / 100;
+    const balanceDue = (totalCents - depositCents) / 100;
+
     const lineItems = [{
       price_data: {
         currency: 'eur',
-        product_data: { name: `Location ${r.car_name} — ${r.start_date} au ${r.end_date} (${days} jour${days > 1 ? 's' : ''})` },
-        unit_amount: Math.round(carTotal * 100),
+        product_data: {
+          name: `Acompte de réservation (20%) — ${r.car_name} — ${r.start_date} au ${r.end_date}`,
+          description: `Solde de ${balanceDue.toFixed(2)} € à régler en personne à la remise du véhicule.`,
+        },
+        unit_amount: depositCents,
       },
       quantity: 1,
     }];
 
-    if (r.delivery_out) {
-      lineItems.push({
-        price_data: {
-          currency: 'eur',
-          product_data: { name: `Livraison du véhicule${r.delivery_out_address ? ` — ${r.delivery_out_address.slice(0, 80)}` : ''}` },
-          unit_amount: 2000,
-        },
-        quantity: 1,
-      });
-    }
-    if (r.delivery_in) {
-      lineItems.push({
-        price_data: {
-          currency: 'eur',
-          product_data: { name: `Récupération du véhicule${r.delivery_in_address ? ` — ${r.delivery_in_address.slice(0, 80)}` : ''}` },
-          unit_amount: 2000,
-        },
-        quantity: 1,
-      });
-    }
-    if (r.booster) {
-      lineItems.push({
-        price_data: {
-          currency: 'eur',
-          product_data: { name: `Réhausseur enfant (${days} jour${days > 1 ? 's' : ''})` },
-          unit_amount: 200,
-        },
-        quantity: days,
-      });
-    }
-    if (r.baby_seat) {
-      lineItems.push({
-        price_data: {
-          currency: 'eur',
-          product_data: { name: `Siège bébé (${days} jour${days > 1 ? 's' : ''})` },
-          unit_amount: 400,
-        },
-        quantity: days,
-      });
-    }
+    car_reservations.update(r.id, { deposit_amount: depositAmount, balance_due: balanceDue });
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -227,7 +215,7 @@ router.get('/session/:sessionId', async (req, res) => {
         // Nouveau flux : mise à jour de la réservation existante
         if (meta.reservation_id) {
           const rid = Number(meta.reservation_id);
-          car_reservations.update(rid, { status: 'confirmed', stripe_session_id: session.id });
+          car_reservations.update(rid, { status: 'confirmed', stripe_session_id: session.id, stripe_payment_intent_id: session.payment_intent || null });
           existing = car_reservations.getById(rid);
         } else {
           // Ancien flux (rétrocompat)
@@ -275,6 +263,44 @@ router.get('/public/:id', (req, res) => {
     caution_amount: r.caution_amount || null,
     contract_signed: !!r.contract_signed_at,
   });
+});
+
+// Public — infos d'annulation (le lien vient de l'email de confirmation, protégé par le token)
+router.get('/cancel/:id/:token', (req, res) => {
+  const r = car_reservations.getById(Number(req.params.id));
+  if (!r || r.cancel_token !== req.params.token) return res.status(404).json({ error: 'Lien invalide' });
+  if (r.status === 'cancelled') return res.json({ already_cancelled: true, refunded: !!r.refunded });
+  const days = daysUntil(r.start_date);
+  res.json({
+    car_name: r.car_name, start_date: r.start_date, end_date: r.end_date,
+    deposit_amount: r.deposit_amount || null, balance_due: r.balance_due || null,
+    days_until_start: days,
+    refund_eligible: days >= FREE_CANCEL_DAYS,
+  });
+});
+
+// Public — confirme l'annulation (rembourse l'acompte si à ≥ 2 jours du départ)
+router.post('/cancel/:id/:token', async (req, res) => {
+  const r = car_reservations.getById(Number(req.params.id));
+  if (!r || r.cancel_token !== req.params.token) return res.status(404).json({ error: 'Lien invalide' });
+  if (r.status === 'cancelled') return res.status(400).json({ error: 'Cette réservation est déjà annulée' });
+
+  const days = daysUntil(r.start_date);
+  const eligible = days >= FREE_CANCEL_DAYS;
+  let refunded = false;
+
+  if (eligible && r.stripe_payment_intent_id && stripe) {
+    try {
+      await stripe.refunds.create({ payment_intent: r.stripe_payment_intent_id });
+      refunded = true;
+    } catch (err) {
+      console.error('[REFUND] Échec remboursement réservation véhicule', r.id, ':', err.message);
+      return res.status(500).json({ error: 'Le remboursement a échoué, contactez-nous directement.' });
+    }
+  }
+
+  car_reservations.update(r.id, { status: 'cancelled', cancelled_at: new Date().toISOString(), refunded });
+  res.json({ success: true, refunded });
 });
 
 // Soumet le contrat signé
@@ -420,6 +446,7 @@ router.get('/:id/contract/print', (req, res, next) => {
 <h3>3) Conditions pour louer</h3><p>Le Locataire et tout conducteur autorisé doivent : (i) présenter un permis de conduire valide, (ii) une pièce d'identité valide, (iii) un justificatif de domicile si demandé, (iv) être en capacité de payer la location et la caution.</p>
 <h3>4) Conducteurs autorisés</h3><p>Seules les personnes indiquées au contrat peuvent conduire. Tout ajout de conducteur doit être déclaré avant départ. Le Locataire reste responsable du Véhicule et des conducteurs autorisés.</p>
 <h3>5) Réservation – Paiement – Caution</h3><p>Le prix comprend la location et les options indiquées. La caution peut être versée par préautorisation CB, chèque, espèces ou virement. Le Loueur peut l'encaisser pour couvrir : dommages, franchise, carburant manquant, nettoyage, retard, amendes, immobilisation.</p>
+<h3>5 bis) Acompte et annulation</h3><p>Un acompte de 20 % du montant total est réglé en ligne à la réservation ; le solde (80 %) est réglé en personne à la remise du véhicule. Annulation à 2 jours ou plus avant le départ : acompte intégralement remboursé. Annulation à moins de 2 jours du départ : acompte non remboursé, acquis au Loueur.</p>
 <h3>6) Remise du Véhicule – État des lieux départ</h3><p>Le Véhicule est remis avec un état des lieux départ mentionnant km, carburant, et défauts visibles. Le Locataire doit vérifier et signaler toute anomalie avant de quitter le lieu de départ.</p>
 <h3>7) Utilisation du Véhicule (interdictions)</h3><p>Le Locataire s'engage à utiliser le Véhicule en bon usage et notamment à ne pas : sous-louer, prêter à un conducteur non autorisé, transporter des matières dangereuses, participer à des courses, conduire sous alcool/stupéfiants, ou toute utilisation contraire au Code de la route.</p>
 <h3>8) Kilométrage – Carburant</h3><p>Kilométrage illimité sauf mention contraire. Carburant : le niveau doit être rendu identique au départ. Tout carburant manquant est facturé selon la grille du Loueur.</p>

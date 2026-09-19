@@ -654,9 +654,16 @@ export default function Checkout() {
                       <span style={{ fontWeight: 600 }}>{isPickup ? 'Retrait sur place' : `Livraison — ${deliveryFee.toFixed(2)} €`}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 800, color: 'var(--primary)', borderTop: '1.5px solid var(--gray-200)', paddingTop: 10, marginTop: 8 }}>
-                      <span>Total à payer</span>
-                      <span>{finalTotal.toFixed(2)} €</span>
+                      <span>{hasRentals ? 'Acompte à payer (20%)' : 'Total à payer'}</span>
+                      <span>{(hasRentals ? finalTotal * 0.2 : finalTotal).toFixed(2)} €</span>
                     </div>
+                    {hasRentals && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '8px 10px', background: 'rgba(217,119,6,.08)', border: '1.5px solid rgba(217,119,6,.2)', borderRadius: 8 }}>
+                        <span style={{ fontSize: 12, color: '#92400e', fontWeight: 600 }}>
+                          Solde de {(finalTotal * 0.8).toFixed(2)} € réglé en personne à la remise. Annulation gratuite jusqu'à 2 jours avant le début — au-delà, l'acompte reste acquis.
+                        </span>
+                      </div>
+                    )}
                     {totalCaution > 0 && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '8px 10px', background: 'rgba(59,130,246,.07)', border: '1.5px solid rgba(59,130,246,.2)', borderRadius: 8 }}>
                         <span>🔒</span>
@@ -676,7 +683,7 @@ export default function Checkout() {
                   <button className="btn btn-primary btn-lg" onClick={handlePay} disabled={paying}
                     style={{ width: '100%', justifyContent: 'center', fontSize: 16 }}>
                     <CreditCard size={18}/>
-                    {paying ? 'Redirection vers Stripe...' : `Payer ${finalTotal.toFixed(2)} € →`}
+                    {paying ? 'Redirection vers Stripe...' : `Payer ${(hasRentals ? finalTotal * 0.2 : finalTotal).toFixed(2)} € →`}
                   </button>
                   <button className="btn" onClick={() => setStep(hasRentals ? 'contract' : 'coord')}
                     style={{ width: '100%', justifyContent: 'center', marginTop: 10, background: 'var(--gray-100)', color: 'var(--gray-700)' }}>

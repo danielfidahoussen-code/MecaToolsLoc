@@ -48,7 +48,17 @@ export default function CGV() {
             <p>PrestoLocation ne stocke aucune donnée bancaire. Les transactions sont traitées par un prestataire de paiement certifié PCI-DSS.</p>
           </LegalSection>
 
-          <LegalSection title="6. Caution (Location)">
+          <LegalSection title="6. Acompte et annulation (Location)">
+            <p>Pour toute réservation de location (outillage ou véhicule), un <strong>acompte de 20 % du montant total</strong> est demandé en ligne au moment de la réservation. Le solde, soit 80 % du montant total, est réglé en personne lors de la remise du matériel ou du véhicule.</p>
+            <p>Le Client peut annuler sa réservation à tout moment avant la date de début de location prévue au contrat :</p>
+            <ul>
+              <li><strong>Annulation à 2 jours ou plus avant le début de la location :</strong> l'acompte est intégralement remboursé.</li>
+              <li><strong>Annulation à moins de 2 jours avant le début de la location :</strong> l'acompte reste acquis à PrestoLocation et n'est pas remboursé.</li>
+            </ul>
+            <p>L'annulation s'effectue via le lien dédié fourni dans l'email de confirmation de réservation. Le remboursement, lorsqu'il est dû, est effectué sur le moyen de paiement utilisé lors de la réservation, dans un délai habituel de quelques jours ouvrés.</p>
+          </LegalSection>
+
+          <LegalSection title="7. Caution (Location)">
             <p>Pour toute location, une caution (dépôt de garantie) est demandée. Cette caution :</p>
             <ul>
               <li>Est constituée <strong>lors de la remise du matériel</strong>, par empreinte de carte bancaire, chèque non encaissé ou tout autre moyen convenu ;</li>
@@ -59,7 +69,7 @@ export default function CGV() {
             <p>Le montant de la caution correspond à la valeur du matériel loué ; il est communiqué au Client lors de la remise du matériel. Si les dommages excèdent le montant de la caution, la différence pourra être facturée au Client.</p>
           </LegalSection>
 
-          <LegalSection title="7. Contrat de location">
+          <LegalSection title="8. Contrat de location">
             <p>Chaque location fait l'objet d'un contrat en bonne et due forme, signé électroniquement par le Client avant la mise à disposition du matériel. Ce contrat précise :</p>
             <ul>
               <li>La durée de la location et les dates de début/fin</li>
@@ -70,7 +80,7 @@ export default function CGV() {
             </ul>
           </LegalSection>
 
-          <LegalSection title="8. Obligations du locataire">
+          <LegalSection title="9. Obligations du locataire">
             <p>Le Client s'engage à :</p>
             <ul>
               <li>Utiliser le matériel conformément à sa destination et dans le respect des règles de sécurité</li>
@@ -81,7 +91,7 @@ export default function CGV() {
             <p>En cas de dommage, perte ou vol, le Client sera tenu responsable et la caution pourra être encaissée. Des frais supplémentaires pourront être facturés si les dommages excèdent le montant de la caution.</p>
           </LegalSection>
 
-          <LegalSection title="9. Droit de rétractation (Achat)">
+          <LegalSection title="10. Droit de rétractation (Achat)">
             <p>Conformément aux articles L.221-18 et suivants du Code de la consommation, le Client consommateur dispose d'un délai de <strong>14 jours</strong> à compter de la réception du produit pour exercer son droit de rétractation, sans avoir à motiver sa décision.</p>
             <p>Pour exercer ce droit, le Client informe le Vendeur de sa décision par une déclaration dénuée d'ambiguïté (courrier ou email à contact@prestolocation.re), le cas échéant au moyen du formulaire type de rétractation. Le produit doit ensuite être renvoyé dans un délai de 14 jours.</p>
             <p>Le Client peut manipuler et essayer le produit comme il pourrait le faire en magasin ; sa responsabilité n'est engagée qu'à raison de la <strong>dépréciation</strong> résultant de manipulations excédant ce qui est nécessaire pour établir la nature et les caractéristiques du bien.</p>
@@ -89,7 +99,7 @@ export default function CGV() {
             <p>Conformément à l'article L.221-28 du Code de la consommation, le droit de rétractation ne s'applique pas aux contrats de <strong>location</strong> pour une date ou une période déterminée.</p>
           </LegalSection>
 
-          <LegalSection title="10. Garanties légales (Achat)">
+          <LegalSection title="11. Garanties légales (Achat)">
             <p>Indépendamment de toute garantie commerciale, le Vendeur reste tenu des garanties légales suivantes pour les produits vendus :</p>
             <ul>
               <li><strong>Garantie légale de conformité</strong> (art. L.217-3 et suivants du Code de la consommation) : le Client dispose d'un délai de <strong>2 ans</strong> à compter de la délivrance du bien pour agir ; il peut choisir entre la réparation ou le remplacement du bien, et bénéficie d'une présomption d'antériorité du défaut.</li>
@@ -98,11 +108,11 @@ export default function CGV() {
             <p>Pour toute mise en œuvre de ces garanties, le Client peut contacter le Vendeur à contact@prestolocation.re.</p>
           </LegalSection>
 
-          <LegalSection title="11. Responsabilité">
+          <LegalSection title="12. Responsabilité">
             <p>Le Vendeur garantit que le matériel loué ou vendu est en bon état de fonctionnement au moment de la mise à disposition. Sa responsabilité ne saurait être engagée pour tout dommage résultant d'une mauvaise utilisation du matériel par le Client.</p>
           </LegalSection>
 
-          <LegalSection title="12. Médiation et litiges">
+          <LegalSection title="13. Médiation et litiges">
             <p>En cas de litige, le Client adresse au préalable une réclamation écrite au Vendeur (contact@prestolocation.re). À défaut de résolution amiable, le Client consommateur peut recourir gratuitement à un médiateur de la consommation :</p>
             <ul>
               <li><strong>Médiateur désigné :</strong> [nom du médiateur à compléter] — [adresse / site du médiateur]</li>

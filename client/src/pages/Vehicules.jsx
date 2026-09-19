@@ -321,6 +321,14 @@ function CarCard({ car }) {
               </div>
             )}
 
+            {/* Info acompte + annulation */}
+            {!isRequestOnly && (
+              <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 10, padding: '10px 14px', marginBottom: 12, fontSize: 12, color: '#7c2d12', lineHeight: 1.6 }}>
+                <p style={{ fontWeight: 800, marginBottom: 2 }}>Acompte de 20% à la réservation</p>
+                <p>Le solde ({(total * 0.8).toFixed(2)} €) se règle en personne à la remise du véhicule. Annulation gratuite jusqu'à 2 jours avant le départ — au-delà, l'acompte reste acquis.</p>
+              </div>
+            )}
+
             {/* Info caution */}
             <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 10, padding: '10px 14px', marginBottom: 12, fontSize: 12, color: '#0c4a6e', lineHeight: 1.6 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>

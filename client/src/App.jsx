@@ -21,6 +21,7 @@ import LogoPreview from './pages/LogoPreview';
 import CheckoutSuccess from './pages/CheckoutSuccess';
 import Vehicules from './pages/Vehicules';
 import CarReservationSuccess from './pages/CarReservationSuccess';
+import CancelReservation from './pages/CancelReservation';
 import CarContract from './pages/CarContract';
 
 export default function App() {
@@ -53,6 +54,8 @@ export default function App() {
                   <Route path="/vehicules" element={<Vehicules/>}/>
                   <Route path="/vehicules/success" element={<CarReservationSuccess/>}/>
                   <Route path="/vehicules/contrat/:id" element={<CarContract/>}/>
+                  <Route path="/annulation-vehicule/:id/:token" element={<CancelReservation apiBase="/api/car-reservations" itemLabel="Réservation"/>}/>
+                  <Route path="/annulation-commande/:id/:token" element={<CancelReservation apiBase="/api/orders" itemLabel="Commande"/>}/>
                   {/* Redirections depuis les anciennes URLs */}
                   <Route path="/autres-services" element={<Navigate to="/vehicules" replace/>}/>
                   <Route path="/autres-services/success" element={<Navigate to="/vehicules/success" replace/>}/>

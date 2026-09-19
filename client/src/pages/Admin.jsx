@@ -666,14 +666,17 @@ export default function Admin() {
                           <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--primary)' }}>#{o.id} — {o.customer_name}</p>
                           <p style={{ fontSize: 12, color: 'var(--gray-500)', marginTop: 2 }}>{o.customer_email}</p>
                         </div>
-                        <span style={{ padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, flexShrink: 0, background: o.status === 'paid' ? '#d1fae5' : '#fef3c7', color: o.status === 'paid' ? '#065f46' : '#92400e' }}>
-                          {o.status === 'paid' ? '✅ Payé' : '⏳ ' + o.status}
+                        <span style={{ padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, flexShrink: 0, background: o.status === 'cancelled' ? '#fee2e2' : o.status === 'paid' ? '#d1fae5' : '#fef3c7', color: o.status === 'cancelled' ? '#991b1b' : o.status === 'paid' ? '#065f46' : '#92400e' }}>
+                          {o.status === 'cancelled' ? `❌ Annulée${o.refunded ? ' (remboursée)' : ''}` : o.status === 'paid' ? '✅ Payé' : '⏳ ' + o.status}
                         </span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, alignItems: 'center' }}>
                         <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{o.total_price.toFixed(2)} €</span>
                         <span style={{ color: 'var(--gray-400)' }}>{new Date(o.created_at).toLocaleDateString('fr-FR')}</span>
                       </div>
+                      {o.deposit_amount > 0 && (
+                        <p style={{ fontSize: 11, color: '#92400e', marginTop: 4 }}>Acompte {o.deposit_amount.toFixed(2)} € — solde {o.balance_due?.toFixed(2)} € dû{o.rental_start ? ` (départ ${o.rental_start})` : ''}</p>
+                      )}
                       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                         {o.contract_id && (
                           <a href={`/api/rental-contracts/${o.contract_id}/pdf?token=${token}`} target="_blank" rel="noreferrer"
@@ -702,11 +705,14 @@ export default function Admin() {
                           <td style={{ padding: '11px 14px', fontWeight: 700 }}>#{o.id}</td>
                           <td style={{ padding: '11px 14px', fontWeight: 600 }}>{o.customer_name}</td>
                           <td style={{ padding: '11px 14px', color: 'var(--gray-500)' }}>{o.customer_email}</td>
-                          <td style={{ padding: '11px 14px', fontWeight: 800, color: 'var(--primary)' }}>{o.total_price.toFixed(2)} €</td>
+                          <td style={{ padding: '11px 14px', fontWeight: 800, color: 'var(--primary)' }}>
+                            {o.total_price.toFixed(2)} €
+                            {o.deposit_amount > 0 && <div style={{ fontSize: 11, fontWeight: 600, color: '#92400e' }}>Acompte {o.deposit_amount.toFixed(2)} €</div>}
+                          </td>
                           <td style={{ padding: '11px 14px' }}>{o.type}</td>
                           <td style={{ padding: '11px 14px' }}>
-                            <span style={{ padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, background: o.status === 'paid' ? '#d1fae5' : '#fef3c7', color: o.status === 'paid' ? '#065f46' : '#92400e' }}>
-                              {o.status === 'paid' ? '✅ Payé' : '⏳ ' + o.status}
+                            <span style={{ padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, background: o.status === 'cancelled' ? '#fee2e2' : o.status === 'paid' ? '#d1fae5' : '#fef3c7', color: o.status === 'cancelled' ? '#991b1b' : o.status === 'paid' ? '#065f46' : '#92400e' }}>
+                              {o.status === 'cancelled' ? `❌ Annulée${o.refunded ? ' (remb.)' : ''}` : o.status === 'paid' ? '✅ Payé' : '⏳ ' + o.status}
                             </span>
                           </td>
                           <td style={{ padding: '11px 14px', color: 'var(--gray-500)', fontSize: 12 }}>{new Date(o.created_at).toLocaleDateString('fr-FR')}</td>
@@ -889,6 +895,12 @@ export default function Admin() {
                       <p style={{ fontSize: 13, fontWeight: 600 }}>{r.customer_name}</p>
                       <p style={{ fontSize: 12, color: 'var(--gray-500)', marginBottom: 4 }}>{r.customer_email} · {r.customer_phone}</p>
                       <p style={{ fontSize: 12, color: 'var(--gray-600)', marginBottom: (r.delivery_out || r.delivery_in || r.booster || r.baby_seat) ? 4 : 8 }}>{r.start_date} → {r.end_date} ({r.days} j)</p>
+                      {r.deposit_amount > 0 && (
+                        <p style={{ fontSize: 11, color: '#92400e', marginBottom: 6 }}>
+                          Acompte {r.deposit_amount.toFixed(2)} € — solde {r.balance_due?.toFixed(2)} € dû
+                          {r.status === 'cancelled' && (r.refunded ? ' · remboursé' : ' · acompte conservé')}
+                        </p>
+                      )}
                       {r.delivery_out && (
                         <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 700, color: '#92400e', marginBottom: 4 }}>
                           Livraison{r.delivery_out_address ? ` — ${r.delivery_out_address}` : ''}
@@ -951,7 +963,14 @@ export default function Admin() {
                           <td style={{ padding: '11px 14px', fontSize: 13, fontWeight: 600 }}>{r.customer_phone || '—'}</td>
                           <td style={{ padding: '11px 14px', fontSize: 12, color: 'var(--gray-600)', whiteSpace: 'nowrap' }}>{r.start_date} → {r.end_date}</td>
                           <td style={{ padding: '11px 14px', fontWeight: 600 }}>{r.days} j</td>
-                          <td style={{ padding: '11px 14px', fontWeight: 800, color: 'var(--primary)' }}>{r.total} €</td>
+                          <td style={{ padding: '11px 14px', fontWeight: 800, color: 'var(--primary)' }}>
+                            {r.total} €
+                            {r.deposit_amount > 0 && (
+                              <div style={{ fontSize: 11, fontWeight: 600, color: '#92400e' }}>
+                                Acompte {r.deposit_amount.toFixed(2)} €{r.status === 'cancelled' && (r.refunded ? ' (remb.)' : ' (conservé)')}
+                              </div>
+                            )}
+                          </td>
                           <td style={{ padding: '11px 14px' }}>
                             {r.delivery_out ? (
                               <div>

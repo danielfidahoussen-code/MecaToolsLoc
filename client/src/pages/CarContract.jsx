@@ -25,6 +25,9 @@ Seules les personnes indiquées au contrat peuvent conduire. Tout ajout de condu
 5) Réservation – Paiement – Caution
 Le prix comprend la location et les options indiquées au contrat. La caution est versée par (préautorisation CB / chèque / espèces / virement) selon le contrat. Le Loueur peut encaisser tout ou partie de la caution (ou la conserver/ajuster) pour couvrir : dommages, franchise, carburant manquant, kilomètres supplémentaires, nettoyage, retard, amendes/infractions, frais de dossier, immobilisation, remorquage, accessoires manquants, ou toute somme due.
 
+5 bis) Acompte et annulation
+Un acompte de 20 % du montant total est réglé en ligne au moment de la réservation ; le solde (80 %) est réglé en personne lors de la remise du Véhicule. En cas d'annulation par le Locataire à 2 jours ou plus avant le début de la location, l'acompte est intégralement remboursé. En cas d'annulation à moins de 2 jours du début de la location, l'acompte reste acquis au Loueur et n'est pas remboursé. L'annulation s'effectue via le lien dédié communiqué dans l'email de confirmation.
+
 6) Remise du Véhicule – État des lieux départ
 Le Véhicule est remis avec un état des lieux départ (photos possibles) mentionnant km, carburant, et défauts visibles. Le Locataire doit vérifier immédiatement et signaler toute anomalie déterminante avant de quitter le lieu de départ ; à défaut, l'état des lieux départ fait foi.
 

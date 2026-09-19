@@ -8,6 +8,7 @@
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+const SITE_URL = process.env.SITE_URL || 'https://www.prestolocation.re';
 
 async function sendTelegram(text) {
   if (!BOT_TOKEN || !CHAT_ID) {
@@ -195,7 +196,7 @@ async function notifyContactMessage({ name, email, phone, subject, message }) {
 
 // Confirmation client — commande d'outils
 // `contract` (optionnel) : enregistrement rental_contracts déjà signé -> joint en PDF à l'email.
-async function confirmCustomerOrder({ customer_name, customer_email, customer_address, items, total_price, contract }) {
+async function confirmCustomerOrder({ id, customer_name, customer_email, customer_address, items, total_price, deposit_amount, balance_due, cancel_token, contract }) {
   const lignes = (items || []).map(i => {
     const type = i.type === 'rent' ? 'Location' : 'Achat';
     const dates = (i.start || i.rentDates?.startDate) ? ` — du ${i.start || i.rentDates?.startDate} au ${i.end || i.rentDates?.endDate}` : '';
@@ -206,6 +207,7 @@ async function confirmCustomerOrder({ customer_name, customer_email, customer_ad
     ? `<p><strong>Retrait sur place :</strong> 3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis. Du lundi au samedi, 8h–18h.</p>`
     : `<p><strong>Livraison prévue à :</strong> ${esc(customer_address)}. Nous vous contacterons pour convenir du créneau.</p>`;
   const aRent = (items || []).some(i => i.type === 'rent');
+  const hasDeposit = Number(deposit_amount) > 0;
 
   let attachments = [];
   if (contract) {
@@ -218,15 +220,23 @@ async function confirmCustomerOrder({ customer_name, customer_email, customer_ad
     }
   }
 
+  const paiement = hasDeposit
+    ? `<p><strong>Acompte payé : ${Number(deposit_amount).toFixed(2)} €</strong> (20% du total)<br/>Solde à régler en personne à la remise du matériel : <strong>${Number(balance_due || 0).toFixed(2)} €</strong></p>`
+    : `<p><strong>Total payé : ${Number(total_price || 0).toFixed(2)} €</strong></p>`;
+  const cancelLink = (hasDeposit && cancel_token && id)
+    ? `<p style="color:#666;font-size:13px;">Besoin d'annuler ? <a href="${SITE_URL}/annulation-commande/${id}/${cancel_token}">Annulez votre commande ici</a>. Gratuite jusqu'à 2 jours avant le début de la location — au-delà, l'acompte reste acquis.</p>`
+    : '';
+
   const html =
     PRESTOLOCATION_EMAIL_HEADER +
     `<p>Bonjour ${esc(customer_name) || ''},</p>` +
     `<p>Merci pour votre commande chez <strong>PrestoLocation</strong> (Auto Presto). Voici le récapitulatif :</p>` +
     `<ul>${lignes || '<li>—</li>'}</ul>` +
-    `<p><strong>Total payé : ${Number(total_price || 0).toFixed(2)} €</strong></p>` +
+    paiement +
     recup +
     (aRent ? `<p><strong>Pour votre location :</strong> merci de vous munir d'une <strong>pièce d'identité</strong> et d'un <strong>moyen de caution</strong> (carte bancaire ou chèque). La caution est prise lors de la remise du matériel et n'est pas débitée si le matériel est rendu en bon état.</p>` : '') +
     (attachments.length ? `<p>Vous trouverez en pièce jointe une copie de votre <strong>contrat de location signé</strong>.</p>` : '') +
+    cancelLink +
     `<p>Une question ? Répondez à cet email ou appelez le 06 93 83 96 54.</p>` +
     `<p>À très vite,<br/>L'équipe Auto Presto — PrestoLocation</p>`;
 
@@ -239,14 +249,22 @@ async function confirmCustomerCarReservation(r) {
   const recup = r.delivery
     ? `<p><strong>Livraison prévue à :</strong> ${esc(r.delivery_address) || 'votre adresse'}. Nous vous contacterons pour le créneau.</p>`
     : `<p><strong>Retrait sur place :</strong> 3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis.</p>`;
+  const hasDeposit = Number(r.deposit_amount) > 0;
+  const paiement = hasDeposit
+    ? `<p><strong>Acompte payé : ${Number(r.deposit_amount).toFixed(2)} €</strong> (20% du total)<br/>Solde à régler en personne à la remise du véhicule : <strong>${Number(r.balance_due || 0).toFixed(2)} €</strong></p>`
+    : `<p><strong>Total payé : ${Number(r.total || 0).toFixed(2)} €</strong></p>`;
+  const cancelLink = r.cancel_token
+    ? `<p style="color:#666;font-size:13px;">Besoin d'annuler ? <a href="${SITE_URL}/annulation-vehicule/${r.id}/${r.cancel_token}">Annulez votre réservation ici</a>. Gratuite jusqu'à 2 jours avant le début de la location — au-delà, l'acompte reste acquis.</p>`
+    : '';
   const html =
     `<p>Bonjour ${esc(r.customer_name) || ''},</p>` +
     `<p>Votre réservation de véhicule chez <strong>PrestoLoc</strong> (Auto Presto) est confirmée :</p>` +
     `<ul><li><strong>${esc(r.car_name)}</strong></li>` +
     `<li>Du ${esc(r.start_date)} au ${esc(r.end_date)} (${r.days} jour${r.days > 1 ? 's' : ''})</li></ul>` +
-    `<p><strong>Total payé : ${Number(r.total || 0).toFixed(2)} €</strong></p>` +
+    paiement +
     recup +
     `<p>Merci de vous munir de votre <strong>permis de conduire</strong>, d'une <strong>pièce d'identité</strong> et d'un <strong>moyen de caution</strong>. L'état du véhicule et la caution seront vérifiés lors de la remise des clés.</p>` +
+    cancelLink +
     `<p>Une question ? Répondez à cet email ou appelez le 06 93 83 96 54.</p>` +
     `<p>À très vite,<br/>L'équipe Auto Presto — PrestoLoc</p>`;
 
