@@ -267,8 +267,15 @@ export default function CarContract() {
             </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--gray-200)', paddingTop: 8, marginTop: 4, fontWeight: 900, fontSize: 15 }}>
-            <span>Total à payer</span>
+            <span>Total</span>
             <span style={{ color: 'var(--primary)' }}>{reservation.total} €</span>
+          </div>
+          <div style={{ marginTop: 8, padding: '10px 12px', background: '#fff7ed', borderRadius: 8, fontSize: 12, color: '#7c2d12', lineHeight: 1.5 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+              <strong>Acompte à payer maintenant (20%)</strong>
+              <span style={{ fontWeight: 900, fontSize: 15 }}>{(reservation.total * 0.2).toFixed(2)} €</span>
+            </div>
+            <p>Solde de {(reservation.total * 0.8).toFixed(2)} € réglé en personne à la remise du véhicule. Annulation gratuite jusqu'à 2 jours avant le départ.</p>
           </div>
           <div style={{ marginTop: 10, padding: '10px 12px', background: '#f0f9ff', borderRadius: 8, fontSize: 12, color: '#0c4a6e', lineHeight: 1.5 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
@@ -283,7 +290,7 @@ export default function CarContract() {
 
         <button className="btn btn-primary btn-lg" style={{ width: '100%', justifyContent: 'center', fontSize: 16 }}
           onClick={handlePay} disabled={paying}>
-          {paying ? 'Redirection vers le paiement...' : `Payer ${reservation.total} € →`}
+          {paying ? 'Redirection vers le paiement...' : `Payer l'acompte de ${(reservation.total * 0.2).toFixed(2)} € →`}
         </button>
         <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 8 }}>Paiement sécurisé par Stripe</p>
       </div>
