@@ -3,7 +3,8 @@ const crypto = require('crypto');
 const Stripe = require('stripe');
 const { car_reservations } = require('../database');
 const { authMiddleware } = require('../middleware/auth');
-const { notifyNewCarReservation, confirmCustomerCarReservation, notifyCarReservationRequest, confirmCustomerCarRequest } = require('../notify');
+const { notifyNewCarReservation, confirmCustomerCarReservation, notifyCarReservationRequest, confirmCustomerCarRequest, sendLoyaltyCoupon, sendReferralRewardEmail } = require('../notify');
+const { resolveCode, markCouponUsed, hasPriorBooking, issueLoyaltyCoupon, issueReferralReward, getOrCreateReferralCode } = require('../loyalty');
 
 const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
 if (!stripe) console.error('[STRIPE] STRIPE_SECRET_KEY manquante — paiements véhicules désactivés');
@@ -103,6 +104,16 @@ router.post('/:id/checkout', async (req, res) => {
     if (r.booster) totalCents += 200 * days;
     if (r.baby_seat) totalCents += 400 * days;
 
+    // Code promo éventuel (fidélité ou parrainage)
+    let promo = null;
+    const { promo_code } = req.body;
+    if (promo_code) {
+      const result = resolveCode(promo_code, r.customer_email);
+      if (!result.valid) return res.status(400).json({ error: result.error });
+      promo = result;
+      totalCents = Math.round(totalCents * (1 - promo.percent / 100));
+    }
+
     const depositCents = Math.round(totalCents * DEPOSIT_RATE);
     const depositAmount = depositCents / 100;
     const balanceDue = (totalCents - depositCents) / 100;
@@ -112,14 +123,28 @@ router.post('/:id/checkout', async (req, res) => {
         currency: 'eur',
         product_data: {
           name: `Acompte de réservation (20%) — ${r.car_name} — ${r.start_date} au ${r.end_date}`,
-          description: `Solde de ${balanceDue.toFixed(2)} € à régler en personne à la remise du véhicule.`,
+          description: promo
+            ? `Code promo ${promo_code.trim().toUpperCase()} appliqué (-${promo.percent}%). Solde de ${balanceDue.toFixed(2)} € à régler en personne à la remise du véhicule.`
+            : `Solde de ${balanceDue.toFixed(2)} € à régler en personne à la remise du véhicule.`,
         },
         unit_amount: depositCents,
       },
       quantity: 1,
     }];
 
-    car_reservations.update(r.id, { deposit_amount: depositAmount, balance_due: balanceDue });
+    // Fidélité : ce client a-t-il déjà une réservation ? (calculé avant la mise à jour de statut ci-dessous)
+    const isFirstBooking = !hasPriorBooking(r.customer_email);
+
+    car_reservations.update(r.id, {
+      deposit_amount: depositAmount, balance_due: balanceDue,
+      promo_code: promo ? promo_code.trim().toUpperCase() : null,
+      promo_percent: promo ? promo.percent : null,
+      promo_source: promo ? promo.source : null,
+      promo_coupon_id: promo?.couponId || null,
+      promo_referral_owner_email: promo?.referralOwnerEmail || null,
+      promo_referral_owner_name: promo?.referralOwnerName || null,
+      is_first_booking: isFirstBooking,
+    });
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -233,6 +258,21 @@ router.get('/session/:sessionId', async (req, res) => {
         notifyNewCarReservation(existing).catch(err => console.error('[NOTIFY] notifyNewCarReservation:', err.message));
         // Email de confirmation au client
         confirmCustomerCarReservation(existing).catch(err => console.error('[NOTIFY] confirmCustomerCarReservation:', err.message));
+
+        // Fidélité & parrainage (une seule fois, à la 1ère confirmation de cette réservation)
+        if (existing.promo_source === 'coupon' && existing.promo_coupon_id) {
+          markCouponUsed(existing.promo_coupon_id);
+        } else if (existing.promo_source === 'referral' && existing.promo_referral_owner_email) {
+          const reward = issueReferralReward(existing.promo_referral_owner_email, existing.promo_referral_owner_name);
+          sendReferralRewardEmail(existing.promo_referral_owner_email, existing.promo_referral_owner_name, reward)
+            .catch(err => console.error('[NOTIFY] sendReferralRewardEmail:', err.message));
+        }
+        if (existing.is_first_booking) {
+          const coupon = issueLoyaltyCoupon(existing.customer_email, existing.customer_name);
+          const referral = getOrCreateReferralCode(existing.customer_email, existing.customer_name);
+          sendLoyaltyCoupon(existing.customer_email, existing.customer_name, coupon, referral?.code)
+            .catch(err => console.error('[NOTIFY] sendLoyaltyCoupon:', err.message));
+        }
       }
       res.json({ paid: true, reservation_id: existing?.id, customer_name: existing?.customer_name, customer_email: existing?.customer_email });
     } else {

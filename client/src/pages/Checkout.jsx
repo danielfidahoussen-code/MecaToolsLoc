@@ -135,6 +135,10 @@ export default function Checkout() {
   const [step, setStep] = useState('coord');
   const [paying, setPaying] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [promo, setPromo] = useState(null); // { percent, source }
+  const [promoChecking, setPromoChecking] = useState(false);
+  const [promoError, setPromoError] = useState('');
   const [deliveryMode, setDeliveryMode] = useState('delivery');
   const [deliveryTrips, setDeliveryTrips] = useState({ aller: true, retour: false });
   const [deliveryZone, setDeliveryZone] = useState(null); // null = pas encore calculé
@@ -214,6 +218,8 @@ export default function Checkout() {
   const deliveryFee = isPickup ? 0 : (currentZone?.fee ?? 0) * tripCount;
   const discount = isPickup ? total * 0.1 : 0;
   const finalTotal = total - discount + deliveryFee;
+  const promoDiscount = promo ? finalTotal * (promo.percent / 100) : 0;
+  const finalTotalWithPromo = finalTotal - promoDiscount;
   const totalCaution = items.filter(i => i.type === 'rent').reduce((s, i) => s + (i.caution || 0) * i.quantity, 0);
   const rentalZoneError = !isPickup && hasRentals && deliveryZone && deliveryZone !== '0-15';
 
@@ -330,6 +336,7 @@ export default function Checkout() {
         items: items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity, price: i.price, type: i.type, rentDates: i.rentDates || null, caution: i.caution || 0 })),
         total_price: finalTotal,
         contract_id: contractId,
+        promo_code: promo ? promoCode.trim() : undefined,
       });
       // Redirige vers la page de paiement Stripe
       window.location.href = data.url;
@@ -340,6 +347,23 @@ export default function Checkout() {
       setPaying(false);
     }
   };
+
+  const checkPromo = async () => {
+    if (!promoCode.trim()) return;
+    setPromoChecking(true);
+    setPromoError('');
+    try {
+      const { data } = await axios.post('/api/coupons/validate', { code: promoCode.trim(), customer_email: form.email });
+      setPromo({ percent: data.percent, source: data.source });
+      toast.success(`Code appliqué : -${data.percent}% !`);
+    } catch (err) {
+      setPromo(null);
+      setPromoError(err?.response?.data?.error || 'Code invalide');
+    } finally {
+      setPromoChecking(false);
+    }
+  };
+
 
   if (items.length === 0 && !success) return (
     <div style={{ textAlign: 'center', padding: '100px 20px' }}>
@@ -653,14 +677,20 @@ export default function Checkout() {
                       <span style={{ color: 'var(--gray-600)' }}>Livraison</span>
                       <span style={{ fontWeight: 600 }}>{isPickup ? 'Retrait sur place' : `Livraison — ${deliveryFee.toFixed(2)} €`}</span>
                     </div>
+                    {promo && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
+                        <span style={{ color: '#16a34a' }}>Code promo (-{promo.percent}%)</span>
+                        <span style={{ fontWeight: 700, color: '#16a34a' }}>-{promoDiscount.toFixed(2)} €</span>
+                      </div>
+                    )}
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 800, color: 'var(--primary)', borderTop: '1.5px solid var(--gray-200)', paddingTop: 10, marginTop: 8 }}>
                       <span>{hasRentals ? 'Acompte à payer (20%)' : 'Total à payer'}</span>
-                      <span>{(hasRentals ? finalTotal * 0.2 : finalTotal).toFixed(2)} €</span>
+                      <span>{(hasRentals ? finalTotalWithPromo * 0.2 : finalTotalWithPromo).toFixed(2)} €</span>
                     </div>
                     {hasRentals && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '8px 10px', background: 'rgba(217,119,6,.08)', border: '1.5px solid rgba(217,119,6,.2)', borderRadius: 8 }}>
                         <span style={{ fontSize: 12, color: '#92400e', fontWeight: 600 }}>
-                          Solde de {(finalTotal * 0.8).toFixed(2)} € réglé en personne à la remise. Annulation gratuite jusqu'à 2 jours avant le début — au-delà, l'acompte reste acquis.
+                          Solde de {(finalTotalWithPromo * 0.8).toFixed(2)} € réglé en personne à la remise. Annulation gratuite jusqu'à 2 jours avant le début — au-delà, l'acompte reste acquis.
                         </span>
                       </div>
                     )}
@@ -670,6 +700,20 @@ export default function Checkout() {
                         <span style={{ fontSize: 12, color: '#1e40af', fontWeight: 600 }}>Une caution sera prise lors de la remise de l'outil</span>
                       </div>
                     )}
+                  </div>
+
+                  {/* Code promo */}
+                  <div style={{ marginBottom: 20 }}>
+                    <label className="form-label">Code promo</label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <input className="form-control" placeholder="FIDELE-XXXXXX / PARRAIN-XXXXXX"
+                        value={promoCode} onChange={e => { setPromoCode(e.target.value); setPromo(null); setPromoError(''); }}
+                        disabled={!!promo}/>
+                      <button type="button" className="btn btn-outline" onClick={checkPromo} disabled={promoChecking || !!promo || !promoCode.trim()}>
+                        {promo ? 'Appliqué ✓' : promoChecking ? '...' : 'Valider'}
+                      </button>
+                    </div>
+                    {promoError && <p style={{ fontSize: 12, color: 'var(--danger)', marginTop: 4 }}>{promoError}</p>}
                   </div>
 
                   {/* Info Stripe */}
@@ -683,7 +727,7 @@ export default function Checkout() {
                   <button className="btn btn-primary btn-lg" onClick={handlePay} disabled={paying}
                     style={{ width: '100%', justifyContent: 'center', fontSize: 16 }}>
                     <CreditCard size={18}/>
-                    {paying ? 'Redirection vers Stripe...' : `Payer ${(hasRentals ? finalTotal * 0.2 : finalTotal).toFixed(2)} € →`}
+                    {paying ? 'Redirection vers Stripe...' : `Payer ${(hasRentals ? finalTotalWithPromo * 0.2 : finalTotalWithPromo).toFixed(2)} € →`}
                   </button>
                   <button className="btn" onClick={() => setStep(hasRentals ? 'contract' : 'coord')}
                     style={{ width: '100%', justifyContent: 'center', marginTop: 10, background: 'var(--gray-100)', color: 'var(--gray-700)' }}>
@@ -734,6 +778,12 @@ export default function Checkout() {
                     <span style={{ color: '#16a34a', fontWeight: 700 }}>-{discount.toFixed(2)} €</span>
                   </div>
                 )}
+                {promo && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
+                    <span style={{ color: '#16a34a', fontWeight: 700 }}>🏷️ Code promo (-{promo.percent}%)</span>
+                    <span style={{ color: '#16a34a', fontWeight: 700 }}>-{promoDiscount.toFixed(2)} €</span>
+                  </div>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14 }}>
                   <span style={{ color: 'var(--gray-600)' }}>Livraison {geoResult && !isPickup ? `(${geoResult.km.toFixed(1)} km)` : ''}</span>
                   <span style={{ color: 'var(--primary)', fontWeight: 600 }}>
@@ -742,11 +792,11 @@ export default function Checkout() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 18, color: 'var(--primary)', borderTop: '2px solid var(--gray-200)', paddingTop: 12, marginTop: 8 }}>
                   <span>Total TTC</span>
-                  <span>{finalTotal.toFixed(2)} €</span>
+                  <span>{finalTotalWithPromo.toFixed(2)} €</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--gray-400)', marginTop: 4 }}>
                   <span>dont TVA (8,5%)</span>
-                  <span>{(finalTotal - finalTotal / 1.085).toFixed(2)} € — HT : {(finalTotal / 1.085).toFixed(2)} €</span>
+                  <span>{(finalTotalWithPromo - finalTotalWithPromo / 1.085).toFixed(2)} € — HT : {(finalTotalWithPromo / 1.085).toFixed(2)} €</span>
                 </div>
                 {totalCaution > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, padding: '10px 12px', background: 'rgba(59,130,246,.07)', border: '1.5px solid rgba(59,130,246,.2)', borderRadius: 10, fontSize: 13 }}>

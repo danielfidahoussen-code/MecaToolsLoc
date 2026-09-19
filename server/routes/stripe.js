@@ -2,7 +2,8 @@ const router = require('express').Router();
 const crypto = require('crypto');
 const Stripe = require('stripe');
 const { orders, products, reservations, rental_contracts } = require('../database');
-const { notifyNewOrder, confirmCustomerOrder } = require('../notify');
+const { notifyNewOrder, confirmCustomerOrder, sendLoyaltyCoupon, sendReferralRewardEmail } = require('../notify');
+const { resolveCode, markCouponUsed, hasPriorBooking, issueLoyaltyCoupon, issueReferralReward, getOrCreateReferralCode } = require('../loyalty');
 
 // Init tolérante : si la clé manque, le site reste en ligne (seul le paiement échoue proprement)
 const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -32,7 +33,7 @@ router.post('/create-checkout-session', async (req, res) => {
   try {
     const {
       customer_name, customer_email, customer_phone, customer_address,
-      delivery_mode, delivery_fee, discount, items, total_price, contract_id,
+      delivery_mode, delivery_fee, discount, items, total_price, contract_id, promo_code,
     } = req.body;
 
     const hasRentalItems = (items || []).some(i => i.type === 'rent');
@@ -47,6 +48,15 @@ router.post('/create-checkout-session', async (req, res) => {
     // Total du panier en centimes (sert de base à l'acompte s'il y a de la location)
     let cartTotalCents = items.reduce((s, item) => s + Math.round(item.price * 100) * item.quantity, 0);
     if (delivery_fee > 0) cartTotalCents += Math.round(delivery_fee * 100);
+
+    // Code promo éventuel (fidélité ou parrainage)
+    let promo = null;
+    if (promo_code) {
+      const result = resolveCode(promo_code, customer_email);
+      if (!result.valid) return res.status(400).json({ error: result.error });
+      promo = result;
+      cartTotalCents = Math.round(cartTotalCents * (1 - promo.percent / 100));
+    }
 
     let lineItems;
     let depositAmount = null;
@@ -63,14 +73,28 @@ router.post('/create-checkout-session', async (req, res) => {
           currency: 'eur',
           product_data: {
             name: 'Acompte de réservation (20%)',
-            description: `Solde de ${balanceDue.toFixed(2)} € à régler en personne à la remise du matériel.`,
+            description: promo
+              ? `Code promo ${promo_code.trim().toUpperCase()} appliqué (-${promo.percent}%). Solde de ${balanceDue.toFixed(2)} € à régler en personne à la remise du matériel.`
+              : `Solde de ${balanceDue.toFixed(2)} € à régler en personne à la remise du matériel.`,
           },
           unit_amount: depositCents,
         },
         quantity: 1,
       }];
+    } else if (promo) {
+      // Achat sans location, avec code promo : un seul article représentant le total remisé
+      lineItems = [{
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: `Commande PrestoLocation — code promo ${promo_code.trim().toUpperCase()} (-${promo.percent}%)`,
+          },
+          unit_amount: cartTotalCents,
+        },
+        quantity: 1,
+      }];
     } else {
-      // Achat sans location : paiement intégral, comportement inchangé
+      // Achat sans location, sans code promo : paiement intégral, comportement inchangé
       lineItems = items.map(item => ({
         price_data: {
           currency: 'eur',
@@ -113,7 +137,7 @@ router.post('/create-checkout-session', async (req, res) => {
         delivery_mode: (delivery_mode || '').slice(0, 100),
         delivery_fee: String(delivery_fee || 0),
         discount: String(discount || 0),
-        total_price: String(total_price),
+        total_price: promo ? String(cartTotalCents / 100) : String(total_price),
         caution_total: String(items.reduce((s, i) => s + (i.caution || 0) * (i.quantity || 1), 0)),
         items: itemsMeta.slice(0, 490),
         contract_id: contract_id ? String(contract_id) : '',
@@ -121,6 +145,13 @@ router.post('/create-checkout-session', async (req, res) => {
         deposit_amount: depositAmount != null ? String(depositAmount) : '',
         balance_due: balanceDue != null ? String(balanceDue) : '',
         rental_start: hasRentalItems ? (earliestRentalStart(items) || '') : '',
+        promo_code: promo ? promo_code.trim().toUpperCase() : '',
+        promo_percent: promo ? String(promo.percent) : '',
+        promo_source: promo ? promo.source : '',
+        promo_coupon_id: promo?.couponId ? String(promo.couponId) : '',
+        promo_referral_owner_email: promo?.referralOwnerEmail || '',
+        promo_referral_owner_name: promo?.referralOwnerName || '',
+        is_first_booking: String(!hasPriorBooking(customer_email)),
       },
       payment_intent_data: {
         description: `PrestoLocation - commande de ${(customer_name || '').slice(0, 100)}`,
@@ -218,7 +249,24 @@ async function createOrderFromSession(session) {
     deposit_amount: meta.deposit_amount ? parseFloat(meta.deposit_amount) : null,
     balance_due: meta.balance_due ? parseFloat(meta.balance_due) : null,
     rental_start: meta.rental_start || null,
+    promo_code: meta.promo_code || null,
+    promo_percent: meta.promo_percent ? parseFloat(meta.promo_percent) : null,
   });
+
+  // Fidélité & parrainage (une seule fois, à la création de la commande)
+  if (meta.promo_source === 'coupon' && meta.promo_coupon_id) {
+    markCouponUsed(Number(meta.promo_coupon_id));
+  } else if (meta.promo_source === 'referral' && meta.promo_referral_owner_email) {
+    const reward = issueReferralReward(meta.promo_referral_owner_email, meta.promo_referral_owner_name);
+    sendReferralRewardEmail(meta.promo_referral_owner_email, meta.promo_referral_owner_name, reward)
+      .catch(err => console.error('[NOTIFY] sendReferralRewardEmail:', err.message));
+  }
+  if (meta.is_first_booking === 'true') {
+    const coupon = issueLoyaltyCoupon(session.customer_email, meta.customer_name);
+    const referral = getOrCreateReferralCode(session.customer_email, meta.customer_name);
+    sendLoyaltyCoupon(session.customer_email, meta.customer_name, coupon, referral?.code)
+      .catch(err => console.error('[NOTIFY] sendLoyaltyCoupon:', err.message));
+  }
 
   items.forEach(item => {
     if (item.type === 'sale') {
@@ -267,6 +315,8 @@ async function createOrderFromSession(session) {
     deposit_amount: meta.deposit_amount ? parseFloat(meta.deposit_amount) : null,
     balance_due: meta.balance_due ? parseFloat(meta.balance_due) : null,
     cancel_token: meta.cancel_token || null,
+    promo_code: meta.promo_code || null,
+    promo_percent: meta.promo_percent || null,
     contract,
   }).catch(err => console.error('[NOTIFY] confirmCustomerOrder:', err.message));
 }

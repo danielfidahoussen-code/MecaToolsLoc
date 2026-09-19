@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, FileText, Download, Mail, CheckCircle, Circle } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, FileText, Download, Mail, CheckCircle, Circle, Tag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -317,6 +317,8 @@ export default function Admin() {
   const [reservations, setReservations] = useState([]);
   const [carReservations, setCarReservations] = useState([]);
   const [contactMessages, setContactMessages] = useState([]);
+  const [coupons, setCoupons] = useState([]);
+  const [referralCodes, setReferralCodes] = useState([]);
   const [carsDb, setCarsDb] = useState([]);
   const [categories, setCategories] = useState([]);
   const [editProduct, setEditProduct] = useState(null);
@@ -333,7 +335,7 @@ export default function Admin() {
     if (!loggedIn || !token) return;
     setLoading(true);
     try {
-      const [p, o, r, c, cr, cars, msgs] = await Promise.all([
+      const [p, o, r, c, cr, cars, msgs, cp] = await Promise.all([
         axios.get('/api/products?limit=100'),
         axios.get('/api/orders', API(token)),
         axios.get('/api/reservations', API(token)),
@@ -341,6 +343,7 @@ export default function Admin() {
         axios.get('/api/car-reservations', API(token)),
         axios.get('/api/cars/all', API(token)),
         axios.get('/api/contact', API(token)),
+        axios.get('/api/coupons', API(token)),
       ]);
       setProducts(p.data.products);
       setOrders(o.data);
@@ -349,6 +352,8 @@ export default function Admin() {
       setCarReservations(cr.data);
       setCarsDb(cars.data);
       setContactMessages(msgs.data);
+      setCoupons(cp.data.coupons);
+      setReferralCodes(cp.data.referral_codes);
     } catch {}
     setLoading(false);
   };
@@ -444,6 +449,7 @@ export default function Admin() {
     { id: 'reservations',    label: 'Réservations',     icon: <Calendar size={15}/> },
     { id: 'car_reservations',label: 'Location voitures',icon: <Calendar size={15}/> },
     { id: 'messages',        label: 'Messages',         icon: <Mail size={15}/> },
+    { id: 'coupons',         label: 'Codes promo',      icon: <Tag size={15}/> },
     { id: 'stats',           label: 'Tableau de bord',  icon: <BarChart3 size={15}/> },
   ];
 
@@ -848,6 +854,73 @@ export default function Admin() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'coupons' && (
+            <div>
+              <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: isMobile ? 17 : 22, marginBottom: 20 }}>Codes promo</h2>
+
+              <h3 style={{ fontWeight: 700, color: 'var(--primary)', fontSize: 15, marginBottom: 10 }}>Coupons émis ({coupons.length})</h3>
+              {coupons.length === 0 ? <p style={{ color: 'var(--gray-500)', marginBottom: 24 }}>Aucun coupon émis pour le moment</p> : (
+                <div style={{ overflowX: 'auto', marginBottom: 32 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+                    <thead>
+                      <tr style={{ background: 'var(--light)', borderBottom: '2px solid var(--gray-200)' }}>
+                        {['Code', 'Type', '%', 'Bénéficiaire', 'Statut', 'Émis le'].map((h, hi) => (
+                          <th key={hi} style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700 }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {coupons.map((c, i) => (
+                        <tr key={c.id} style={{ background: i % 2 ? 'var(--light)' : 'white' }}>
+                          <td style={{ padding: '10px 12px', fontWeight: 700, fontFamily: 'monospace' }}>{c.code}</td>
+                          <td style={{ padding: '10px 12px' }}>{c.kind === 'loyalty' ? 'Fidélité' : 'Récompense parrainage'}</td>
+                          <td style={{ padding: '10px 12px', fontWeight: 700 }}>-{c.percent}%</td>
+                          <td style={{ padding: '10px 12px' }}>
+                            <p style={{ fontWeight: 600 }}>{c.owner_name || '—'}</p>
+                            <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{c.owner_email}</p>
+                          </td>
+                          <td style={{ padding: '10px 12px' }}>
+                            <span style={{ padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, background: c.used ? '#fee2e2' : '#d1fae5', color: c.used ? '#991b1b' : '#065f46' }}>
+                              {c.used ? 'Utilisé' : 'Disponible'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '10px 12px', fontSize: 12, color: 'var(--gray-400)' }}>{new Date(c.created_at).toLocaleDateString('fr-FR')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <h3 style={{ fontWeight: 700, color: 'var(--primary)', fontSize: 15, marginBottom: 10 }}>Codes de parrainage ({referralCodes.length})</h3>
+              {referralCodes.length === 0 ? <p style={{ color: 'var(--gray-500)' }}>Aucun code de parrainage pour le moment</p> : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+                    <thead>
+                      <tr style={{ background: 'var(--light)', borderBottom: '2px solid var(--gray-200)' }}>
+                        {['Code', 'Propriétaire', 'Créé le'].map((h, hi) => (
+                          <th key={hi} style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700 }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {referralCodes.map((r, i) => (
+                        <tr key={r.id} style={{ background: i % 2 ? 'var(--light)' : 'white' }}>
+                          <td style={{ padding: '10px 12px', fontWeight: 700, fontFamily: 'monospace' }}>{r.code}</td>
+                          <td style={{ padding: '10px 12px' }}>
+                            <p style={{ fontWeight: 600 }}>{r.owner_name || '—'}</p>
+                            <p style={{ fontSize: 12, color: 'var(--gray-500)' }}>{r.owner_email}</p>
+                          </td>
+                          <td style={{ padding: '10px 12px', fontSize: 12, color: 'var(--gray-400)' }}>{new Date(r.created_at).toLocaleDateString('fr-FR')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>

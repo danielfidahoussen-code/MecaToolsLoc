@@ -61,8 +61,15 @@ export default function ProductCard({ product }) {
             )}
             {product.available_for_rent && product.price_day && (
               <div style={{ background: 'rgba(245,197,24,.1)', padding: '5px 10px', borderRadius: 8 }}>
-                <p style={{ fontSize: 10, color: 'var(--gray-600)', fontWeight: 600 }}>LOCATION</p>
-                <p style={{ fontWeight: 800, fontSize: 17, color: 'var(--primary)' }}>{product.price_day.toFixed(2)} €<span style={{ fontSize: 11, fontWeight: 500 }}>/j</span></p>
+                <p style={{ fontSize: 10, color: 'var(--gray-600)', fontWeight: 600 }}>LOCATION — À PARTIR DE</p>
+                {product.price_week > 0 ? (
+                  <>
+                    <p style={{ fontWeight: 800, fontSize: 17, color: 'var(--primary)' }}>{(product.price_week / 7).toFixed(2)} €<span style={{ fontSize: 11, fontWeight: 500 }}>/j</span></p>
+                    <p style={{ fontSize: 10, color: 'var(--gray-500)' }}>{product.price_day.toFixed(2)} €/j à la journée</p>
+                  </>
+                ) : (
+                  <p style={{ fontWeight: 800, fontSize: 17, color: 'var(--primary)' }}>{product.price_day.toFixed(2)} €<span style={{ fontSize: 11, fontWeight: 500 }}>/j</span></p>
+                )}
               </div>
             )}
           </div>

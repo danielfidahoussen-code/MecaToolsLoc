@@ -196,7 +196,7 @@ async function notifyContactMessage({ name, email, phone, subject, message }) {
 
 // Confirmation client — commande d'outils
 // `contract` (optionnel) : enregistrement rental_contracts déjà signé -> joint en PDF à l'email.
-async function confirmCustomerOrder({ id, customer_name, customer_email, customer_address, items, total_price, deposit_amount, balance_due, cancel_token, contract }) {
+async function confirmCustomerOrder({ id, customer_name, customer_email, customer_address, items, total_price, deposit_amount, balance_due, cancel_token, promo_code, promo_percent, contract }) {
   const lignes = (items || []).map(i => {
     const type = i.type === 'rent' ? 'Location' : 'Achat';
     const dates = (i.start || i.rentDates?.startDate) ? ` — du ${i.start || i.rentDates?.startDate} au ${i.end || i.rentDates?.endDate}` : '';
@@ -220,9 +220,11 @@ async function confirmCustomerOrder({ id, customer_name, customer_email, custome
     }
   }
 
-  const paiement = hasDeposit
-    ? `<p><strong>Acompte payé : ${Number(deposit_amount).toFixed(2)} €</strong> (20% du total)<br/>Solde à régler en personne à la remise du matériel : <strong>${Number(balance_due || 0).toFixed(2)} €</strong></p>`
-    : `<p><strong>Total payé : ${Number(total_price || 0).toFixed(2)} €</strong></p>`;
+  const paiement =
+    (promo_code ? `<p style="color:#16a34a;">Code promo <strong>${esc(promo_code)}</strong> appliqué (-${promo_percent}%).</p>` : '') +
+    (hasDeposit
+      ? `<p><strong>Acompte payé : ${Number(deposit_amount).toFixed(2)} €</strong> (20% du total)<br/>Solde à régler en personne à la remise du matériel : <strong>${Number(balance_due || 0).toFixed(2)} €</strong></p>`
+      : `<p><strong>Total payé : ${Number(total_price || 0).toFixed(2)} €</strong></p>`);
   const cancelLink = (hasDeposit && cancel_token && id)
     ? `<p style="color:#666;font-size:13px;">Besoin d'annuler ? <a href="${SITE_URL}/annulation-commande/${id}/${cancel_token}">Annulez votre commande ici</a>. Gratuite jusqu'à 2 jours avant le début de la location — au-delà, l'acompte reste acquis.</p>`
     : '';
@@ -250,9 +252,11 @@ async function confirmCustomerCarReservation(r) {
     ? `<p><strong>Livraison prévue à :</strong> ${esc(r.delivery_address) || 'votre adresse'}. Nous vous contacterons pour le créneau.</p>`
     : `<p><strong>Retrait sur place :</strong> 3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis.</p>`;
   const hasDeposit = Number(r.deposit_amount) > 0;
-  const paiement = hasDeposit
-    ? `<p><strong>Acompte payé : ${Number(r.deposit_amount).toFixed(2)} €</strong> (20% du total)<br/>Solde à régler en personne à la remise du véhicule : <strong>${Number(r.balance_due || 0).toFixed(2)} €</strong></p>`
-    : `<p><strong>Total payé : ${Number(r.total || 0).toFixed(2)} €</strong></p>`;
+  const paiement =
+    (r.promo_code ? `<p style="color:#16a34a;">Code promo <strong>${esc(r.promo_code)}</strong> appliqué (-${r.promo_percent}%).</p>` : '') +
+    (hasDeposit
+      ? `<p><strong>Acompte payé : ${Number(r.deposit_amount).toFixed(2)} €</strong> (20% du total)<br/>Solde à régler en personne à la remise du véhicule : <strong>${Number(r.balance_due || 0).toFixed(2)} €</strong></p>`
+      : `<p><strong>Total payé : ${Number(r.total || 0).toFixed(2)} €</strong></p>`);
   const cancelLink = r.cancel_token
     ? `<p style="color:#666;font-size:13px;">Besoin d'annuler ? <a href="${SITE_URL}/annulation-vehicule/${r.id}/${r.cancel_token}">Annulez votre réservation ici</a>. Gratuite jusqu'à 2 jours avant le début de la location — au-delà, l'acompte reste acquis.</p>`
     : '';
@@ -295,10 +299,36 @@ async function sendTelegramTest() {
   await sendTelegram('Test PrestoLocation : si tu vois ce message, les notifications Telegram fonctionnent (commandes, réservations et contact).');
 }
 
+// Email du code fidélité (-15%), envoyé après la 1ère réservation payée
+async function sendLoyaltyCoupon(email, name, coupon, referralCode) {
+  const html =
+    PRESTOLOCATION_EMAIL_HEADER +
+    `<p>Bonjour ${esc(name) || ''},</p>` +
+    `<p>Merci pour votre première réservation chez <strong>PrestoLocation</strong> ! Pour vous remercier, voici un code de <strong>-15% sur votre prochaine réservation</strong> (outillage ou véhicule) :</p>` +
+    `<p style="font-size:22px;font-weight:900;letter-spacing:2px;background:#fff7ed;color:#c2410c;padding:12px 18px;border-radius:8px;text-align:center;margin:16px 0;">${esc(coupon.code)}</p>` +
+    `<p>Entrez ce code au moment du paiement.</p>` +
+    (referralCode ? `<p>Et si vous parrainez un proche avec votre code personnel <strong>${esc(referralCode)}</strong>, il aura -10% sur sa première réservation, et vous recevrez -10% sur la vôtre !</p>` : '') +
+    `<p>À très vite,<br/>L'équipe PrestoLocation</p>`;
+  await sendCustomerEmail(email, 'Votre code -15% pour votre prochaine réservation — PrestoLocation', html);
+}
+
+// Email de récompense de parrainage (-10%), envoyé au parrain quand son filleul a payé sa réservation
+async function sendReferralRewardEmail(email, name, coupon) {
+  const html =
+    PRESTOLOCATION_EMAIL_HEADER +
+    `<p>Bonjour ${esc(name) || ''},</p>` +
+    `<p>Bonne nouvelle : la personne que vous avez parrainée vient de réserver chez <strong>PrestoLocation</strong> ! En vous remerciant, voici un code de <strong>-10% sur votre prochaine réservation</strong> :</p>` +
+    `<p style="font-size:22px;font-weight:900;letter-spacing:2px;background:#fff7ed;color:#c2410c;padding:12px 18px;border-radius:8px;text-align:center;margin:16px 0;">${esc(coupon.code)}</p>` +
+    `<p>Merci pour votre confiance et pour avoir partagé PrestoLocation autour de vous.</p>` +
+    `<p>À très vite,<br/>L'équipe PrestoLocation</p>`;
+  await sendCustomerEmail(email, 'Merci pour votre parrainage — voici -10% pour vous — PrestoLocation', html);
+}
+
 module.exports = {
   notifyNewOrder, notifyNewCarReservation, notifyContactMessage,
   confirmCustomerOrder, confirmCustomerCarReservation,
   notifyCarReservationRequest, confirmCustomerCarRequest,
   telegramConfigured, sendTelegramTest,
+  sendLoyaltyCoupon, sendReferralRewardEmail,
   emailConfigured, sendEmailTest, emailDiagnostic,
 };

@@ -37,6 +37,7 @@ app.use('/api/car-reservations', require('./routes/car-reservations'));
 app.use('/api/cars', require('./routes/cars'));
 app.use('/api/rental-contracts', require('./routes/rental-contracts'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/coupons', require('./routes/coupons'));
 app.use('/api/admin', require('./routes/admin'));
 
 // Serve React build in production

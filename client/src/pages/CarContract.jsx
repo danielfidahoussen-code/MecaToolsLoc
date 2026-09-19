@@ -168,6 +168,10 @@ export default function CarContract() {
   const [signed, setSigned] = useState(false);
   const [paying, setPaying] = useState(false);
   const [secondDriver, setSecondDriver] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [promo, setPromo] = useState(null); // { percent, source }
+  const [promoChecking, setPromoChecking] = useState(false);
+  const [promoError, setPromoError] = useState('');
 
   useEffect(() => {
     axios.get(`/api/car-reservations/public/${id}`)
@@ -202,11 +206,27 @@ export default function CarContract() {
   const handlePay = async () => {
     setPaying(true);
     try {
-      const { data } = await axios.post(`/api/car-reservations/${id}/checkout`);
+      const { data } = await axios.post(`/api/car-reservations/${id}/checkout`, { promo_code: promo ? promoCode.trim() : undefined });
       window.location.href = data.url;
     } catch (err) {
       toast.error(err?.response?.data?.error || 'Erreur paiement');
       setPaying(false);
+    }
+  };
+
+  const checkPromo = async () => {
+    if (!promoCode.trim()) return;
+    setPromoChecking(true);
+    setPromoError('');
+    try {
+      const { data } = await axios.post('/api/coupons/validate', { code: promoCode.trim(), customer_email: reservation.customer_email });
+      setPromo({ percent: data.percent, source: data.source });
+      toast.success(`Code appliqué : -${data.percent}% !`);
+    } catch (err) {
+      setPromo(null);
+      setPromoError(err?.response?.data?.error || 'Code invalide');
+    } finally {
+      setPromoChecking(false);
     }
   };
 
@@ -224,7 +244,9 @@ export default function CarContract() {
     </div>
   );
 
-  if (signed && reservation) return (
+  if (signed && reservation) {
+    const discountedTotal = promo ? reservation.total * (1 - promo.percent / 100) : reservation.total;
+    return (
     <div style={{ maxWidth: 540, margin: '60px auto', padding: '0 16px' }}>
       <div className="card" style={{ padding: '32px 28px', textAlign: 'center' }}>
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
@@ -270,12 +292,18 @@ export default function CarContract() {
             <span>Total</span>
             <span style={{ color: 'var(--primary)' }}>{reservation.total} €</span>
           </div>
+          {promo && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 13 }}>
+              <span style={{ color: '#16a34a' }}>Code promo (-{promo.percent}%)</span>
+              <span style={{ fontWeight: 700, color: '#16a34a' }}>-{(reservation.total * promo.percent / 100).toFixed(2)} €</span>
+            </div>
+          )}
           <div style={{ marginTop: 8, padding: '10px 12px', background: '#fff7ed', borderRadius: 8, fontSize: 12, color: '#7c2d12', lineHeight: 1.5 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
               <strong>Acompte à payer maintenant (20%)</strong>
-              <span style={{ fontWeight: 900, fontSize: 15 }}>{(reservation.total * 0.2).toFixed(2)} €</span>
+              <span style={{ fontWeight: 900, fontSize: 15 }}>{(discountedTotal * 0.2).toFixed(2)} €</span>
             </div>
-            <p>Solde de {(reservation.total * 0.8).toFixed(2)} € réglé en personne à la remise du véhicule. Annulation gratuite jusqu'à 2 jours avant le départ.</p>
+            <p>Solde de {(discountedTotal * 0.8).toFixed(2)} € réglé en personne à la remise du véhicule. Annulation gratuite jusqu'à 2 jours avant le départ.</p>
           </div>
           <div style={{ marginTop: 10, padding: '10px 12px', background: '#f0f9ff', borderRadius: 8, fontSize: 12, color: '#0c4a6e', lineHeight: 1.5 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
@@ -288,14 +316,29 @@ export default function CarContract() {
           </div>
         </div>
 
+        {/* Code promo */}
+        <div style={{ marginBottom: 16 }}>
+          <label className="form-label">Code promo</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input className="form-control" placeholder="FIDELE-XXXXXX / PARRAIN-XXXXXX"
+              value={promoCode} onChange={e => { setPromoCode(e.target.value); setPromo(null); setPromoError(''); }}
+              disabled={!!promo}/>
+            <button type="button" className="btn btn-outline" onClick={checkPromo} disabled={promoChecking || !!promo || !promoCode.trim()}>
+              {promo ? 'Appliqué ✓' : promoChecking ? '...' : 'Valider'}
+            </button>
+          </div>
+          {promoError && <p style={{ fontSize: 12, color: 'var(--danger)', marginTop: 4 }}>{promoError}</p>}
+        </div>
+
         <button className="btn btn-primary btn-lg" style={{ width: '100%', justifyContent: 'center', fontSize: 16 }}
           onClick={handlePay} disabled={paying}>
-          {paying ? 'Redirection vers le paiement...' : `Payer l'acompte de ${(reservation.total * 0.2).toFixed(2)} € →`}
+          {paying ? 'Redirection vers le paiement...' : `Payer l'acompte de ${(discountedTotal * 0.2).toFixed(2)} € →`}
         </button>
         <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 8 }}>Paiement sécurisé par Stripe</p>
       </div>
     </div>
   );
+  }
 
   const r = reservation;
 
