@@ -51,7 +51,6 @@ faqs.all().forEach(f => {
   }
 });
 
-const rental_contracts = db.table('rental_contracts');
 const car_reservations = db.table('car_reservations');
 
 const cars = db.table('cars');
@@ -326,4 +325,4 @@ if (!cars.all().some(c => c.price_1_3 != null)) {
   ].forEach(c => cars.insert(c));
 }
 
-module.exports = { categories, products, reservations, orders, users, faqs, contacts, coupons, referral_codes, rental_contracts, car_reservations, cars };
+module.exports = { categories, products, reservations, orders, users, faqs, contacts, coupons, referral_codes, car_reservations, cars };

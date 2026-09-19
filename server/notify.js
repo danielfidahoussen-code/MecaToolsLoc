@@ -40,7 +40,7 @@ const SMTP_PASS = process.env.SMTP_PASS;
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = process.env.SMTP_PORT;
 const MAIL_FROM = process.env.MAIL_FROM || (RESEND_API_KEY ? 'onboarding@resend.dev' : SMTP_USER);
-const FROM_HEADER = `Auto Presto - PrestoLocation <${MAIL_FROM}>`;
+const FROM_HEADER = `PrestoLocation <${MAIL_FROM}>`;
 
 let mailer = null;
 if (!RESEND_API_KEY) {
@@ -164,7 +164,7 @@ async function confirmCustomerCarRequest(r) {
     `<p>Nous avons bien reçu votre demande de réservation pour <strong>${esc(r.car_name)}</strong>, du ${esc(r.start_date)} au ${esc(r.end_date)} (${r.days} jour${r.days > 1 ? 's' : ''}).</p>` +
     `<p>Nous vous recontactons rapidement pour confirmer la disponibilité. Le paiement, le contrat et les modalités de livraison/récupération se règlent directement avec vous.</p>` +
     `<p>Une question ? Répondez à cet email ou appelez le 06 93 83 96 54.</p>` +
-    `<p>À très vite,<br/>L'équipe Auto Presto — PrestoLocation</p>`;
+    `<p>À très vite,<br/>L'équipe PrestoLocation</p>`;
 
   await sendCustomerEmail(r.customer_email, 'Votre demande de réservation — PrestoLocation', html);
 }
@@ -195,8 +195,7 @@ async function notifyContactMessage({ name, email, phone, subject, message }) {
 }
 
 // Confirmation client — commande d'outils
-// `contract` (optionnel) : enregistrement rental_contracts déjà signé -> joint en PDF à l'email.
-async function confirmCustomerOrder({ id, customer_name, customer_email, customer_address, items, total_price, deposit_amount, balance_due, cancel_token, promo_code, promo_percent, contract }) {
+async function confirmCustomerOrder({ id, customer_name, customer_email, customer_address, items, total_price, deposit_amount, balance_due, cancel_token, promo_code, promo_percent }) {
   const lignes = (items || []).map(i => {
     const type = i.type === 'rent' ? 'Location' : 'Achat';
     const dates = (i.start || i.rentDates?.startDate) ? ` — du ${i.start || i.rentDates?.startDate} au ${i.end || i.rentDates?.endDate}` : '';
@@ -208,17 +207,6 @@ async function confirmCustomerOrder({ id, customer_name, customer_email, custome
     : `<p><strong>Livraison prévue à :</strong> ${esc(customer_address)}. Nous vous contacterons pour convenir du créneau.</p>`;
   const aRent = (items || []).some(i => i.type === 'rent');
   const hasDeposit = Number(deposit_amount) > 0;
-
-  let attachments = [];
-  if (contract) {
-    try {
-      const { buildRentalContractPdf } = require('./pdf/rentalContract');
-      const buffer = await buildRentalContractPdf(contract);
-      attachments = [{ filename: `contrat-location-outillage-${contract.id}.pdf`, content: buffer }];
-    } catch (err) {
-      console.error('[NOTIFY] Génération PDF contrat (email client) échouée:', err.message);
-    }
-  }
 
   const paiement =
     (promo_code ? `<p style="color:#16a34a;">Code promo <strong>${esc(promo_code)}</strong> appliqué (-${promo_percent}%).</p>` : '') +
@@ -232,17 +220,16 @@ async function confirmCustomerOrder({ id, customer_name, customer_email, custome
   const html =
     PRESTOLOCATION_EMAIL_HEADER +
     `<p>Bonjour ${esc(customer_name) || ''},</p>` +
-    `<p>Merci pour votre commande chez <strong>PrestoLocation</strong> (Auto Presto). Voici le récapitulatif :</p>` +
+    `<p>Merci pour votre commande chez <strong>PrestoLocation</strong>. Voici le récapitulatif :</p>` +
     `<ul>${lignes || '<li>—</li>'}</ul>` +
     paiement +
     recup +
     (aRent ? `<p><strong>Pour votre location :</strong> merci de vous munir d'une <strong>pièce d'identité</strong> et d'un <strong>moyen de caution</strong> (carte bancaire ou chèque). La caution est prise lors de la remise du matériel et n'est pas débitée si le matériel est rendu en bon état.</p>` : '') +
-    (attachments.length ? `<p>Vous trouverez en pièce jointe une copie de votre <strong>contrat de location signé</strong>.</p>` : '') +
     cancelLink +
     `<p>Une question ? Répondez à cet email ou appelez le 06 93 83 96 54.</p>` +
-    `<p>À très vite,<br/>L'équipe Auto Presto — PrestoLocation</p>`;
+    `<p>À très vite,<br/>L'équipe PrestoLocation</p>`;
 
-  await sendCustomerEmail(customer_email, 'Confirmation de votre commande — PrestoLocation', html, attachments);
+  await sendCustomerEmail(customer_email, 'Confirmation de votre commande — PrestoLocation', html);
 }
 
 // Confirmation client — réservation véhicule
@@ -262,7 +249,7 @@ async function confirmCustomerCarReservation(r) {
     : '';
   const html =
     `<p>Bonjour ${esc(r.customer_name) || ''},</p>` +
-    `<p>Votre réservation de véhicule chez <strong>PrestoLoc</strong> (Auto Presto) est confirmée :</p>` +
+    `<p>Votre réservation de véhicule chez <strong>PrestoLocation</strong> est confirmée :</p>` +
     `<ul><li><strong>${esc(r.car_name)}</strong></li>` +
     `<li>Du ${esc(r.start_date)} au ${esc(r.end_date)} (${r.days} jour${r.days > 1 ? 's' : ''})</li></ul>` +
     paiement +
@@ -270,14 +257,14 @@ async function confirmCustomerCarReservation(r) {
     `<p>Merci de vous munir de votre <strong>permis de conduire</strong>, d'une <strong>pièce d'identité</strong> et d'un <strong>moyen de caution</strong>. L'état du véhicule et la caution seront vérifiés lors de la remise des clés.</p>` +
     cancelLink +
     `<p>Une question ? Répondez à cet email ou appelez le 06 93 83 96 54.</p>` +
-    `<p>À très vite,<br/>L'équipe Auto Presto — PrestoLoc</p>`;
+    `<p>À très vite,<br/>L'équipe PrestoLocation</p>`;
 
-  await sendCustomerEmail(r.customer_email, 'Confirmation de votre location — PrestoLoc', html);
+  await sendCustomerEmail(r.customer_email, 'Confirmation de votre location — PrestoLocation', html);
 }
 
 const emailConfigured = () => !!(RESEND_API_KEY || mailer);
 async function sendEmailTest(to) {
-  await sendCustomerEmail(to, 'Test email — Auto Presto / PrestoLocation',
+  await sendCustomerEmail(to, 'Test email — PrestoLocation',
     '<p>Si vous recevez cet email, l\'envoi des confirmations de commande par email fonctionne correctement.</p>');
 }
 // Diagnostic : tente un envoi RÉEL en remontant l'erreur exacte
@@ -286,8 +273,8 @@ async function emailDiagnostic(to) {
   if (!provider) return { configured: false, error: 'Ni RESEND_API_KEY ni SMTP configurés sur Railway' };
   if (!to) return { configured: true, provider, sent: false, message: 'Configuré. Ajoute ?email=... pour tester un envoi réel.' };
   try {
-    if (RESEND_API_KEY) await sendViaResend(to, 'Test email — Auto Presto / PrestoLocation', '<p>Si vous recevez cet email, l\'envoi fonctionne correctement.</p>');
-    else await mailer.sendMail({ from: FROM_HEADER, to, subject: 'Test email — Auto Presto / PrestoLocation', html: '<p>Test.</p>' });
+    if (RESEND_API_KEY) await sendViaResend(to, 'Test email — PrestoLocation', '<p>Si vous recevez cet email, l\'envoi fonctionne correctement.</p>');
+    else await mailer.sendMail({ from: FROM_HEADER, to, subject: 'Test email — PrestoLocation', html: '<p>Test.</p>' });
     return { configured: true, provider, sent: true, from: MAIL_FROM, message: `Email réellement envoyé à ${to}.` };
   } catch (err) {
     return { configured: true, provider, sent: false, from: MAIL_FROM, error: err.message };

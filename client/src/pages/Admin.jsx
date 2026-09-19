@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, FileText, Download, Mail, CheckCircle, Circle, Tag } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, Download, Mail, CheckCircle, Circle, Tag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -684,12 +684,6 @@ export default function Admin() {
                         <p style={{ fontSize: 11, color: '#92400e', marginTop: 4 }}>Acompte {o.deposit_amount.toFixed(2)} € — solde {o.balance_due?.toFixed(2)} € dû{o.rental_start ? ` (départ ${o.rental_start})` : ''}</p>
                       )}
                       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                        {o.contract_id && (
-                          <a href={`/api/rental-contracts/${o.contract_id}/pdf?token=${token}`} target="_blank" rel="noreferrer"
-                            className="btn btn-sm btn-outline" style={{ flex: 1, justifyContent: 'center' }}>
-                            <FileText size={13}/> Contrat PDF
-                          </a>
-                        )}
                         <button className="btn btn-sm btn-danger" onClick={() => deleteOrder(o.id)} style={{ flex: 1, justifyContent: 'center' }}><Trash2 size={13}/> Supprimer</button>
                       </div>
                     </div>
@@ -724,10 +718,6 @@ export default function Admin() {
                           <td style={{ padding: '11px 14px', color: 'var(--gray-500)', fontSize: 12 }}>{new Date(o.created_at).toLocaleDateString('fr-FR')}</td>
                           <td style={{ padding: '11px 14px' }}>
                             <div style={{ display: 'flex', gap: 6 }}>
-                              {o.contract_id && (
-                                <a href={`/api/rental-contracts/${o.contract_id}/pdf?token=${token}`} target="_blank" rel="noreferrer" title="Contrat PDF"
-                                  className="btn btn-sm btn-outline"><FileText size={13}/></a>
-                              )}
                               <button className="btn btn-sm btn-danger" onClick={() => deleteOrder(o.id)} title="Supprimer"><Trash2 size={13}/></button>
                             </div>
                           </td>
@@ -989,20 +979,11 @@ export default function Admin() {
                           {[r.booster ? 'Réhausseur' : null, r.baby_seat ? 'Siège bébé' : null].filter(Boolean).join(' + ')}
                         </div>
                       )}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
-                        {r.booking_mode === 'request'
-                          ? <span style={{ fontSize: 11, fontWeight: 700, background: '#ede9fe', color: '#5b21b6', padding: '2px 8px', borderRadius: 20 }}>Demande — à traiter en personne</span>
-                          : r.contract_signed_at
-                            ? <span style={{ fontSize: 11, fontWeight: 700, background: '#d1fae5', color: '#065f46', padding: '2px 8px', borderRadius: 20 }}>Contrat signé</span>
-                            : <span style={{ fontSize: 11, fontWeight: 700, background: '#fee2e2', color: '#991b1b', padding: '2px 8px', borderRadius: 20 }}>Contrat non signé</span>
-                        }
-                        {r.contract_signed_at && (
-                          <a href={`/api/car-reservations/${r.id}/contract/print?token=${token}`} target="_blank" rel="noreferrer"
-                            style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
-                            <FileText size={12}/> Voir
-                          </a>
-                        )}
-                      </div>
+                      {r.booking_mode === 'request' && (
+                        <div style={{ marginBottom: 8 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, background: '#ede9fe', color: '#5b21b6', padding: '2px 8px', borderRadius: 20 }}>Demande — à traiter en personne</span>
+                        </div>
+                      )}
                       <select style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1.5px solid var(--gray-200)', fontSize: 13, fontWeight: 700 }}
                         value={r.status} onChange={e => updateCarReservationStatus(r.id, e.target.value)}>
                         <option value="confirmed">Confirmée</option>
@@ -1019,7 +1000,7 @@ export default function Admin() {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <thead>
                       <tr style={{ background: 'var(--light)', borderBottom: '2px solid var(--gray-200)' }}>
-                        {['#', 'Véhicule', 'Client', 'Téléphone', 'Dates', 'Durée', 'Total', 'Livraison', 'Récupération', 'Sièges', 'Contrat', 'Statut', ''].map((h, hi) => (
+                        {['#', 'Véhicule', 'Client', 'Téléphone', 'Dates', 'Durée', 'Total', 'Livraison', 'Récupération', 'Sièges', 'Statut', ''].map((h, hi) => (
                           <th key={hi} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
                         ))}
                       </tr>
@@ -1064,17 +1045,10 @@ export default function Admin() {
                             {[r.booster ? 'Réhausseur' : null, r.baby_seat ? 'Siège bébé' : null].filter(Boolean).join(', ') || <span style={{ color: 'var(--gray-400)' }}>—</span>}
                           </td>
                           <td style={{ padding: '11px 14px' }}>
-                            {r.booking_mode === 'request' ? (
+                            {r.booking_mode === 'request' && (
                               <span style={{ fontSize: 11, fontWeight: 700, color: '#5b21b6', background: '#ede9fe', padding: '2px 6px', borderRadius: 4 }}>Demande</span>
-                            ) : r.contract_signed_at ? (
-                              <a href={`/api/car-reservations/${r.id}/contract/print?token=${token}`} target="_blank" rel="noreferrer"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#065f46', background: '#d1fae5', padding: '3px 8px', borderRadius: 6, textDecoration: 'none' }}>
-                                <FileText size={12}/> Voir
-                              </a>
-                            ) : <span style={{ fontSize: 11, fontWeight: 700, color: '#991b1b', background: '#fee2e2', padding: '2px 6px', borderRadius: 4 }}>Non signé</span>}
-                          </td>
-                          <td style={{ padding: '11px 14px' }}>
-                            <select style={{ padding: '4px 8px', borderRadius: 6, border: '1.5px solid var(--gray-200)', fontSize: 12, fontWeight: 700 }}
+                            )}
+                            <select style={{ padding: '4px 8px', borderRadius: 6, border: '1.5px solid var(--gray-200)', fontSize: 12, fontWeight: 700, marginTop: r.booking_mode === 'request' ? 6 : 0 }}
                               value={r.status} onChange={e => updateCarReservationStatus(r.id, e.target.value)}>
                               <option value="confirmed">Confirmée</option>
                               <option value="pending">En attente</option>

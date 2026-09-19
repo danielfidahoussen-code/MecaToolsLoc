@@ -70,7 +70,7 @@ export default function CGV() {
           </LegalSection>
 
           <LegalSection title="8. Contrat de location">
-            <p>Chaque location fait l'objet d'un contrat en bonne et due forme, signé électroniquement par le Client avant la mise à disposition du matériel. Ce contrat précise :</p>
+            <p>Chaque location fait l'objet d'un contrat en bonne et due forme, signé par le Client sur place, lors de la remise du matériel ou du véhicule. Ce contrat précise :</p>
             <ul>
               <li>La durée de la location et les dates de début/fin</li>
               <li>Le descriptif précis du matériel loué</li>

@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const crypto = require('crypto');
 const Stripe = require('stripe');
-const { orders, products, reservations, rental_contracts } = require('../database');
+const { orders, products, reservations } = require('../database');
 const { notifyNewOrder, confirmCustomerOrder, sendLoyaltyCoupon, sendReferralRewardEmail } = require('../notify');
 const { resolveCode, markCouponUsed, hasPriorBooking, issueLoyaltyCoupon, issueReferralReward, getOrCreateReferralCode } = require('../loyalty');
 
@@ -33,13 +33,10 @@ router.post('/create-checkout-session', async (req, res) => {
   try {
     const {
       customer_name, customer_email, customer_phone, customer_address,
-      delivery_mode, delivery_fee, discount, items, total_price, contract_id, promo_code,
+      delivery_mode, delivery_fee, discount, items, total_price, promo_code,
     } = req.body;
 
     const hasRentalItems = (items || []).some(i => i.type === 'rent');
-    if (hasRentalItems && !contract_id) {
-      return res.status(400).json({ error: 'Le contrat de location doit être signé avant le paiement' });
-    }
 
     const host = req.headers.host || '';
     const proto = host.includes('localhost') ? 'http' : 'https';
@@ -140,7 +137,6 @@ router.post('/create-checkout-session', async (req, res) => {
         total_price: promo ? String(cartTotalCents / 100) : String(total_price),
         caution_total: String(items.reduce((s, i) => s + (i.caution || 0) * (i.quantity || 1), 0)),
         items: itemsMeta.slice(0, 490),
-        contract_id: contract_id ? String(contract_id) : '',
         cancel_token: cancelToken || '',
         deposit_amount: depositAmount != null ? String(depositAmount) : '',
         balance_due: balanceDue != null ? String(balanceDue) : '',
@@ -240,7 +236,6 @@ async function createOrderFromSession(session) {
     customer_address: meta.customer_address || '',
     items: meta.items || '[]',
     total_price: parseFloat(meta.total_price || 0),
-    contract_id: meta.contract_id ? Number(meta.contract_id) : null,
     type: 'mixed',
     status: 'paid',
     stripe_session_id: session.id,
@@ -303,8 +298,7 @@ async function createOrderFromSession(session) {
     caution_total: meta.caution_total,
   }).catch(err => console.error('[NOTIFY] notifyNewOrder:', err.message));
 
-  // Email de confirmation au client — joint le contrat de location signé s'il y en a un
-  const contract = meta.contract_id ? rental_contracts.getById(Number(meta.contract_id)) : null;
+  // Email de confirmation au client
   confirmCustomerOrder({
     id: orderId,
     customer_name: meta.customer_name,
@@ -317,7 +311,6 @@ async function createOrderFromSession(session) {
     cancel_token: meta.cancel_token || null,
     promo_code: meta.promo_code || null,
     promo_percent: meta.promo_percent || null,
-    contract,
   }).catch(err => console.error('[NOTIFY] confirmCustomerOrder:', err.message));
 }
 
