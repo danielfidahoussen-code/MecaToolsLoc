@@ -25,7 +25,7 @@ export default function CGV() {
           </LegalSection>
 
           <LegalSection title="3. Tarifs">
-            <p>Les prix sont indiqués en euros toutes taxes comprises (TTC). Le prix applicable à une commande est celui affiché sur le site au moment de la validation de la commande par le Client. Le Vendeur peut faire évoluer ses tarifs à tout moment, sans que cela n'affecte les commandes déjà validées.</p>
+            <p>Les prix sont indiqués en euros. PrestoLocation bénéficie de la franchise en base de TVA (article 293 B du Code général des impôts) : les prix affichés ne comportent donc pas de TVA. Le prix applicable à une commande est celui affiché sur le site au moment de la validation de la commande par le Client. Le Vendeur peut faire évoluer ses tarifs à tout moment, sans que cela n'affecte les commandes déjà validées.</p>
             <p>Le montant total dû (produits + frais de livraison éventuels) est présenté au Client avant la validation définitive de sa commande.</p>
             <p><strong>Remise retrait sur place :</strong> une remise de 10 % est accordée au Client qui récupère le matériel directement à notre adresse (3B rue de la Guadeloupe, Moufia, 97490 Saint-Denis).</p>
           </LegalSection>

@@ -202,7 +202,7 @@ export default function ProductDetail() {
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                     <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--primary)' }}>{product.price_sale?.toFixed(2)} €</span>
-                    <span style={{ fontSize: 14, color: 'var(--gray-500)' }}>TTC</span>
+                    <span style={{ fontSize: 14, color: 'var(--gray-500)' }}>TVA non applicable</span>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Quantité</label>
