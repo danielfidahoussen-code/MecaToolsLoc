@@ -15,6 +15,7 @@ import Contact from './pages/Contact';
 import Admin from './pages/Admin';
 import MentionsLegales from './pages/MentionsLegales';
 import CGV from './pages/CGV';
+import ContratsEtFranchises from './pages/ContratsEtFranchises';
 import Confidentialite from './pages/Confidentialite';
 import LogoPreview from './pages/LogoPreview';
 import CheckoutSuccess from './pages/CheckoutSuccess';
@@ -47,6 +48,7 @@ export default function App() {
                   <Route path="/contact" element={<Contact/>}/>
                   <Route path="/mentions-legales" element={<MentionsLegales/>}/>
                   <Route path="/cgv" element={<CGV/>}/>
+                  <Route path="/contrats-et-franchises" element={<ContratsEtFranchises/>}/>
                   <Route path="/confidentialite" element={<Confidentialite/>}/>
                   <Route path="/logo-preview" element={<LogoPreview/>}/>
                   <Route path="/vehicules" element={<Vehicules/>}/>

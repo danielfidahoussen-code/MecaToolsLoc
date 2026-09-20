@@ -142,6 +142,7 @@ export default function Footer() {
               {[
                 { l: 'Mentions légales', to: '/mentions-legales' },
                 { l: 'CGV', to: '/cgv' },
+                { l: 'Contrats & Franchises', to: '/contrats-et-franchises' },
                 { l: 'Politique de confidentialité', to: '/confidentialite' },
               ].map(({ l, to }) => (
                 <Link key={l} to={to} style={{ color: 'rgba(255,255,255,.4)', fontSize: 13, transition: 'color .2s' }}
