@@ -98,8 +98,16 @@ export default function Home() {
       <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #3a0808 100%)', color: 'white', padding: '56px 0 40px' }}>
         <div className="container">
           <p style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,.55)', marginBottom: 10 }}>La Réunion</p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.25)', padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700 }}>
+              🔧 Outillage — location & vente
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.25)', padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700 }}>
+              🚗 Véhicules — location
+            </span>
+          </div>
           <h1 style={{ fontSize: 'clamp(28px,4.5vw,44px)', fontWeight: 900, lineHeight: 1.15, marginBottom: 14, maxWidth: 660 }}>
-            Outillage professionnel et véhicules, à la location comme à l'achat.
+            Location & vente d'outillage professionnel. Location de véhicules.
           </h1>
           <p style={{ color: 'rgba(255,255,255,.72)', fontSize: 16, maxWidth: 540, marginBottom: 28, lineHeight: 1.6 }}>
             Par un mécanicien, pour les mécaniciens. Matériel pro dispo tout de suite, jeunes conducteurs acceptés.
