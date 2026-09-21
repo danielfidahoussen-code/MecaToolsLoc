@@ -1,12 +1,10 @@
 import { Link } from 'react-router-dom';
 import { VEHICLE_CGL_TEXT, TOOL_RENTAL_CONTRACT_TEXT } from '../data/legalTexts';
 
-// Barème des franchises par catégorie de véhicule — en attente des montants réels
-// et des noms de catégorie réels (voir CLAUDE.md). Remplacer `null` par les montants
-// une fois reçus, ex. franchise: 1000, et `cat` par le nom réel de la catégorie.
+// Barème des franchises par catégorie de véhicule (offre "Assurance Premium")
 const FRANCHISE_TABLE = [
-  { cat: 'Catégorie 1', franchise: null, assurance: null, nonRachetable: null },
-  { cat: 'Catégorie 2', franchise: null, assurance: null, nonRachetable: null },
+  { cat: 'Catégorie A', franchise: 1500, assurance: 10, nonRachetable: 650 },
+  { cat: 'Catégorie B', franchise: 1350, assurance: 5, nonRachetable: 500 },
 ];
 
 export default function ContratsEtFranchises() {
@@ -26,7 +24,7 @@ export default function ContratsEtFranchises() {
           </div>
 
           <Section title="Réduisez votre franchise">
-            <p>En louant votre véhicule, vous pouvez également réduire votre franchise (en option) selon les conditions ci-dessous. Il suffit de nous l'indiquer lors de votre réservation.</p>
+            <p>En louant votre véhicule, vous pouvez également réduire votre franchise grâce à notre <strong>offre Assurance Premium</strong> (en option), selon les conditions ci-dessous. Il suffit de nous l'indiquer lors de votre réservation.</p>
             <FranchiseTable/>
             <p style={{ fontSize: 13, color: 'var(--gray-500)', marginTop: 14, fontStyle: 'italic' }}>
               Les détériorations intérieures, les brûlures et les dégâts aux pneumatiques restent à la charge du Client.
@@ -64,6 +62,9 @@ function euros(v) {
 function FranchiseTable() {
   return (
     <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid var(--gray-200)', boxShadow: '0 2px 10px rgba(34,4,4,.05)', margin: '16px 0' }}>
+      <div style={{ background: 'var(--accent)', color: 'white', fontWeight: 800, fontSize: 12, letterSpacing: 0.5, textTransform: 'uppercase', padding: '8px 16px' }}>
+        Offre Assurance Premium
+      </div>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
         <thead>
           <tr style={{ background: 'var(--primary)' }}>
