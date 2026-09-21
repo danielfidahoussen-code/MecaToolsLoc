@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const QRCode = require('qrcode');
+const bwipjs = require('bwip-js');
 const { products, categories } = require('../database');
 const { authMiddleware } = require('../middleware/auth');
 
@@ -25,6 +26,25 @@ router.get('/:id/qrcode.png', async (req, res) => {
   try {
     const url = `${SITE_URL}/produit/${product.id}`;
     const buffer = await QRCode.toBuffer(url, { width: 400, margin: 1, color: { dark: '#220404', light: '#ffffff' } });
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(buffer);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Code-barres (Code128) d'un produit — alternative au QR code pour les douchettes
+// qui ne lisent pas le 2D. Encode aussi le lien direct vers la fiche produit.
+router.get('/:id/barcode.png', async (req, res) => {
+  const product = products.getById(req.params.id);
+  if (!product) return res.status(404).json({ error: 'Produit non trouvé' });
+  try {
+    const url = `${SITE_URL}/produit/${product.id}`;
+    const buffer = await bwipjs.toBuffer({
+      bcid: 'code128', text: url, scale: 2, height: 10,
+      includetext: true, textxalign: 'center', textfont: 'Helvetica', textsize: 8,
+    });
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=86400');
     res.send(buffer);
