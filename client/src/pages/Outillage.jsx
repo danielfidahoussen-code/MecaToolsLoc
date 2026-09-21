@@ -10,9 +10,11 @@ export default function Outillage() {
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
 
   const type = searchParams.get('type') || '';
   const search = searchParams.get('search') || '';
+  const category = searchParams.get('category') || '';
   const page = parseInt(searchParams.get('page') || '1');
 
   const setParam = (key, val) => {
@@ -23,16 +25,20 @@ export default function Outillage() {
   };
 
   useEffect(() => {
+    axios.get('/api/products/categories').then(r => setCategories(r.data)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setLoading(true);
-    const params = { type, search, page, limit: 12 };
+    const params = { type, search, category, page, limit: 12 };
     axios.get('/api/products', { params }).then(r => {
       setProducts(r.data.products);
       setTotal(r.data.total);
       setPages(r.data.pages);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, [type, search, page]);
+  }, [type, search, category, page]);
 
   const typeLabels = { '': 'Tout', 'rent': 'Location', 'sale': 'Achat' };
 
@@ -66,13 +72,27 @@ export default function Outillage() {
             </div>
 
             {/* Clear */}
-            {(type || search) && (
+            {(type || search || category) && (
               <button className="btn btn-sm" style={{ background: 'var(--gray-200)', color: 'var(--gray-700)' }}
                 onClick={() => setSearchParams({})}>
                 <X size={14}/> Effacer
               </button>
             )}
           </div>
+
+          {/* Catégories */}
+          {categories.length > 0 && (
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 24, paddingBottom: 4 }}>
+              {categories.map(c => (
+                <button key={c.id} onClick={() => setParam('category', category === c.slug ? '' : c.slug)}
+                  style={{
+                    padding: '7px 16px', borderRadius: 20, fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, border: 'none',
+                    background: category === c.slug ? 'var(--accent)' : 'var(--gray-100)',
+                    color: category === c.slug ? 'white' : 'var(--gray-700)',
+                  }}>{c.icon} {c.name}</button>
+              ))}
+            </div>
+          )}
 
           {/* Results count */}
           <p style={{ color: 'var(--gray-600)', fontSize: 14, marginBottom: 24 }}>
