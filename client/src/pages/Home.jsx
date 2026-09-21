@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Shield, Truck, CreditCard, CalendarClock, ArrowRight } from 'lucide-react';
+import { Shield, Truck, CreditCard, CalendarClock, ArrowRight, Wrench, Car } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 
 function startPriceOf(car) {
@@ -50,6 +50,26 @@ function CategoryTile({ cat }) {
   );
 }
 
+// Bandeau d'en-tête de zone — marque clairement le début d'un des deux marchés
+function MarketHeader({ icon, eyebrow, title, linkTo, linkLabel }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          {icon}
+        </div>
+        <div>
+          <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--accent)', marginBottom: 2 }}>{eyebrow}</p>
+          <h2 style={{ fontSize: 22, fontWeight: 900, color: 'var(--primary)' }}>{title}</h2>
+        </div>
+      </div>
+      <Link to={linkTo} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none', flexShrink: 0 }}>
+        {linkLabel} <ArrowRight size={14}/>
+      </Link>
+    </div>
+  );
+}
+
 const REASSURANCE = [
   { icon: <CreditCard size={22}/>, title: 'Acompte 20% seulement', text: "Le solde se règle en personne, à la remise. Annulation gratuite jusqu'à 2 jours avant." },
   { icon: <Shield size={22}/>, title: 'Caution non bloquée', text: "Prise par empreinte, jamais débitée si le matériel revient en bon état." },
@@ -84,19 +104,45 @@ export default function Home() {
           <p style={{ color: 'rgba(255,255,255,.72)', fontSize: 16, maxWidth: 540, marginBottom: 28, lineHeight: 1.6 }}>
             Par un mécanicien, pour les mécaniciens. Matériel pro dispo tout de suite, jeunes conducteurs acceptés.
           </p>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <Link to="/outillage" className="btn btn-primary btn-lg">Voir l'outillage</Link>
-            <Link to="/vehicules" style={{
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              padding: '13px 26px', borderRadius: 10, fontWeight: 700, fontSize: 15,
-              background: 'rgba(255,255,255,.12)', color: 'white', border: '1.5px solid rgba(255,255,255,.3)', textDecoration: 'none',
-            }}>Voir les véhicules</Link>
-          </div>
+        </div>
+      </div>
+
+      {/* Les deux marchés — séparation claire dès l'arrivée */}
+      <div className="container" style={{ marginTop: -28, marginBottom: 8, position: 'relative', zIndex: 2 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
+          <Link to="/outillage" style={{ textDecoration: 'none' }}>
+            <div className="card" style={{ padding: '26px 28px', display: 'flex', alignItems: 'center', gap: 18, transition: 'var(--transition)' }}
+              onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
+              onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}>
+              <div style={{ width: 54, height: 54, borderRadius: 14, background: 'rgba(255,51,51,.1)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Wrench size={26}/>
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontWeight: 900, fontSize: 18, color: 'var(--primary)', marginBottom: 3 }}>Outillage professionnel</p>
+                <p style={{ fontSize: 13, color: 'var(--gray-500)' }}>Location et vente de matériel pro</p>
+              </div>
+              <ArrowRight size={20} color="var(--gray-300)"/>
+            </div>
+          </Link>
+          <Link to="/vehicules" style={{ textDecoration: 'none' }}>
+            <div className="card" style={{ padding: '26px 28px', display: 'flex', alignItems: 'center', gap: 18, transition: 'var(--transition)' }}
+              onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
+              onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}>
+              <div style={{ width: 54, height: 54, borderRadius: 14, background: 'rgba(255,51,51,.1)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Car size={26}/>
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontWeight: 900, fontSize: 18, color: 'var(--primary)', marginBottom: 3 }}>Location de véhicules</p>
+                <p style={{ fontSize: 13, color: 'var(--gray-500)' }}>Toute l'île, jeunes conducteurs acceptés</p>
+              </div>
+              <ArrowRight size={20} color="var(--gray-300)"/>
+            </div>
+          </Link>
         </div>
       </div>
 
       {/* Barre infos rapides */}
-      <div style={{ background: 'var(--light)', borderBottom: '1px solid var(--gray-200)', padding: '14px 0' }}>
+      <div style={{ background: 'var(--light)', borderBottom: '1px solid var(--gray-200)', padding: '14px 0', marginTop: 36 }}>
         <div className="container" style={{ display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: 13, color: 'var(--gray-600)', fontWeight: 600 }}>
           <span>Acompte 20% seulement</span>
           <span style={{ color: 'var(--gray-300)' }}>|</span>
@@ -108,41 +154,18 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="container" style={{ paddingTop: 44, paddingBottom: 56 }}>
+      {/* ── Zone Outillage ── */}
+      <div style={{ background: 'white', padding: '48px 0' }}>
+        <div className="container">
+          <MarketHeader icon={<Wrench size={20}/>} eyebrow="Marché n°1" title="Outillage professionnel"
+            linkTo="/outillage" linkLabel="Voir tout l'outillage"/>
 
-        {/* Catégories */}
-        {categories.length > 0 && (
-          <div style={{ marginBottom: 48 }}>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--primary)', marginBottom: 16 }}>Parcourir par catégorie</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 12 }}>
+          {categories.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 12, marginBottom: 28 }}>
               {categories.map(c => <CategoryTile key={c.id} cat={c}/>)}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Véhicules à louer */}
-        {cars.length > 0 && (
-          <div style={{ marginBottom: 48 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--primary)' }}>Véhicules à louer</h2>
-              <Link to="/vehicules" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none' }}>
-                Voir tout <ArrowRight size={14}/>
-              </Link>
-            </div>
-            <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4 }}>
-              {cars.map(car => <CarPreviewCard key={car.id} car={car}/>)}
-            </div>
-          </div>
-        )}
-
-        {/* Outillage populaire */}
-        <div style={{ marginBottom: 56 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--primary)' }}>Outillage populaire</h2>
-            <Link to="/outillage" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none' }}>
-              Voir tout l'outillage <ArrowRight size={14}/>
-            </Link>
-          </div>
           {loadingProducts
             ? <div style={{ textAlign: 'center', padding: 60 }}><div className="spinner"/></div>
             : popularProducts.length === 0
@@ -150,23 +173,35 @@ export default function Home() {
               : <div className="grid-4">{popularProducts.map(p => <ProductCard key={p.id} product={p}/>)}</div>
           }
         </div>
+      </div>
 
-        {/* Pourquoi PrestoLocation */}
-        <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--primary)', marginBottom: 20 }}>Pourquoi PrestoLocation ?</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18 }}>
-            {REASSURANCE.map((r, i) => (
-              <div key={i} style={{ background: 'var(--light)', border: '1px solid var(--gray-200)', borderRadius: 14, padding: '20px 20px' }}>
-                <div style={{ width: 42, height: 42, borderRadius: 10, background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                  {r.icon}
-                </div>
-                <p style={{ fontWeight: 800, fontSize: 14.5, color: 'var(--primary)', marginBottom: 6 }}>{r.title}</p>
-                <p style={{ fontSize: 13, color: 'var(--gray-600)', lineHeight: 1.6 }}>{r.text}</p>
-              </div>
-            ))}
+      {/* ── Zone Véhicules ── */}
+      {cars.length > 0 && (
+        <div style={{ background: 'var(--light)', padding: '48px 0', borderTop: '1px solid var(--gray-200)' }}>
+          <div className="container">
+            <MarketHeader icon={<Car size={20}/>} eyebrow="Marché n°2" title="Location de véhicules"
+              linkTo="/vehicules" linkLabel="Voir tous les véhicules"/>
+            <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4 }}>
+              {cars.map(car => <CarPreviewCard key={car.id} car={car}/>)}
+            </div>
           </div>
         </div>
+      )}
 
+      {/* Pourquoi PrestoLocation — socle commun aux deux marchés */}
+      <div className="container" style={{ paddingTop: 48, paddingBottom: 56 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--primary)', marginBottom: 20 }}>Pourquoi PrestoLocation ?</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18 }}>
+          {REASSURANCE.map((r, i) => (
+            <div key={i} style={{ background: 'var(--light)', border: '1px solid var(--gray-200)', borderRadius: 14, padding: '20px 20px' }}>
+              <div style={{ width: 42, height: 42, borderRadius: 10, background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                {r.icon}
+              </div>
+              <p style={{ fontWeight: 800, fontSize: 14.5, color: 'var(--primary)', marginBottom: 6 }}>{r.title}</p>
+              <p style={{ fontSize: 13, color: 'var(--gray-600)', lineHeight: 1.6 }}>{r.text}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
