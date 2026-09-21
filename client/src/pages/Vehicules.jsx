@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { differenceInDays } from 'date-fns';
@@ -460,6 +460,37 @@ export default function Vehicules() {
             {visibleCars.map(car => <CarCard key={car.id} car={car}/>)}
           </div>
         )}
+
+        {/* Informations générales */}
+        <div style={{ marginBottom: 48 }}>
+          <h2 style={{ fontWeight: 800, fontSize: 'clamp(20px,3vw,26px)', color: 'var(--primary)', marginBottom: 6 }}>
+            Les informations générales concernant la location d'un véhicule avec PrestoLocation
+          </h2>
+          <p style={{ color: 'var(--gray-600)', fontSize: 14, marginBottom: 20 }}>
+            En plus des <Link to="/contrats-et-franchises" style={{ color: 'var(--accent)', fontWeight: 600 }}>conditions générales de location</Link>, voici quelques informations utiles avant de réserver.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+            <div style={{ background: 'var(--light)', border: '1px solid var(--gray-200)', borderRadius: 14, padding: '22px 24px' }}>
+              <p style={{ fontWeight: 800, fontSize: 13, letterSpacing: 0.5, color: 'var(--primary)', marginBottom: 14 }}>INFORMATIONS GÉNÉRALES</p>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 14, color: 'var(--gray-700)', paddingLeft: 18 }}>
+                <li>La location à la journée s'étend par tranche de 24 h.</li>
+                <li>Le carburant est à la charge du client, à restituer au même niveau qu'au départ.</li>
+                <li>Possibilité de louer un siège-bébé pour 4 € / jour.</li>
+                <li>Possibilité de louer un réhausseur pour 2 € / jour.</li>
+                <li>Kilométrage illimité. Jeunes conducteurs acceptés.</li>
+              </ul>
+            </div>
+            <div style={{ background: 'var(--light)', border: '1px solid var(--gray-200)', borderRadius: 14, padding: '22px 24px' }}>
+              <p style={{ fontWeight: 800, fontSize: 13, letterSpacing: 0.5, color: 'var(--primary)', marginBottom: 14 }}>LIVRAISON & ASSURANCE</p>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 14, color: 'var(--gray-700)', paddingLeft: 18 }}>
+                <li>Prise en charge à l'aéroport jusqu'à notre agence : 20 € (offert si la location dépasse 20 jours).</li>
+                <li>Livraison du véhicule sur l'île : 28 € (Est / Ouest) ou 35 € (Sud).</li>
+                <li>L'assurance couvre les dommages causés au tiers, le vol, l'incendie et le bris de glace.</li>
+                <li>Annulation gratuite jusqu'à 2 jours avant le départ (voir nos <Link to="/cgv" style={{ color: 'var(--accent)', fontWeight: 600 }}>CGV</Link>).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
 
         {/* Pied de page contact */}
         <div style={{ background: 'var(--primary)', borderRadius: 20, padding: '28px 32px', color: 'white', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 24 }}>
