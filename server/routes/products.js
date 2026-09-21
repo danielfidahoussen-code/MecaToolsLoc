@@ -1,6 +1,9 @@
 const router = require('express').Router();
+const QRCode = require('qrcode');
 const { products, categories } = require('../database');
 const { authMiddleware } = require('../middleware/auth');
+
+const SITE_URL = process.env.SITE_URL || 'https://www.prestolocation.re';
 
 function withCategory(product) {
   if (!product) return null;
@@ -12,6 +15,64 @@ function withCategory(product) {
 
 router.get('/categories', (req, res) => {
   res.json(categories.all());
+});
+
+// QR code d'un produit — encode le lien direct vers sa fiche produit.
+// Public : le lien pointe vers une page déjà publique, rien de sensible à protéger.
+router.get('/:id/qrcode.png', async (req, res) => {
+  const product = products.getById(req.params.id);
+  if (!product) return res.status(404).json({ error: 'Produit non trouvé' });
+  try {
+    const url = `${SITE_URL}/produit/${product.id}`;
+    const buffer = await QRCode.toBuffer(url, { width: 400, margin: 1, color: { dark: '#220404', light: '#ffffff' } });
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(buffer);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin — feuille imprimable avec le QR code + nom de chaque outil, à coller sur le matériel.
+router.get('/qrcodes/print', (req, res, next) => {
+  const jwt = require('jsonwebtoken');
+  const { JWT_SECRET } = require('../middleware/auth');
+  const token = req.headers.authorization?.split(' ')[1] || req.query.token;
+  if (!token) return res.status(401).json({ error: 'Token manquant' });
+  try { jwt.verify(token, JWT_SECRET); next(); }
+  catch { return res.status(401).json({ error: 'Token invalide' }); }
+}, async (req, res) => {
+  const rows = products.all().filter(p => p.active !== 0);
+  const cards = rows.map(p => `
+    <div class="card">
+      <img src="/api/products/${p.id}/qrcode.png" alt="QR ${p.name}"/>
+      <p class="name">${p.name}</p>
+      <p class="ref">Réf. #${p.id}</p>
+    </div>
+  `).join('');
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
+<title>Fiches QR — Outillage PrestoLocation</title>
+<style>
+  body{font-family:Arial,sans-serif;margin:0;padding:24px;color:#111;}
+  h1{font-size:18px;text-align:center;margin-bottom:4px;}
+  p.sub{text-align:center;color:#666;font-size:12px;margin-bottom:20px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;}
+  .card{border:1px solid #ccc;border-radius:8px;padding:10px;text-align:center;page-break-inside:avoid;}
+  .card img{width:100%;height:auto;max-width:150px;}
+  .card .name{font-weight:bold;font-size:12px;margin-top:6px;line-height:1.3;}
+  .card .ref{font-size:10px;color:#888;margin-top:2px;}
+  .no-print{text-align:center;margin-bottom:20px;}
+  @media print{.no-print{display:none;}}
+</style></head><body>
+<div class="no-print">
+  <button onclick="window.print()" style="padding:8px 20px;font-size:13px;font-weight:bold;background:#c0392b;color:white;border:none;border-radius:6px;cursor:pointer;">Imprimer toutes les fiches</button>
+</div>
+<h1>Fiches QR — Outillage PrestoLocation</h1>
+<p class="sub">Scanner un code ouvre directement la fiche produit correspondante sur le site.</p>
+<div class="grid">${cards}</div>
+</body></html>`);
 });
 
 router.get('/', (req, res) => {

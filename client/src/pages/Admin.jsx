@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, Download, Mail, CheckCircle, Circle, Tag } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Package, ShoppingBag, Calendar, BarChart3, LogIn, Car, Download, Mail, CheckCircle, Circle, Tag, QrCode } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -232,6 +232,7 @@ function ProductCard({ p, onEdit, onDelete }) {
           </span>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
+          <a href={`/api/products/${p.id}/qrcode.png`} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline" title="QR code"><QrCode size={13}/></a>
           <button className="btn btn-sm btn-outline" onClick={() => onEdit(p)} style={{ flex: 1, justifyContent: 'center' }}><Edit2 size={13}/> Modifier</button>
           <button className="btn btn-sm btn-danger" onClick={() => onDelete(p.id)} style={{ flex: 1, justifyContent: 'center' }}><Trash2 size={13}/> Supprimer</button>
         </div>
@@ -592,9 +593,14 @@ export default function Admin() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 10 }}>
                 <h2 style={{ fontWeight: 800, color: 'var(--primary)', fontSize: isMobile ? 17 : 22 }}>Catalogue ({products.length} produits)</h2>
-                <button className="btn btn-primary btn-sm" onClick={() => { setEditProduct(null); setShowForm(true); }} style={{ flexShrink: 0 }}>
-                  <Plus size={15}/> {isMobile ? 'Ajouter' : 'Ajouter un produit'}
-                </button>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <a href={`/api/products/qrcodes/print?token=${token}`} target="_blank" rel="noreferrer" className="btn btn-outline btn-sm">
+                    <QrCode size={15}/> {isMobile ? 'Fiches QR' : 'Imprimer les fiches QR'}
+                  </a>
+                  <button className="btn btn-primary btn-sm" onClick={() => { setEditProduct(null); setShowForm(true); }}>
+                    <Plus size={15}/> {isMobile ? 'Ajouter' : 'Ajouter un produit'}
+                  </button>
+                </div>
               </div>
               {loading ? <div className="loading-center"><div className="spinner"/></div> : isMobile ? (
                 /* Mobile: cards */
@@ -641,6 +647,7 @@ export default function Admin() {
                           </td>
                           <td style={{ padding: '11px 14px' }}>
                             <div style={{ display: 'flex', gap: 6 }}>
+                              <a href={`/api/products/${p.id}/qrcode.png`} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline" title="QR code"><QrCode size={13}/></a>
                               <button className="btn btn-sm btn-outline" onClick={() => { setEditProduct(p); setShowForm(true); }}><Edit2 size={13}/></button>
                               <button className="btn btn-sm btn-danger" onClick={() => handleDelete(p.id)}><Trash2 size={13}/></button>
                             </div>
