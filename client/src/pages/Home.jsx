@@ -168,6 +168,29 @@ export default function Home() {
           <MarketHeader icon={<Wrench size={20}/>} eyebrow="Marché n°1" title="Outillage professionnel"
             linkTo="/outillage" linkLabel="Voir tout l'outillage"/>
 
+          {/* Pitch — pourquoi louer plutôt qu'acheter */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, marginBottom: 40, alignItems: 'center' }}>
+            <div>
+              <h3 style={{ fontSize: 17, fontWeight: 800, color: 'var(--primary)', marginBottom: 10 }}>
+                Pourquoi louer votre outillage plutôt que l'acheter ?
+              </h3>
+              <p style={{ fontSize: 14.5, color: 'var(--gray-600)', lineHeight: 1.75 }}>
+                Certaines réparations demandent un outil très spécifique, que vous n'utiliserez peut-être qu'une seule fois.
+                Plutôt que d'investir plusieurs centaines, voire plusieurs milliers d'euros dans du matériel qui dormira
+                ensuite dans un coin de l'atelier, louez-le chez PrestoLocation le temps de l'intervention —
+                puis refacturez cette location à votre client, comme n'importe quelle fourniture nécessaire à la réparation.
+              </p>
+            </div>
+            <div style={{ background: 'var(--light)', border: '1px solid var(--gray-200)', borderRadius: 14, padding: '22px 24px' }}>
+              <p style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--accent)', marginBottom: 8 }}>Exemple concret</p>
+              <p style={{ fontSize: 14.5, color: 'var(--gray-700)', lineHeight: 1.7 }}>
+                Une distribution à refaire, mais pas de <strong>kit de calage moteur</strong> (souvent autour de <strong>1 500 €</strong> à l'achat) ?
+                Louez-le chez nous pour la durée du chantier, réalisez l'intervention, et rendez l'outil une fois le travail terminé.
+                Vous ne perdez pas le chantier, et vous n'immobilisez pas votre trésorerie dans un outil que vous ne ressortirez peut-être plus.
+              </p>
+            </div>
+          </div>
+
           {categories.length > 0 && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 12, marginBottom: 28 }}>
               {categories.map(c => <CategoryTile key={c.id} cat={c}/>)}
@@ -189,6 +212,25 @@ export default function Home() {
           <div className="container">
             <MarketHeader icon={<Car size={20}/>} eyebrow="Marché n°2" title="Location de véhicules"
               linkTo="/vehicules" linkLabel="Voir tous les véhicules"/>
+
+            {/* Pitch — flotte hybride & vérifiée */}
+            <div style={{ background: 'white', border: '1px solid var(--gray-200)', borderRadius: 14, padding: '24px 28px', marginBottom: 32 }}>
+              <h3 style={{ fontSize: 17, fontWeight: 800, color: 'var(--primary)', marginBottom: 10 }}>
+                Une flotte hybride, économique et vérifiée avant chaque départ
+              </h3>
+              <p style={{ fontSize: 14.5, color: 'var(--gray-600)', lineHeight: 1.75, marginBottom: 16 }}>
+                Notre flotte est composée majoritairement de véhicules <strong>hybrides</strong> : moins de consommation à la pompe,
+                moins d'émissions, et une conduite plus sereine sur les routes de La Réunion. Et parce que la sécurité ne se
+                négocie pas, nous sommes associés au garage <strong>Auto Presto</strong>, qui vérifie chaque véhicule avant
+                chaque départ — pneus, freins, niveaux — pour que vous preniez la route l'esprit tranquille.
+              </p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                {['🔋 Flotte majoritairement hybride', '🛠️ Vérifié par Auto Presto avant chaque départ', '🛡️ Sécurité et fiabilité'].map(b => (
+                  <span key={b} style={{ background: 'var(--light)', border: '1px solid var(--gray-200)', padding: '6px 14px', borderRadius: 20, fontSize: 12.5, fontWeight: 700, color: 'var(--primary)' }}>{b}</span>
+                ))}
+              </div>
+            </div>
+
             <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4 }}>
               {cars.map(car => <CarPreviewCard key={car.id} car={car}/>)}
             </div>
