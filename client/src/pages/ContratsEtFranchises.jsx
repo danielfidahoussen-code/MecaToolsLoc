@@ -2,11 +2,11 @@ import { Link } from 'react-router-dom';
 import { VEHICLE_CGL_TEXT, TOOL_RENTAL_CONTRACT_TEXT } from '../data/legalTexts';
 
 // Barème des franchises par catégorie de véhicule — en attente des montants réels
-// (voir CLAUDE.md). Remplacer `null` par les montants une fois reçus, ex. franchise: 1000.
+// et des noms de catégorie réels (voir CLAUDE.md). Remplacer `null` par les montants
+// une fois reçus, ex. franchise: 1000, et `cat` par le nom réel de la catégorie.
 const FRANCHISE_TABLE = [
-  { cat: 'Catégories 1, 2, 3', franchise: null, assurance: null, nonRachetable: null },
-  { cat: 'Catégories 4, 5, 6, 7', franchise: null, assurance: null, nonRachetable: null },
-  { cat: 'Catégories 8, 9, 10', franchise: null, assurance: null, nonRachetable: null },
+  { cat: 'Catégorie 1', franchise: null, assurance: null, nonRachetable: null },
+  { cat: 'Catégorie 2', franchise: null, assurance: null, nonRachetable: null },
 ];
 
 export default function ContratsEtFranchises() {
