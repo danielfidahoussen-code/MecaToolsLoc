@@ -61,7 +61,7 @@ La franchise applicable est celle indiquée au contrat et publiée, par catégor
 Le Véhicule doit être rendu à la date/heure et au lieu convenus, avec accessoires et documents. Toute prolongation doit être validée par le Loueur avant l'échéance. En cas de retard non autorisé : facturation d'heures/jours supplémentaires + pénalités selon la grille du Loueur, et possibilité de déclaration du Véhicule comme "non restitué" si le Locataire reste injoignable.
 
 15) État des lieux retour – Dommages – Nettoyage
-L'état des lieux retour est réalisé au retour (photos possibles). Tout dommage non mentionné au départ est présumé survenu pendant la location, sauf preuve contraire. Nettoyage : si le véhicule est rendu anormalement sale (intérieur/extérieur), odeurs, poils, taches, sable, boue, etc., des frais de nettoyage peuvent être facturés selon la grille.
+L'état des lieux retour est réalisé au retour (photos possibles). Tout dommage non mentionné au départ est présumé survenu pendant la location, sauf preuve contraire. Nettoyage : si le véhicule est rendu anormalement sale (intérieur/extérieur), odeurs, poils, taches, sable, boue, etc., des frais de nettoyage de 50 euros peuvent être facturés.
 
 16) Infractions – Amendes – Frais de dossier
 Le Locataire est responsable des infractions (stationnement, vitesse, péages, etc.) et des frais associés. Le Loueur peut transmettre les coordonnées du Locataire aux autorités et facturer des frais de traitement/dossier selon la grille.
