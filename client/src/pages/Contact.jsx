@@ -1,10 +1,16 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Phone, Mail, MapPin, Clock, Send, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Contact() {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [searchParams] = useSearchParams();
+  const [form, setForm] = useState({
+    name: '', email: '', phone: '',
+    subject: searchParams.get('subject') || '',
+    message: searchParams.get('message') || '',
+  });
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));

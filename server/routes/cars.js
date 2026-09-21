@@ -29,6 +29,7 @@ router.post('/', authMiddleware, (req, res) => {
     price_day, price_5days, price_2weeks,
     price_1_3, price_4_10, price_11_20, price_21_29, price_30plus,
     min_days, caution, image, active, booking_mode,
+    available_for_sale, price_sale,
   } = req.body;
   if (!name) return res.status(400).json({ error: 'Nom requis' });
   const { lastInsertRowid: id } = cars.insert({
@@ -46,6 +47,8 @@ router.post('/', authMiddleware, (req, res) => {
     image: image || '',
     active: active !== false ? 1 : 0,
     booking_mode: booking_mode === 'request' ? 'request' : 'online',
+    available_for_sale: available_for_sale ? 1 : 0,
+    price_sale: numOrNull(price_sale),
   });
   res.json(parseCar(cars.getById(id)));
 });
@@ -57,6 +60,7 @@ router.put('/:id', authMiddleware, (req, res) => {
     price_day, price_5days, price_2weeks,
     price_1_3, price_4_10, price_11_20, price_21_29, price_30plus,
     min_days, caution, image, active, booking_mode,
+    available_for_sale, price_sale,
   } = req.body;
   cars.update(Number(req.params.id), {
     name,
@@ -73,6 +77,8 @@ router.put('/:id', authMiddleware, (req, res) => {
     image: image || '',
     active: active !== false ? 1 : 0,
     booking_mode: booking_mode === 'request' ? 'request' : 'online',
+    available_for_sale: available_for_sale ? 1 : 0,
+    price_sale: numOrNull(price_sale),
   });
   res.json(parseCar(cars.getById(Number(req.params.id))));
 });

@@ -1150,8 +1150,9 @@ function CarForm({ car, token, onSave, onClose }) {
     price_day: '', price_5days: '', price_2weeks: '',
     price_1_3: '', price_4_10: '', price_11_20: '', price_21_29: '', price_30plus: '',
     min_days: '', caution: '', image: '', active: true, booking_mode: 'online',
+    available_for_sale: false, price_sale: '',
     specs: [['Carburant',''],['Boîte',''],['Places',''],['Portes',''],['Climatisation',''],['Kilométrage','']] };
-  const [form, setForm] = useState(car ? { ...car, active: car.active !== 0 } : empty);
+  const [form, setForm] = useState(car ? { ...car, active: car.active !== 0, available_for_sale: !!car.available_for_sale } : empty);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -1249,6 +1250,19 @@ function CarForm({ car, token, onSave, onClose }) {
             <label className="form-label">Caution (€)</label>
             <input className="form-control" type="number" value={form.caution || ''} onChange={e => set('caution', e.target.value)} placeholder="Ex: 500"/>
             <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 3 }}>Demandée à la remise des clés (chèque ou CB)</p>
+          </div>
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontWeight: 600, fontSize: 14, marginBottom: form.available_for_sale ? 10 : 0 }}>
+              <input type="checkbox" checked={!!form.available_for_sale} onChange={e => set('available_for_sale', e.target.checked)}
+                style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}/>
+              Également en vente (vitrine, pas de paiement en ligne)
+            </label>
+            {form.available_for_sale && (
+              <div>
+                <input className="form-control" type="number" value={form.price_sale || ''} onChange={e => set('price_sale', e.target.value)} placeholder="Prix de vente €"/>
+                <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 3 }}>Affiché avec un bouton "Nous contacter pour acheter" — pas de réservation/paiement en ligne pour l'achat.</p>
+              </div>
+            )}
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
             <label className="form-label">Photo du véhicule</label>

@@ -195,6 +195,20 @@ function CarCard({ car }) {
           </div>
         )}
 
+        {car.available_for_sale && car.price_sale > 0 && (
+          <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: '#c2410c', textTransform: 'uppercase', letterSpacing: 0.5 }}>Également à vendre</span>
+              <span style={{ fontWeight: 900, fontSize: 18, color: '#c2410c' }}>{car.price_sale} €</span>
+            </div>
+            <a className="btn btn-outline btn-sm"
+              href={`/contact?subject=${encodeURIComponent("Demande d'achat")}&message=${encodeURIComponent(`Bonjour, je suis intéressé(e) par l'achat du véhicule : ${car.name}.`)}`}
+              style={{ width: '100%', justifyContent: 'center', borderColor: '#c2410c', color: '#c2410c' }}>
+              Nous contacter pour acheter
+            </a>
+          </div>
+        )}
+
         {/* Toggle formulaire */}
         <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginBottom: open ? 16 : 0 }}
           onClick={() => setOpen(o => !o)}>
