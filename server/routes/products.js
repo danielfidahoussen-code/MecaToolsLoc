@@ -40,10 +40,12 @@ router.get('/:id/barcode.png', async (req, res) => {
   const product = products.getById(req.params.id);
   if (!product) return res.status(404).json({ error: 'Produit non trouvé' });
   try {
-    const url = `${SITE_URL}/produit/${product.id}`;
+    // Sans schéma/www pour raccourcir le code-barres — les navigateurs
+    // reconnaissent ce format tapé dans la barre d'adresse tout aussi bien.
+    const shortUrl = SITE_URL.replace(/^https?:\/\/(www\.)?/, '') + `/produit/${product.id}`;
     const buffer = await bwipjs.toBuffer({
-      bcid: 'code128', text: url, scale: 2, height: 10,
-      includetext: true, textxalign: 'center', textfont: 'Helvetica', textsize: 8,
+      bcid: 'code128', text: shortUrl, scale: 2, height: 8,
+      includetext: true, textxalign: 'center', textfont: 'Helvetica', textsize: 7,
     });
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=86400');
