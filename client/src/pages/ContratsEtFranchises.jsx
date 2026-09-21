@@ -1,6 +1,14 @@
 import { Link } from 'react-router-dom';
 import { VEHICLE_CGL_TEXT, TOOL_RENTAL_CONTRACT_TEXT } from '../data/legalTexts';
 
+// Barème des franchises par catégorie de véhicule — en attente des montants réels
+// (voir CLAUDE.md). Remplacer `null` par les montants une fois reçus, ex. franchise: 1000.
+const FRANCHISE_TABLE = [
+  { cat: 'Catégories 1, 2, 3', franchise: null, assurance: null, nonRachetable: null },
+  { cat: 'Catégories 4, 5, 6, 7', franchise: null, assurance: null, nonRachetable: null },
+  { cat: 'Catégories 8, 9, 10', franchise: null, assurance: null, nonRachetable: null },
+];
+
 export default function ContratsEtFranchises() {
   return (
     <div>
@@ -17,11 +25,15 @@ export default function ContratsEtFranchises() {
             Les textes ci-dessous sont fournis <strong>à titre informatif</strong> pour que vous puissiez en prendre connaissance avant votre réservation. Le document qui fait foi reste, dans tous les cas, le <strong>contrat papier signé sur place</strong> lors de la remise du matériel ou du véhicule. Ils complètent nos <Link to="/cgv" style={{ color: 'var(--accent)', fontWeight: 600 }}>Conditions Générales de Vente</Link>.
           </div>
 
-          <Section title="Barème des franchises — Location de véhicules">
-            <p>La franchise correspond à la somme qui reste à la charge du Locataire en cas de sinistre responsable ou non identifié, dans la limite de ce montant, et indépendamment du dépôt de garantie (caution) versé à la réservation.</p>
-            <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 10, padding: '14px 16px', margin: '14px 0', fontSize: 14, color: '#7c2d12', lineHeight: 1.6 }}>
-              Le détail des montants par catégorie de véhicule est en cours de publication. En attendant, le montant applicable à votre location vous est communiqué avant la réservation et rappelé sur le contrat signé lors de la remise du véhicule — n'hésitez pas à nous contacter (<a href="mailto:contact@prestolocation.re" style={{ color: '#7c2d12', fontWeight: 700 }}>contact@prestolocation.re</a> — 06 93 83 96 54) pour toute question à ce sujet.
-            </div>
+          <Section title="Réduisez votre franchise">
+            <p>En louant votre véhicule, vous pouvez également réduire votre franchise (en option) selon les conditions ci-dessous. Il suffit de nous l'indiquer lors de votre réservation.</p>
+            <FranchiseTable/>
+            <p style={{ fontSize: 13, color: 'var(--gray-500)', marginTop: 14, fontStyle: 'italic' }}>
+              Les détériorations intérieures, les brûlures et les dégâts aux pneumatiques restent à la charge du Client.
+            </p>
+            <p style={{ fontSize: 13, color: 'var(--gray-500)', marginTop: 6 }}>
+              Une question sur votre franchise ? <a href="mailto:contact@prestolocation.re" style={{ color: 'var(--accent)', fontWeight: 600 }}>contact@prestolocation.re</a> — 06 93 83 96 54.
+            </p>
           </Section>
 
           <Section title="Contrat de location de véhicule (CGL)">
@@ -41,6 +53,36 @@ export default function ContratsEtFranchises() {
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+function euros(v) {
+  return v == null ? <span style={{ color: 'var(--gray-400)', fontWeight: 400 }}>à venir</span> : `${v} €`;
+}
+
+function FranchiseTable() {
+  return (
+    <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid var(--gray-200)', boxShadow: '0 2px 10px rgba(34,4,4,.05)', margin: '16px 0' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+        <thead>
+          <tr style={{ background: 'var(--primary)' }}>
+            {['Catégorie', 'Franchise', 'Assurance supplémentaire (par jour)', 'Franchise non rachetable'].map((h, i) => (
+              <th key={i} style={{ padding: '14px 16px', textAlign: i === 0 ? 'left' : 'center', color: 'white', fontWeight: 700, fontSize: 13, letterSpacing: 0.3 }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {FRANCHISE_TABLE.map((row, i) => (
+            <tr key={row.cat} style={{ background: i % 2 ? 'var(--light)' : 'white' }}>
+              <td style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--primary)' }}>{row.cat}</td>
+              <td style={{ padding: '14px 16px', textAlign: 'center', fontWeight: 700 }}>{euros(row.franchise)}</td>
+              <td style={{ padding: '14px 16px', textAlign: 'center' }}>{euros(row.assurance)}</td>
+              <td style={{ padding: '14px 16px', textAlign: 'center' }}>{euros(row.nonRachetable)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
