@@ -189,7 +189,7 @@ function CarCard({ car }) {
             <span style={{ fontWeight: 900, fontSize: 14 }}>{car.caution} €</span>
           </div>
         )}
-        {car.min_days && (
+        {car.min_days > 0 && (
           <div style={{ fontSize: 12, color: 'var(--gray-500)', background: 'var(--gray-100)', padding: '6px 10px', borderRadius: 8, marginBottom: 12, fontWeight: 600 }}>
             Durée minimum : {car.min_days} jours
           </div>
