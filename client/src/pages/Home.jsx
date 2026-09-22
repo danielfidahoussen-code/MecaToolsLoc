@@ -154,9 +154,12 @@ export default function Home() {
           {/* Pitch — pourquoi louer plutôt qu'acheter */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, marginBottom: 40, alignItems: 'center' }}>
             <div>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: 'var(--primary)', marginBottom: 10 }}>
+              <h3 style={{ fontSize: 17, fontWeight: 800, color: 'var(--primary)', marginBottom: 6 }}>
                 Pourquoi louer votre outillage plutôt que l'acheter ?
               </h3>
+              <p style={{ fontSize: 14, fontWeight: 700, fontStyle: 'italic', color: 'var(--accent)', marginBottom: 10 }}>
+                Libérez votre pont, pas votre planning.
+              </p>
               <p style={{ fontSize: 14.5, color: 'var(--gray-600)', lineHeight: 1.75 }}>
                 Certaines réparations demandent un outil très spécifique, que vous n'utiliserez peut-être qu'une seule fois.
                 Plutôt que d'investir plusieurs centaines, voire plusieurs milliers d'euros dans du matériel qui dormira
@@ -168,8 +171,8 @@ export default function Home() {
               <p style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--accent)', marginBottom: 8 }}>Exemple concret</p>
               <p style={{ fontSize: 14.5, color: 'var(--gray-700)', lineHeight: 1.7 }}>
                 Une distribution à refaire, mais pas de <strong>kit de calage moteur</strong> (souvent autour de <strong>1 500 €</strong> à l'achat) ?
-                Louez-le chez nous pour la durée du chantier, réalisez l'intervention, et rendez l'outil une fois le travail terminé.
-                Vous ne perdez pas le chantier, et vous n'immobilisez pas votre trésorerie dans un outil que vous ne ressortirez peut-être plus.
+                Louez-le chez nous pour la durée de l'intervention, réalisez la réparation, et rendez l'outil une fois le travail terminé.
+                Vous ne perdez pas le client, et vous n'immobilisez pas votre trésorerie dans un outil que vous ne ressortirez peut-être plus.
               </p>
             </div>
           </div>
