@@ -36,32 +36,15 @@ function CarPreviewCard({ car }) {
   );
 }
 
-function CategoryTile({ cat }) {
-  return (
-    <Link to={`/outillage?category=${cat.slug}`} style={{
-      textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-      padding: '20px 12px', borderRadius: 14, background: 'white', border: '1px solid var(--gray-200)', transition: 'var(--transition)',
-    }}
-      onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-      onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--gray-200)'; e.currentTarget.style.transform = 'none'; }}>
-      <span style={{ fontSize: 26 }}>{cat.icon}</span>
-      <span style={{ fontWeight: 700, fontSize: 12.5, color: 'var(--primary)', textAlign: 'center', lineHeight: 1.3 }}>{cat.name}</span>
-    </Link>
-  );
-}
-
 // Bandeau d'en-tête de zone — marque clairement le début d'un des deux marchés
-function MarketHeader({ icon, eyebrow, title, linkTo, linkLabel }) {
+function MarketHeader({ icon, title, linkTo, linkLabel }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {icon}
         </div>
-        <div>
-          <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--accent)', marginBottom: 2 }}>{eyebrow}</p>
-          <h2 style={{ fontSize: 22, fontWeight: 900, color: 'var(--primary)' }}>{title}</h2>
-        </div>
+        <h2 style={{ fontSize: 22, fontWeight: 900, color: 'var(--primary)' }}>{title}</h2>
       </div>
       <Link to={linkTo} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none', flexShrink: 0 }}>
         {linkLabel} <ArrowRight size={14}/>
@@ -78,13 +61,11 @@ const REASSURANCE = [
 ];
 
 export default function Home() {
-  const [categories, setCategories] = useState([]);
   const [popularProducts, setPopularProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [cars, setCars] = useState([]);
 
   useEffect(() => {
-    axios.get('/api/products/categories').then(r => setCategories(r.data)).catch(() => {});
     axios.get('/api/cars').then(r => setCars(r.data.slice(0, 6))).catch(() => {});
     axios.get('/api/products', { params: { limit: 8 } }).then(r => {
       setPopularProducts(r.data.products);
@@ -109,9 +90,19 @@ export default function Home() {
           <h1 style={{ fontSize: 'clamp(28px,4.5vw,44px)', fontWeight: 900, lineHeight: 1.15, marginBottom: 14, maxWidth: 660 }}>
             Location & vente d'outillage professionnel. Location de véhicules.
           </h1>
-          <p style={{ color: 'rgba(255,255,255,.72)', fontSize: 16, maxWidth: 540, marginBottom: 28, lineHeight: 1.6 }}>
-            Par un mécanicien, pour les mécaniciens. Matériel pro dispo tout de suite, jeunes conducteurs acceptés.
+          <p style={{ color: 'rgba(255,255,255,.85)', fontSize: 16, fontStyle: 'italic', fontWeight: 600, marginBottom: 20 }}>
+            Par un mécanicien, pour les mécaniciens.
           </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14, maxWidth: 640, marginBottom: 28 }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 18, flexShrink: 0 }}>🔧</span>
+              <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 14, lineHeight: 1.5 }}>Matériel professionnel disponible tout de suite</p>
+            </div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 18, flexShrink: 0 }}>🚗</span>
+              <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 14, lineHeight: 1.5 }}>Jeunes conducteurs acceptés, véhicules vérifiés avant chaque départ pour votre sécurité</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -165,7 +156,7 @@ export default function Home() {
       {/* ── Zone Outillage ── */}
       <div style={{ background: 'white', padding: '48px 0' }}>
         <div className="container">
-          <MarketHeader icon={<Wrench size={20}/>} eyebrow="Marché n°1" title="Outillage professionnel"
+          <MarketHeader icon={<Wrench size={20}/>} title="Outillage professionnel"
             linkTo="/outillage" linkLabel="Voir tout l'outillage"/>
 
           {/* Pitch — pourquoi louer plutôt qu'acheter */}
@@ -191,12 +182,6 @@ export default function Home() {
             </div>
           </div>
 
-          {categories.length > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 12, marginBottom: 28 }}>
-              {categories.map(c => <CategoryTile key={c.id} cat={c}/>)}
-            </div>
-          )}
-
           {loadingProducts
             ? <div style={{ textAlign: 'center', padding: 60 }}><div className="spinner"/></div>
             : popularProducts.length === 0
@@ -210,7 +195,7 @@ export default function Home() {
       {cars.length > 0 && (
         <div style={{ background: 'var(--light)', padding: '48px 0', borderTop: '1px solid var(--gray-200)' }}>
           <div className="container">
-            <MarketHeader icon={<Car size={20}/>} eyebrow="Marché n°2" title="Location de véhicules"
+            <MarketHeader icon={<Car size={20}/>} title="Location de véhicules"
               linkTo="/vehicules" linkLabel="Voir tous les véhicules"/>
 
             {/* Pitch — flotte hybride & vérifiée */}
