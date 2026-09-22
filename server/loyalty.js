@@ -8,6 +8,11 @@ const { orders, car_reservations, coupons, referral_codes } = require('./databas
 const LOYALTY_PERCENT = 15;
 const REFERRAL_PERCENT = 10;
 
+// Code de lancement — fixe, public (campagne réseaux sociaux), réutilisable par
+// n'importe quel nouveau client (pas de compte "propriétaire", pas à usage unique).
+const LAUNCH_CODE = 'PRESTO15';
+const LAUNCH_PERCENT = 15;
+
 function genCode(prefix) {
   return `${prefix}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
 }
@@ -67,6 +72,13 @@ function resolveCode(code, customerEmail) {
   if (!code) return { valid: false, error: 'Code manquant' };
   const clean = code.trim().toUpperCase();
 
+  if (clean === LAUNCH_CODE) {
+    if (hasPriorBooking(customerEmail)) {
+      return { valid: false, error: 'Ce code est réservé à votre première réservation' };
+    }
+    return { valid: true, percent: LAUNCH_PERCENT, source: 'launch' };
+  }
+
   const coupon = coupons.all().find(c => c.code === clean);
   if (coupon) {
     if (coupon.used) return { valid: false, error: 'Ce code a déjà été utilisé' };
@@ -93,7 +105,7 @@ function markCouponUsed(couponId) {
 }
 
 module.exports = {
-  LOYALTY_PERCENT, REFERRAL_PERCENT,
+  LOYALTY_PERCENT, REFERRAL_PERCENT, LAUNCH_CODE, LAUNCH_PERCENT,
   hasPriorBooking, getOrCreateReferralCode,
   issueLoyaltyCoupon, issueReferralReward,
   resolveCode, markCouponUsed,
