@@ -89,7 +89,7 @@ export default function Outillage() {
                     padding: '7px 16px', borderRadius: 20, fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, border: 'none',
                     background: category === c.slug ? 'var(--accent)' : 'var(--gray-100)',
                     color: category === c.slug ? 'white' : 'var(--gray-700)',
-                  }}>{c.icon} {c.name}</button>
+                  }}>{c.name}</button>
               ))}
             </div>
           )}
