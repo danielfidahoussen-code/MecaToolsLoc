@@ -1,5 +1,13 @@
 import { Link } from 'react-router-dom';
-import { Wrench, Heart, Award } from 'lucide-react';
+import { Wrench, Heart, Award, ShieldCheck, CheckCircle2 } from 'lucide-react';
+
+const VEHICLE_CHECKS = [
+  'Pression et état des pneus',
+  'Freins et plaquettes',
+  'Niveaux (huile, liquide de refroidissement, lave-glace)',
+  'Éclairage et signalisation',
+  'Propreté intérieure et extérieure',
+];
 
 export default function About() {
   return (
@@ -76,6 +84,41 @@ export default function About() {
                   <p style={{ color: 'var(--gray-600)', lineHeight: 1.7 }}>{desc}</p>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Sécurité des véhicules */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center', marginBottom: 80 }}>
+            <div>
+              <span className="section-label">Location de véhicules</span>
+              <h2 style={{ fontSize: 'clamp(24px,4vw,36px)', fontWeight: 800, color: 'var(--primary)', marginBottom: 20, lineHeight: 1.2 }}>
+                La sécurité de nos véhicules,<br/>garantie par Auto Presto
+              </h2>
+              <p style={{ color: 'var(--gray-600)', lineHeight: 1.8, marginBottom: 16 }}>
+                Ce n'est pas un simple partenariat : <strong>Auto Presto</strong> est notre propre garage, tenu par le
+                mécanicien qui a fondé PrestoLocation. Chaque véhicule de notre flotte passe entre ses mains avant de
+                vous être remis.
+              </p>
+              <p style={{ color: 'var(--gray-600)', lineHeight: 1.8 }}>
+                Concrètement, aucun véhicule ne part sans avoir été inspecté au préalable — pour que vous preniez
+                la route l'esprit tranquille, à chaque location.
+              </p>
+            </div>
+            <div style={{ background: 'var(--light)', border: '1px solid var(--gray-200)', borderRadius: 20, padding: '32px 36px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: 'rgba(255,51,51,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', flexShrink: 0 }}>
+                  <ShieldCheck size={24}/>
+                </div>
+                <p style={{ fontWeight: 800, fontSize: 16, color: 'var(--primary)' }}>Vérifié avant chaque départ</p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {VEHICLE_CHECKS.map(item => (
+                  <div key={item} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <CheckCircle2 size={17} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }}/>
+                    <span style={{ color: 'var(--gray-700)', fontSize: 14.5, lineHeight: 1.5 }}>{item}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
