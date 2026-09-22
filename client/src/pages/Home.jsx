@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Shield, Truck, CreditCard, CalendarClock, ArrowRight, Wrench, Car } from 'lucide-react';
+import { Shield, Truck, CreditCard, CalendarClock, ArrowRight, Wrench, Car, Leaf } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 
 function startPriceOf(car) {
@@ -79,14 +79,6 @@ export default function Home() {
       <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #3a0808 100%)', color: 'white', padding: '56px 0 40px' }}>
         <div className="container">
           <p style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,.55)', marginBottom: 10 }}>La Réunion</p>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.25)', padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700 }}>
-              🔧 Outillage — location & vente
-            </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.25)', padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 700 }}>
-              🚗 Véhicules — location
-            </span>
-          </div>
           <h1 style={{ fontSize: 'clamp(28px,4.5vw,44px)', fontWeight: 900, lineHeight: 1.15, marginBottom: 14, maxWidth: 660 }}>
             Location & vente d'outillage professionnel. Location de véhicules.
           </h1>
@@ -95,11 +87,11 @@ export default function Home() {
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14, maxWidth: 640, marginBottom: 28 }}>
             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-              <span style={{ fontSize: 18, flexShrink: 0 }}>🔧</span>
+              <Wrench size={16} style={{ flexShrink: 0, marginTop: 3, color: 'rgba(255,255,255,.5)' }}/>
               <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 14, lineHeight: 1.5 }}>Matériel professionnel disponible tout de suite</p>
             </div>
             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-              <span style={{ fontSize: 18, flexShrink: 0 }}>🚗</span>
+              <Car size={16} style={{ flexShrink: 0, marginTop: 3, color: 'rgba(255,255,255,.5)' }}/>
               <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 14, lineHeight: 1.5 }}>Jeunes conducteurs acceptés, véhicules vérifiés avant chaque départ pour votre sécurité</p>
             </div>
           </div>
@@ -209,9 +201,16 @@ export default function Home() {
                 négocie pas, nous sommes associés au garage <strong>Auto Presto</strong>, qui vérifie chaque véhicule avant
                 chaque départ — pneus, freins, niveaux — pour que vous preniez la route l'esprit tranquille.
               </p>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                {['🔋 Flotte majoritairement hybride', '🛠️ Vérifié par Auto Presto avant chaque départ', '🛡️ Sécurité et fiabilité'].map(b => (
-                  <span key={b} style={{ background: 'var(--light)', border: '1px solid var(--gray-200)', padding: '6px 14px', borderRadius: 20, fontSize: 12.5, fontWeight: 700, color: 'var(--primary)' }}>{b}</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, borderTop: '1px solid var(--gray-100)', paddingTop: 16 }}>
+                {[
+                  { icon: <Leaf size={15}/>, text: 'Flotte majoritairement hybride' },
+                  { icon: <Wrench size={15}/>, text: 'Vérifié par Auto Presto avant chaque départ' },
+                  { icon: <Shield size={15}/>, text: 'Sécurité et fiabilité' },
+                ].map(({ icon, text }) => (
+                  <div key={text} style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--gray-600)', fontSize: 13, fontWeight: 600 }}>
+                    <span style={{ color: 'var(--accent)', flexShrink: 0, display: 'flex' }}>{icon}</span>
+                    {text}
+                  </div>
                 ))}
               </div>
             </div>
