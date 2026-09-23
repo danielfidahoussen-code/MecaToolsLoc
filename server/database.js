@@ -51,6 +51,15 @@ faqs.all().forEach(f => {
   }
 });
 
+// Migration : recalcule le prix location/semaine (-10%) pour les produits existants
+// dont le prix avait été saisi à la main avant l'automatisation.
+products.all().forEach(p => {
+  if (p.price_day > 0) {
+    const autoWeek = Math.round(p.price_day * 7 * 0.9 * 100) / 100;
+    if (p.price_week !== autoWeek) products.update(p.id, { price_week: autoWeek });
+  }
+});
+
 const car_reservations = db.table('car_reservations');
 
 const cars = db.table('cars');
