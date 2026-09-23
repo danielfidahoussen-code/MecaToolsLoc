@@ -145,8 +145,10 @@ function ProductForm({ product, categories, token, onSave, onClose }) {
             <input className="form-control" type="number" step="0.01" value={form.price_day} onChange={e => set('price_day', parseFloat(e.target.value) || '')} placeholder="0.00"/>
           </div>
           <div className="form-group" style={{ gridColumn: isMobile ? '1' : undefined }}>
-            <label className="form-label">Prix location/semaine (€)</label>
-            <input className="form-control" type="number" step="0.01" value={form.price_week} onChange={e => set('price_week', parseFloat(e.target.value) || '')} placeholder="0.00"/>
+            <label className="form-label">Prix location/semaine (€) <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--gray-500)' }}>— calculé auto (-10%)</span></label>
+            <input className="form-control" type="text" disabled
+              value={form.price_day > 0 ? `${(form.price_day * 7 * 0.9).toFixed(2)} €` : '—'}
+              style={{ background: 'var(--gray-100)', color: 'var(--gray-600)' }}/>
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
             <label className="form-label">🔒 Caution location (€) <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--gray-500)' }}>— collectée à la remise, non débitée en ligne</span></label>

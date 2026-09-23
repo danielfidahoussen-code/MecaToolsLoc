@@ -129,15 +129,21 @@ router.get('/:id', (req, res) => {
   res.json({ ...product, reservations: res_list });
 });
 
+// Prix semaine = prix jour x 7 avec 10% de remise, calculé automatiquement
+function computeWeekPrice(priceDay) {
+  const day = Number(priceDay);
+  return day > 0 ? Math.round(day * 7 * 0.9 * 100) / 100 : null;
+}
+
 router.post('/', authMiddleware, (req, res) => {
-  const { name, description, category_id, price_sale, price_day, price_week, caution, stock, available_for_sale, available_for_rent, image, images, has_qr_notice } = req.body;
-  const result = products.insert({ name, description, category_id: Number(category_id), price_sale: Number(price_sale) || null, price_day: Number(price_day) || null, price_week: Number(price_week) || null, caution: Number(caution) || null, stock: Number(stock) || 0, available_for_sale: available_for_sale ? 1 : 0, available_for_rent: available_for_rent ? 1 : 0, image: image || '/api/placeholder/400/300', images: JSON.stringify(images || []), has_qr_notice: has_qr_notice ? 1 : 0 });
+  const { name, description, category_id, price_sale, price_day, caution, stock, available_for_sale, available_for_rent, image, images, has_qr_notice } = req.body;
+  const result = products.insert({ name, description, category_id: Number(category_id), price_sale: Number(price_sale) || null, price_day: Number(price_day) || null, price_week: computeWeekPrice(price_day), caution: Number(caution) || null, stock: Number(stock) || 0, available_for_sale: available_for_sale ? 1 : 0, available_for_rent: available_for_rent ? 1 : 0, image: image || '/api/placeholder/400/300', images: JSON.stringify(images || []), has_qr_notice: has_qr_notice ? 1 : 0 });
   res.status(201).json(withCategory(products.getById(result.lastInsertRowid)));
 });
 
 router.put('/:id', authMiddleware, (req, res) => {
-  const { name, description, category_id, price_sale, price_day, price_week, caution, stock, available_for_sale, available_for_rent, image, images, has_qr_notice } = req.body;
-  products.update(Number(req.params.id), { name, description, category_id: Number(category_id), price_sale: Number(price_sale) || null, price_day: Number(price_day) || null, price_week: Number(price_week) || null, caution: Number(caution) || null, stock: Number(stock) || 0, available_for_sale: available_for_sale ? 1 : 0, available_for_rent: available_for_rent ? 1 : 0, image, images: JSON.stringify(images || []), has_qr_notice: has_qr_notice ? 1 : 0 });
+  const { name, description, category_id, price_sale, price_day, caution, stock, available_for_sale, available_for_rent, image, images, has_qr_notice } = req.body;
+  products.update(Number(req.params.id), { name, description, category_id: Number(category_id), price_sale: Number(price_sale) || null, price_day: Number(price_day) || null, price_week: computeWeekPrice(price_day), caution: Number(caution) || null, stock: Number(stock) || 0, available_for_sale: available_for_sale ? 1 : 0, available_for_rent: available_for_rent ? 1 : 0, image, images: JSON.stringify(images || []), has_qr_notice: has_qr_notice ? 1 : 0 });
   res.json(withCategory(products.getById(Number(req.params.id))));
 });
 
