@@ -131,9 +131,12 @@ function CarCard({ car }) {
   const tiers = getTiers(car);
   const startPrice = tiers.length > 0 ? tiers[tiers.length - 1].value : 0;
 
+  const openCard = () => setOpen(true);
+
   return (
     <div className="card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      {/* Image */}
+      {/* Image — cliquable : ouvre le formulaire de réservation (pas de fiche produit dédiée pour les véhicules) */}
+      <div style={{ cursor: 'pointer' }} onClick={openCard}>
       <div style={{ height: 200, background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0, overflow: 'hidden', borderBottom: '1px solid var(--gray-100)' }}>
         {car.image
           ? <img src={car.image} alt={car.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .4s ease' }}
@@ -149,8 +152,11 @@ function CarCard({ car }) {
           <p style={{ fontSize: 20, fontWeight: 900, color: 'white', lineHeight: 1 }}>{startPrice} €<span style={{ fontSize: 11, fontWeight: 500 }}>/j</span></p>
         </div>
       </div>
+      </div>
 
       <div style={{ padding: '20px 22px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Nom / description / specs / tarifs — cliquable, ouvre le formulaire de réservation */}
+        <div style={{ cursor: 'pointer' }} onClick={openCard}>
         <div style={{ marginBottom: 14 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 3 }}>{car.category}</p>
           <h2 style={{ fontWeight: 900, fontSize: 20, color: 'var(--primary)', marginBottom: 8 }}>{car.name}</h2>
@@ -194,6 +200,7 @@ function CarCard({ car }) {
             Durée minimum : {car.min_days} jours
           </div>
         )}
+        </div>
 
         {car.available_for_sale && car.price_sale > 0 && (
           <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>

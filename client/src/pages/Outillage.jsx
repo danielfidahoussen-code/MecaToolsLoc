@@ -10,7 +10,6 @@ export default function Outillage() {
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState([]);
 
   const type = searchParams.get('type') || '';
   const search = searchParams.get('search') || '';
@@ -23,10 +22,6 @@ export default function Outillage() {
     np.delete('page');
     setSearchParams(np);
   };
-
-  useEffect(() => {
-    axios.get('/api/products/categories').then(r => setCategories(r.data)).catch(() => {});
-  }, []);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -79,20 +74,6 @@ export default function Outillage() {
               </button>
             )}
           </div>
-
-          {/* Catégories */}
-          {categories.length > 0 && (
-            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 24, paddingBottom: 4 }}>
-              {categories.map(c => (
-                <button key={c.id} onClick={() => setParam('category', category === c.slug ? '' : c.slug)}
-                  style={{
-                    padding: '7px 16px', borderRadius: 20, fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, border: 'none',
-                    background: category === c.slug ? 'var(--accent)' : 'var(--gray-100)',
-                    color: category === c.slug ? 'white' : 'var(--gray-700)',
-                  }}>{c.name}</button>
-              ))}
-            </div>
-          )}
 
           {/* Results count */}
           <p style={{ color: 'var(--gray-600)', fontSize: 14, marginBottom: 24 }}>

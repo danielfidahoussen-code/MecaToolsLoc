@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Eye, Calendar } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
+  const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
 
   const handleBuy = (e) => {
-    e.preventDefault();
+    e.stopPropagation();
     addItem(product, 'sale', 1);
     toast.success(`${product.name} ajouté au panier !`);
   };
@@ -18,8 +19,8 @@ export default function ProductCard({ product }) {
   const stockLabel = product.stock > 5 ? 'En stock' : product.stock > 0 ? `${product.stock} restant${product.stock > 1 ? 's' : ''}` : 'Rupture';
 
   return (
-    <Link to={`/produit/${product.id}`} style={{ textDecoration: 'none', height: '100%' }}>
-      <div className="card" style={{ transition: 'var(--transition)', cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}
+    <div className="card" style={{ transition: 'var(--transition)', cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}
+        onClick={() => navigate(`/produit/${product.id}`)}
         onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
         onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}>
 
@@ -70,11 +71,11 @@ export default function ProductCard({ product }) {
           </div>
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 'auto' }}>
-            <Link to={`/produit/${product.id}`} className="btn btn-outline btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 90 }}>
+            <Link to={`/produit/${product.id}`} onClick={e => e.stopPropagation()} className="btn btn-outline btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 90 }}>
               <Eye size={14}/> Détails
             </Link>
             {product.available_for_rent && product.stock > 0 && (
-              <Link to={`/produit/${product.id}?tab=rent`} className="btn btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 90, background: 'var(--primary)', color: 'white', fontWeight: 700 }}>
+              <Link to={`/produit/${product.id}?tab=rent`} onClick={e => e.stopPropagation()} className="btn btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 90, background: 'var(--primary)', color: 'white', fontWeight: 700 }}>
                 <Calendar size={14}/> Louer
               </Link>
             )}
@@ -86,6 +87,5 @@ export default function ProductCard({ product }) {
           </div>
         </div>
       </div>
-    </Link>
   );
 }
