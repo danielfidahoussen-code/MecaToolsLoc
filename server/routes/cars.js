@@ -18,6 +18,13 @@ router.get('/all', authMiddleware, (req, res) => {
   res.json(cars.all().map(parseCar));
 });
 
+// Public — fiche d'un véhicule
+router.get('/:id', (req, res) => {
+  const car = cars.getById(Number(req.params.id));
+  if (!car || car.active === 0) return res.status(404).json({ error: 'Véhicule introuvable' });
+  res.json(parseCar(car));
+});
+
 // Convertit une valeur de champ prix en nombre, ou null si vide (ne force jamais 0 —
 // price_1_3 == null sert de marqueur "tarif classique" côté site, cf hasTierPricing()).
 const numOrNull = (v) => (v === '' || v === undefined || v === null) ? null : Number(v);
