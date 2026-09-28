@@ -179,18 +179,18 @@ export default function ProductDetail() {
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 700, color: stockColor }}>
                   ● {product.stock > 0 ? `${product.stock} en stock` : 'Rupture de stock'}
                 </span>
-                {product.available_for_rent && <span className="badge badge-rent">Location</span>}
-                {product.available_for_sale && <span className="badge badge-sale">Achat</span>}
+                {!!product.available_for_rent && <span className="badge badge-rent">Location</span>}
+                {!!product.available_for_sale && <span className="badge badge-sale">Achat</span>}
               </div>
 
               {/* Tabs */}
               <div style={{ display: 'flex', gap: 0, marginBottom: 24, borderRadius: 12, background: 'var(--gray-100)', padding: 4 }}>
-                {product.available_for_sale && (
+                {!!product.available_for_sale && (
                   <button style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: 14, transition: 'var(--transition)', background: activeTab === 'buy' ? 'white' : 'transparent', color: activeTab === 'buy' ? 'var(--primary)' : 'var(--gray-500)', boxShadow: activeTab === 'buy' ? 'var(--shadow-sm)' : 'none' }} onClick={() => setActiveTab('buy')}>
                     Acheter
                   </button>
                 )}
-                {product.available_for_rent && (
+                {!!product.available_for_rent && (
                   <button style={{ flex: 1, padding: '10px', borderRadius: 10, fontWeight: 700, fontSize: 14, transition: 'var(--transition)', background: activeTab === 'rent' ? 'white' : 'transparent', color: activeTab === 'rent' ? 'var(--primary)' : 'var(--gray-500)', boxShadow: activeTab === 'rent' ? 'var(--shadow-sm)' : 'none' }} onClick={() => setActiveTab('rent')}>
                     Louer
                   </button>
@@ -198,7 +198,7 @@ export default function ProductDetail() {
               </div>
 
               {/* Buy panel */}
-              {activeTab === 'buy' && product.available_for_sale && (
+              {activeTab === 'buy' && !!product.available_for_sale && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                     <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--primary)' }}>{product.price_sale?.toFixed(2)} €</span>
@@ -219,7 +219,7 @@ export default function ProductDetail() {
               )}
 
               {/* Rent panel */}
-              {activeTab === 'rent' && product.available_for_rent && (
+              {activeTab === 'rent' && !!product.available_for_rent && (
                 <div>
                   <div style={{ display: 'flex', gap: 12, marginBottom: product.caution ? 12 : 20, flexWrap: 'wrap' }}>
                     <div style={{ background: 'rgba(245,197,24,.1)', padding: '10px 16px', borderRadius: 10 }}>

@@ -18,9 +18,14 @@ export default function ProductCard({ product }) {
   const stockColor = product.stock > 5 ? 'var(--success)' : product.stock > 0 ? 'var(--warning)' : 'var(--danger)';
   const stockLabel = product.stock > 5 ? 'En stock' : product.stock > 0 ? `${product.stock} restant${product.stock > 1 ? 's' : ''}` : 'Rupture';
 
+  // Clic sur la carte : va directement aux infos de réservation si le produit se loue, sinon à la fiche
+  const cardTarget = product.available_for_rent && product.stock > 0
+    ? `/produit/${product.id}?tab=rent`
+    : `/produit/${product.id}`;
+
   return (
     <div className="card" style={{ transition: 'var(--transition)', cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}
-        onClick={() => navigate(`/produit/${product.id}`)}
+        onClick={() => navigate(cardTarget)}
         onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
         onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}>
 
@@ -54,13 +59,13 @@ export default function ProductCard({ product }) {
 
           {/* Prices */}
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
-            {product.available_for_sale && product.price_sale && (
+            {!!product.available_for_sale && product.price_sale > 0 && (
               <div style={{ background: 'rgba(16,185,129,.08)', padding: '5px 10px', borderRadius: 8 }}>
                 <p style={{ fontSize: 10, color: 'var(--gray-600)', fontWeight: 600 }}>ACHAT</p>
                 <p style={{ fontWeight: 800, fontSize: 17, color: 'var(--primary)' }}>{product.price_sale.toFixed(2)} €</p>
               </div>
             )}
-            {product.available_for_rent && product.price_day && (
+            {!!product.available_for_rent && product.price_day > 0 && (
               <div style={{ background: 'rgba(245,197,24,.1)', padding: '5px 10px', borderRadius: 8 }}>
                 <p style={{ fontSize: 10, color: 'var(--gray-600)', fontWeight: 600 }}>LOCATION — À PARTIR DE</p>
                 <p style={{ fontWeight: 800, fontSize: 17, color: 'var(--primary)' }}>
@@ -74,12 +79,12 @@ export default function ProductCard({ product }) {
             <Link to={`/produit/${product.id}`} onClick={e => e.stopPropagation()} className="btn btn-outline btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 90 }}>
               <Eye size={14}/> Détails
             </Link>
-            {product.available_for_rent && product.stock > 0 && (
+            {!!product.available_for_rent && product.stock > 0 && (
               <Link to={`/produit/${product.id}?tab=rent`} onClick={e => e.stopPropagation()} className="btn btn-sm" style={{ flex: 1, justifyContent: 'center', minWidth: 90, background: 'var(--primary)', color: 'white', fontWeight: 700 }}>
                 <Calendar size={14}/> Louer
               </Link>
             )}
-            {product.available_for_sale && product.stock > 0 && (
+            {!!product.available_for_sale && product.stock > 0 && (
               <button className="btn btn-primary btn-sm" onClick={handleBuy} style={{ flex: 1, justifyContent: 'center', minWidth: 90 }}>
                 <ShoppingCart size={14}/> Acheter
               </button>

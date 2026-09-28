@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -77,6 +77,7 @@ function CarCard({ car }) {
   const [reserving, setReserving] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
   const isRequestOnly = car.booking_mode === 'request';
+  const formRef = useRef(null);
 
   const days = startDate && endDate ? Math.max(1, differenceInDays(endDate, startDate)) : 0;
   const carTotal = calcPrice(car, days);
@@ -131,7 +132,11 @@ function CarCard({ car }) {
   const tiers = getTiers(car);
   const startPrice = tiers.length > 0 ? tiers[tiers.length - 1].value : 0;
 
-  const openCard = () => setOpen(true);
+  const openCard = () => {
+    setOpen(true);
+    // Laisse le formulaire se déployer avant de scroller vers les champs à remplir
+    setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+  };
 
   return (
     <div className="card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -175,20 +180,6 @@ function CarCard({ car }) {
           </div>
         )}
 
-        {/* Tarifs */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-          {tiers.map((t, i) => (
-            <div key={t.key} style={{
-              flex: '1 1 0', minWidth: 56, borderRadius: 8, padding: '8px 4px', textAlign: 'center',
-              background: i === tiers.length - 1 ? 'var(--primary)' : i === 0 ? 'var(--gray-100)' : 'rgba(245,197,24,.12)',
-              border: i > 0 && i < tiers.length - 1 ? '1px solid rgba(245,197,24,.3)' : 'none',
-            }}>
-              <p style={{ fontSize: 8, fontWeight: 700, textTransform: 'uppercase', color: i === tiers.length - 1 ? 'rgba(255,255,255,.6)' : 'var(--gray-500)', marginBottom: 2 }}>{t.label}</p>
-              <p style={{ fontSize: 14, fontWeight: 900, color: i === tiers.length - 1 ? 'white' : 'var(--primary)' }}>{t.value} €</p>
-            </div>
-          ))}
-        </div>
-
         {car.caution > 0 && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: '#0c4a6e', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '6px 10px', borderRadius: 8, marginBottom: 8, fontWeight: 600 }}>
             <span>Caution à la remise des clés</span>
@@ -202,7 +193,7 @@ function CarCard({ car }) {
         )}
         </div>
 
-        {car.available_for_sale && car.price_sale > 0 && (
+        {!!car.available_for_sale && car.price_sale > 0 && (
           <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 12, fontWeight: 800, color: '#c2410c', textTransform: 'uppercase', letterSpacing: 0.5 }}>Également à vendre</span>
@@ -218,12 +209,12 @@ function CarCard({ car }) {
 
         {/* Toggle formulaire */}
         <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginBottom: open ? 16 : 0 }}
-          onClick={() => setOpen(o => !o)}>
+          onClick={() => open ? setOpen(false) : openCard()}>
           {open ? 'Fermer' : 'Réserver ce véhicule'}
         </button>
 
         {open && !requestSent && (
-          <div>
+          <div ref={formRef}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Début</label>
