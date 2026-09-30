@@ -55,7 +55,7 @@ function MarketHeader({ icon, title, linkTo, linkLabel }) {
 
 const GOOGLE_REVIEWS_URL = 'https://share.google/SqypKw6BEaoZJEszm';
 const GOOGLE_RATING = 5;
-const GOOGLE_REVIEW_COUNT = 13;
+const GOOGLE_REVIEW_COUNT = 12;
 
 const REVIEWS = [
   { name: 'Sajad Inayat', time: 'avis récent', text: 'Véhicule en très bon état pas de problème. Personnel très accueillant et sympathique.' },
