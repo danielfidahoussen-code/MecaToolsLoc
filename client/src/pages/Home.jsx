@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Shield, Truck, CreditCard, CalendarClock, ArrowRight, Wrench, Car, Leaf } from 'lucide-react';
+import { Shield, Truck, CreditCard, CalendarClock, ArrowRight, Wrench, Car, Leaf, Star } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 
 function startPriceOf(car) {
@@ -49,6 +49,29 @@ function MarketHeader({ icon, title, linkTo, linkLabel }) {
       <Link to={linkTo} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none', flexShrink: 0 }}>
         {linkLabel} <ArrowRight size={14}/>
       </Link>
+    </div>
+  );
+}
+
+const GOOGLE_REVIEWS_URL = 'https://share.google/SqypKw6BEaoZJEszm';
+const GOOGLE_RATING = 5;
+const GOOGLE_REVIEW_COUNT = 11;
+
+const REVIEWS = [
+  { name: 'Ilian el moukhliss', time: 'il y a 4 mois', text: "Tout simplement la meilleure agence de location, simple, propre, efficace… Les prix sont largement abordables et la jeunesse de l'agence permet une meilleure proximité avec eux même. Merci encore pour le service." },
+  { name: 'Rayan Rajabaly', time: 'il y a 4 mois', text: 'Bonne expérience, la Lexus ne consomme pratiquement rien. Je recommande.' },
+  { name: 'Joachim Baddour', time: 'il y a 4 mois', text: "Agréablement surpris par l'accueil et la qualité des voitures, je recommande fortement." },
+  { name: 'Alexandre Paris', time: 'il y a 4 mois', text: 'Très bon service et véhicule irréprochable !' },
+  { name: 'Maxime SiBhunAlors', time: 'il y a 4 mois', text: 'Voiture et service de qualité. Je recommande fortement !' },
+  { name: 'Max Lutz', time: 'il y a 6 mois', text: 'Solid cars and very friendly people!' },
+];
+
+function Stars({ count = 5 }) {
+  return (
+    <div style={{ display: 'flex', gap: 2 }}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star key={i} size={14} fill={i < count ? '#f59e0b' : 'none'} color={i < count ? '#f59e0b' : 'var(--gray-300)'}/>
+      ))}
     </div>
   );
 }
@@ -224,6 +247,39 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Avis clients */}
+      <div style={{ background: 'white', padding: '48px 0', borderTop: '1px solid var(--gray-200)' }}>
+        <div className="container">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, gap: 16, flexWrap: 'wrap' }}>
+            <div>
+              <h2 style={{ fontSize: 22, fontWeight: 900, color: 'var(--primary)', marginBottom: 6 }}>Ce que disent nos clients</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Stars count={GOOGLE_RATING}/>
+                <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 14 }}>{GOOGLE_RATING}/5</span>
+                <span style={{ color: 'var(--gray-400)', fontSize: 13 }}>· {GOOGLE_REVIEW_COUNT} avis Google</span>
+              </div>
+            </div>
+            <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none', flexShrink: 0 }}>
+              Voir tous les avis sur Google <ArrowRight size={14}/>
+            </a>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 18 }}>
+            {REVIEWS.map(r => (
+              <div key={r.name} style={{ background: 'var(--light)', border: '1px solid var(--gray-200)', borderRadius: 14, padding: '20px 22px', display: 'flex', flexDirection: 'column' }}>
+                <Stars count={5}/>
+                <p style={{ fontSize: 14, color: 'var(--gray-700)', lineHeight: 1.6, margin: '10px 0 16px', flex: 1 }}>« {r.text} »</p>
+                <div>
+                  <p style={{ fontWeight: 800, fontSize: 13.5, color: 'var(--primary)' }}>{r.name}</p>
+                  <p style={{ fontSize: 12, color: 'var(--gray-400)' }}>{r.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Pourquoi PrestoLocation — socle commun aux deux marchés */}
       <div className="container" style={{ paddingTop: 48, paddingBottom: 56 }}>
