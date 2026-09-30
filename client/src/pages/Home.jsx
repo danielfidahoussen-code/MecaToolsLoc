@@ -76,6 +76,41 @@ function Stars({ count = 5 }) {
   );
 }
 
+// Bandeau d'avis qui défile automatiquement — placé dans le hero
+function HeroReviewsSlider() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setIndex(i => (i + 1) % REVIEWS.length), 4500);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div style={{ maxWidth: 640, marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <Stars count={GOOGLE_RATING}/>
+        <span style={{ fontWeight: 800, fontSize: 13, color: 'white' }}>{GOOGLE_RATING}/5</span>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,.5)' }}>· {GOOGLE_REVIEW_COUNT} avis Google</span>
+      </div>
+      <div style={{ background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', width: `${REVIEWS.length * 100}%`, transform: `translateX(-${index * (100 / REVIEWS.length)}%)`, transition: 'transform .6s ease' }}>
+          {REVIEWS.map(r => (
+            <div key={r.name} style={{ width: `${100 / REVIEWS.length}%`, flexShrink: 0, padding: '14px 18px', display: 'flex', alignItems: 'center', minHeight: 66 }}>
+              <p style={{ color: 'rgba(255,255,255,.9)', fontSize: 13.5, lineHeight: 1.5 }}>
+                « {r.text} » <strong style={{ color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>— {r.name}</strong>
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer"
+        style={{ display: 'inline-block', marginTop: 8, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.6)', textDecoration: 'underline' }}>
+        Voir tous les avis sur Google
+      </a>
+    </div>
+  );
+}
+
 const REASSURANCE = [
   { icon: <CreditCard size={22}/>, title: 'Acompte 20% seulement', text: "Le solde se règle en personne, à la remise. Annulation gratuite jusqu'à 2 jours avant." },
   { icon: <Shield size={22}/>, title: 'Caution non bloquée', text: "Prise par empreinte, jamais débitée si le matériel revient en bon état." },
@@ -118,6 +153,8 @@ export default function Home() {
               <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 14, lineHeight: 1.5 }}>Jeunes conducteurs acceptés, véhicules vérifiés avant chaque départ pour votre sécurité</p>
             </div>
           </div>
+
+          <HeroReviewsSlider/>
         </div>
       </div>
 
@@ -247,39 +284,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* Avis clients */}
-      <div style={{ background: 'white', padding: '48px 0', borderTop: '1px solid var(--gray-200)' }}>
-        <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, gap: 16, flexWrap: 'wrap' }}>
-            <div>
-              <h2 style={{ fontSize: 22, fontWeight: 900, color: 'var(--primary)', marginBottom: 6 }}>Ce que disent nos clients</h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Stars count={GOOGLE_RATING}/>
-                <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 14 }}>{GOOGLE_RATING}/5</span>
-                <span style={{ color: 'var(--gray-400)', fontSize: 13 }}>· {GOOGLE_REVIEW_COUNT} avis Google</span>
-              </div>
-            </div>
-            <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none', flexShrink: 0 }}>
-              Voir tous les avis sur Google <ArrowRight size={14}/>
-            </a>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 18 }}>
-            {REVIEWS.map(r => (
-              <div key={r.name} style={{ background: 'var(--light)', border: '1px solid var(--gray-200)', borderRadius: 14, padding: '20px 22px', display: 'flex', flexDirection: 'column' }}>
-                <Stars count={5}/>
-                <p style={{ fontSize: 14, color: 'var(--gray-700)', lineHeight: 1.6, margin: '10px 0 16px', flex: 1 }}>« {r.text} »</p>
-                <div>
-                  <p style={{ fontWeight: 800, fontSize: 13.5, color: 'var(--primary)' }}>{r.name}</p>
-                  <p style={{ fontSize: 12, color: 'var(--gray-400)' }}>{r.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Pourquoi PrestoLocation — socle commun aux deux marchés */}
       <div className="container" style={{ paddingTop: 48, paddingBottom: 56 }}>
