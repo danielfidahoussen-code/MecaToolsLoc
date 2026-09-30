@@ -55,15 +55,20 @@ function MarketHeader({ icon, title, linkTo, linkLabel }) {
 
 const GOOGLE_REVIEWS_URL = 'https://share.google/SqypKw6BEaoZJEszm';
 const GOOGLE_RATING = 5;
-const GOOGLE_REVIEW_COUNT = 11;
+const GOOGLE_REVIEW_COUNT = 12;
 
 const REVIEWS = [
+  { name: 'Sajad Inayat', time: 'avis récent', text: 'Véhicule en très bon état pas de problème. Personnel très accueillant et sympathique.' },
   { name: 'Ilian el moukhliss', time: 'il y a 4 mois', text: "Tout simplement la meilleure agence de location, simple, propre, efficace… Les prix sont largement abordables et la jeunesse de l'agence permet une meilleure proximité avec eux même. Merci encore pour le service." },
   { name: 'Rayan Rajabaly', time: 'il y a 4 mois', text: 'Bonne expérience, la Lexus ne consomme pratiquement rien. Je recommande.' },
+  { name: 'Pierre Riv', time: 'il y a 4 mois', text: 'Voiture confortable et locataire serviable ! Je recommande !' },
+  { name: 'Ange Barbe', time: 'il y a 4 mois', text: 'Voiture confortable, locataire serviable et aimable, service rapide. Je recommande.' },
   { name: 'Joachim Baddour', time: 'il y a 4 mois', text: "Agréablement surpris par l'accueil et la qualité des voitures, je recommande fortement." },
   { name: 'Alexandre Paris', time: 'il y a 4 mois', text: 'Très bon service et véhicule irréprochable !' },
   { name: 'Maxime SiBhunAlors', time: 'il y a 4 mois', text: 'Voiture et service de qualité. Je recommande fortement !' },
-  { name: 'Max Lutz', time: 'il y a 6 mois', text: 'Solid cars and very friendly people!' },
+  { name: 'raf dchn', time: 'il y a 4 mois', text: 'Voiture confortable, nickel. Service très correct.' },
+  { name: 'Rayan Remtoula', time: 'il y a 7 mois', text: 'Super sympa, très bonne accueil et accompagnement. Très flexible niveau réservation, prix comme pour les jours de réservation et les heures à récupérer et déposer.' },
+  { name: 'Max Lutz', time: 'il y a 6 mois', text: 'Des voitures solides et des gens très sympathiques !' },
 ];
 
 function Stars({ count = 5 }) {
