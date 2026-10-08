@@ -148,7 +148,7 @@ export default function Home() {
         <div className="container">
           <p style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(255,255,255,.55)', marginBottom: 10 }}>La Réunion</p>
           <h1 style={{ fontSize: 'clamp(28px,4.5vw,44px)', fontWeight: 900, lineHeight: 1.15, marginBottom: 14, maxWidth: 660 }}>
-            Location & vente d'outillage professionnel. Location de véhicules.
+            Location et vente d'outillages et de véhicules.
           </h1>
           <p style={{ color: 'rgba(255,255,255,.85)', fontSize: 16, fontStyle: 'italic', fontWeight: 600, marginBottom: 20 }}>
             Par un mécanicien, pour les mécaniciens.
