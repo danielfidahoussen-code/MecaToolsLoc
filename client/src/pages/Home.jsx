@@ -172,10 +172,9 @@ export default function Home() {
       <div className="container" style={{ marginTop: -28, marginBottom: 8, position: 'relative', zIndex: 2 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
           <Link to="/vehicules" style={{ textDecoration: 'none' }}>
-            <div className="card" style={{ padding: '26px 28px', display: 'flex', alignItems: 'center', gap: 18, transition: 'var(--transition)', border: '2px solid var(--accent)', position: 'relative' }}
+            <div className="card" style={{ padding: '26px 28px', display: 'flex', alignItems: 'center', gap: 18, transition: 'var(--transition)', border: '2px solid var(--accent)' }}
               onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
               onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}>
-              <span style={{ position: 'absolute', top: -11, left: 20, background: 'var(--accent)', color: 'white', fontSize: 10.5, fontWeight: 800, padding: '3px 10px', borderRadius: 20, textTransform: 'uppercase', letterSpacing: 0.5 }}>En vedette</span>
               <div style={{ width: 54, height: 54, borderRadius: 14, background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Car size={26}/>
               </div>
