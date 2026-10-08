@@ -37,16 +37,17 @@ function CarPreviewCard({ car }) {
 }
 
 // Bandeau d'en-tête de zone — marque clairement le début d'un des deux marchés
-function MarketHeader({ icon, title, linkTo, linkLabel }) {
+// `dark` : variante pour zone à fond sombre (véhicules, mis en avant)
+function MarketHeader({ icon, title, linkTo, linkLabel, dark }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: dark ? 'rgba(255,255,255,.15)' : 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {icon}
         </div>
-        <h2 style={{ fontSize: 22, fontWeight: 900, color: 'var(--primary)' }}>{title}</h2>
+        <h2 style={{ fontSize: 22, fontWeight: 900, color: dark ? 'white' : 'var(--primary)' }}>{title}</h2>
       </div>
-      <Link to={linkTo} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none', flexShrink: 0 }}>
+      <Link to={linkTo} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: dark ? 'white' : 'var(--accent)', textDecoration: 'none', flexShrink: 0 }}>
         {linkLabel} <ArrowRight size={14}/>
       </Link>
     </div>
@@ -167,9 +168,24 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Les deux marchés — séparation claire dès l'arrivée */}
+      {/* Les deux marchés — véhicules mis en avant, séparation claire dès l'arrivée */}
       <div className="container" style={{ marginTop: -28, marginBottom: 8, position: 'relative', zIndex: 2 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
+          <Link to="/vehicules" style={{ textDecoration: 'none' }}>
+            <div className="card" style={{ padding: '26px 28px', display: 'flex', alignItems: 'center', gap: 18, transition: 'var(--transition)', border: '2px solid var(--accent)', position: 'relative' }}
+              onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
+              onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}>
+              <span style={{ position: 'absolute', top: -11, left: 20, background: 'var(--accent)', color: 'white', fontSize: 10.5, fontWeight: 800, padding: '3px 10px', borderRadius: 20, textTransform: 'uppercase', letterSpacing: 0.5 }}>En vedette</span>
+              <div style={{ width: 54, height: 54, borderRadius: 14, background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Car size={26}/>
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontWeight: 900, fontSize: 18, color: 'var(--primary)', marginBottom: 3 }}>Location de véhicules</p>
+                <p style={{ fontSize: 13, color: 'var(--gray-500)' }}>Toute l'île, jeunes conducteurs acceptés</p>
+              </div>
+              <ArrowRight size={20} color="var(--accent)"/>
+            </div>
+          </Link>
           <Link to="/outillage" style={{ textDecoration: 'none' }}>
             <div className="card" style={{ padding: '26px 28px', display: 'flex', alignItems: 'center', gap: 18, transition: 'var(--transition)' }}
               onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
@@ -180,20 +196,6 @@ export default function Home() {
               <div style={{ flex: 1 }}>
                 <p style={{ fontWeight: 900, fontSize: 18, color: 'var(--primary)', marginBottom: 3 }}>Outillage professionnel</p>
                 <p style={{ fontSize: 13, color: 'var(--gray-500)' }}>Location et vente de matériel pro</p>
-              </div>
-              <ArrowRight size={20} color="var(--gray-300)"/>
-            </div>
-          </Link>
-          <Link to="/vehicules" style={{ textDecoration: 'none' }}>
-            <div className="card" style={{ padding: '26px 28px', display: 'flex', alignItems: 'center', gap: 18, transition: 'var(--transition)' }}
-              onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
-              onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}>
-              <div style={{ width: 54, height: 54, borderRadius: 14, background: 'rgba(255,51,51,.1)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Car size={26}/>
-              </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontWeight: 900, fontSize: 18, color: 'var(--primary)', marginBottom: 3 }}>Location de véhicules</p>
-                <p style={{ fontSize: 13, color: 'var(--gray-500)' }}>Toute l'île, jeunes conducteurs acceptés</p>
               </div>
               <ArrowRight size={20} color="var(--gray-300)"/>
             </div>
@@ -214,8 +216,47 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ── Zone Véhicules — mise en avant, fond sombre pour bien la distinguer ── */}
+      {cars.length > 0 && (
+        <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #3a0808 100%)', padding: '48px 0' }}>
+          <div className="container">
+            <MarketHeader icon={<Car size={20}/>} title="Location de véhicules" dark
+              linkTo="/vehicules" linkLabel="Voir tous les véhicules"/>
+
+            {/* Pitch — flotte hybride & vérifiée */}
+            <div style={{ background: 'white', borderRadius: 14, padding: '24px 28px', marginBottom: 32 }}>
+              <h3 style={{ fontSize: 17, fontWeight: 800, color: 'var(--primary)', marginBottom: 10 }}>
+                Une flotte hybride, économique et vérifiée avant chaque départ
+              </h3>
+              <p style={{ fontSize: 14.5, color: 'var(--gray-600)', lineHeight: 1.75, marginBottom: 16 }}>
+                Notre flotte est composée majoritairement de véhicules <strong>hybrides</strong> : moins de consommation à la pompe,
+                moins d'émissions, et une conduite plus sereine sur les routes de La Réunion. Et parce que la sécurité ne se
+                négocie pas, nous sommes associés au garage <strong>Auto Presto</strong>, qui vérifie chaque véhicule avant
+                chaque départ — pneus, freins, niveaux — pour que vous preniez la route l'esprit tranquille.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, borderTop: '1px solid var(--gray-100)', paddingTop: 16 }}>
+                {[
+                  { icon: <Leaf size={15}/>, text: 'Flotte majoritairement hybride' },
+                  { icon: <Wrench size={15}/>, text: 'Vérifié par Auto Presto avant chaque départ' },
+                  { icon: <Shield size={15}/>, text: 'Sécurité et fiabilité' },
+                ].map(({ icon, text }) => (
+                  <div key={text} style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--gray-600)', fontSize: 13, fontWeight: 600 }}>
+                    <span style={{ color: 'var(--accent)', flexShrink: 0, display: 'flex' }}>{icon}</span>
+                    {text}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4 }}>
+              {cars.map(car => <CarPreviewCard key={car.id} car={car}/>)}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Zone Outillage ── */}
-      <div style={{ background: 'white', padding: '48px 0' }}>
+      <div style={{ background: 'white', padding: '48px 0', borderTop: '1px solid var(--gray-200)' }}>
         <div className="container">
           <MarketHeader icon={<Wrench size={20}/>} title="Outillage professionnel"
             linkTo="/outillage" linkLabel="Voir tout l'outillage"/>
@@ -254,45 +295,6 @@ export default function Home() {
           }
         </div>
       </div>
-
-      {/* ── Zone Véhicules ── */}
-      {cars.length > 0 && (
-        <div style={{ background: 'var(--light)', padding: '48px 0', borderTop: '1px solid var(--gray-200)' }}>
-          <div className="container">
-            <MarketHeader icon={<Car size={20}/>} title="Location de véhicules"
-              linkTo="/vehicules" linkLabel="Voir tous les véhicules"/>
-
-            {/* Pitch — flotte hybride & vérifiée */}
-            <div style={{ background: 'white', border: '1px solid var(--gray-200)', borderRadius: 14, padding: '24px 28px', marginBottom: 32 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: 'var(--primary)', marginBottom: 10 }}>
-                Une flotte hybride, économique et vérifiée avant chaque départ
-              </h3>
-              <p style={{ fontSize: 14.5, color: 'var(--gray-600)', lineHeight: 1.75, marginBottom: 16 }}>
-                Notre flotte est composée majoritairement de véhicules <strong>hybrides</strong> : moins de consommation à la pompe,
-                moins d'émissions, et une conduite plus sereine sur les routes de La Réunion. Et parce que la sécurité ne se
-                négocie pas, nous sommes associés au garage <strong>Auto Presto</strong>, qui vérifie chaque véhicule avant
-                chaque départ — pneus, freins, niveaux — pour que vous preniez la route l'esprit tranquille.
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, borderTop: '1px solid var(--gray-100)', paddingTop: 16 }}>
-                {[
-                  { icon: <Leaf size={15}/>, text: 'Flotte majoritairement hybride' },
-                  { icon: <Wrench size={15}/>, text: 'Vérifié par Auto Presto avant chaque départ' },
-                  { icon: <Shield size={15}/>, text: 'Sécurité et fiabilité' },
-                ].map(({ icon, text }) => (
-                  <div key={text} style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--gray-600)', fontSize: 13, fontWeight: 600 }}>
-                    <span style={{ color: 'var(--accent)', flexShrink: 0, display: 'flex' }}>{icon}</span>
-                    {text}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 4 }}>
-              {cars.map(car => <CarPreviewCard key={car.id} car={car}/>)}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Pourquoi PrestoLocation — socle commun aux deux marchés */}
       <div className="container" style={{ paddingTop: 48, paddingBottom: 56 }}>
