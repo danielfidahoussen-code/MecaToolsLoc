@@ -55,9 +55,12 @@ function MarketHeader({ icon, title, linkTo, linkLabel }) {
 
 const GOOGLE_REVIEWS_URL = 'https://share.google/SqypKw6BEaoZJEszm';
 const GOOGLE_RATING = 5;
-const GOOGLE_REVIEW_COUNT = 12;
+const GOOGLE_REVIEW_COUNT = 16;
 
 const REVIEWS = [
+  { name: 'Sakina Alihoussen', time: 'avis récent', text: 'Très bonne expérience, équipe sérieuse et professionnelle. Très bon accueil et bonne communication, je recommande !' },
+  { name: 'Aiman Daoud', time: 'avis récent', text: 'Service client au top à chacune des locations. Toujours disponible, service de qualité et arrangeant ! Je recommande.' },
+  { name: 'Clara Giroux', time: 'avis récent', text: "Tout s'est super bien passé ! Adnane a été très arrangeant, réactif et efficace. Je recommande." },
   { name: 'Sajad Inayat', time: 'avis récent', text: 'Véhicule en très bon état pas de problème. Personnel très accueillant et sympathique.' },
   { name: 'Ilian el moukhliss', time: 'il y a 4 mois', text: "Tout simplement la meilleure agence de location, simple, propre, efficace… Les prix sont largement abordables et la jeunesse de l'agence permet une meilleure proximité avec eux même. Merci encore pour le service." },
   { name: 'Rayan Rajabaly', time: 'il y a 4 mois', text: 'Bonne expérience, la Lexus ne consomme pratiquement rien. Je recommande.' },
